@@ -86,6 +86,8 @@ class CQHandler(object):
     def OnEvent_GroupMsg(self, subType, sendTime, fromGroup, fromQQ, fromAnonymous, msg, font):
         logging.info('OnEvent_GroupMsg: subType={0}, sendTime={1}, fromGroup={2}, fromQQ={3}, fromAnonymous={4}, msg={5}, font={6}'.format(subType, sendTime, fromGroup, fromQQ, fromAnonymous, msg, font))
 
+        msg = msg.lstrip().rstrip()
+
         # TODO: move to on add group request
         if fromGroup not in self.active_group:
             self._register_group(fromGroup)

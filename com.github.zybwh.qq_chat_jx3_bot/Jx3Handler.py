@@ -51,7 +51,7 @@ DALIY_YA_BIAO_MONEY_REWARD = 50
 WA_BAO_ENERGY_REQUIRED = 50
 MAX_DALIY_WA_BAO_COUNT = 10
 WA_BAO_COOLDOWN = 10 * 60
-WA_BAO_RARE_FACTOR = 1
+WA_BAO_RARE_FACTOR = 2
 
 MAX_DALIY_CHA_GUAN_COUNT = 5
 CHA_GUAN_ENERGY_COST = 30
@@ -140,7 +140,7 @@ QIYU_LIST = {
     'hu_you_cang_sheng': {"description": "江湖快马飞报！[CQ:at,qq={0}]侠士尽心保护他人，不经意间触发奇遇【护佑苍生】！苍生天下系于一心，此份重担能否一肩担起，与其共勉！",
                         "chance": 0.05,
                         "cooldown": 0,
-                        "reward": {"money": 5000}},
+                        "reward": {"weiwang": 5000}},
     'fu_yao_jiu_tian': {"description": "江湖快马飞报！[CQ:at,qq={0}]侠士轻功盖世，触发奇遇【扶摇九天】！正是御风行千里，扶摇红尘巅",
                         "chance": 0.01,
                         "cooldown": 1 * 60 * 60,
