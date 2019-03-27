@@ -9,6 +9,8 @@
 
 插件开源，欢迎大家改进。如果有什么功能需求请raise issue。我尽量的满足大家，当然你要是想自己写也可以。
 
+剑三中恶小帮 神隐@乾坤一掷
+
 # 使用
 前往 release page，下载最新的 com.github.zybwh.qq_chat_jx3_bot.cpk 放在酷Q/app里，重启即可
 
