@@ -121,6 +121,8 @@ class CQHandler(object):
                     returnMsg = jx3Handler.get_faction_info()
                 elif msg == "查看悬赏":
                     returnMsg = jx3Handler.get_wanted_list()
+                elif msg == "查看名剑大会":
+                    returnMsg = jx3Handler.get_jjc_info(fromQQ)
                 elif msg == "pve装分排行":
                     returnMsg = jx3Handler.get_pve_gear_point_rank()
                 elif msg == "pvp装分排行":
@@ -133,6 +135,8 @@ class CQHandler(object):
                     returnMsg = jx3Handler.get_qiyu_rank()
                 elif msg == "威望排行":
                     returnMsg = jx3Handler.get_weiwang_rank()
+                elif msg == "名剑大会排行":
+                    returnMsg = jx3Handler.get_jjc_rank()
                 elif msg == "签到":
                     returnMsg = jx3Handler.qianDao(fromQQ)
                     if '签到成功' in returnMsg:
@@ -247,6 +251,8 @@ class CQHandler(object):
                         qiyu_type = {str(fromQQ): 'cha_guan_qi_yuan'}
                 elif msg == "抓捕混混":
                     returnMsg = jx3Handler.catch_hun_hun(fromQQ)
+                elif msg == "参加名剑大会":
+                    returnMsg = jx3Handler.jjc(fromQQ)
             elif msg in jx3Handler.getCommandList():
                 returnMsg = "大侠还未注册！无法使用指令"
 
