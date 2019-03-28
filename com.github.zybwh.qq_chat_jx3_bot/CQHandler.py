@@ -172,8 +172,16 @@ class CQHandler(object):
                             returnMsg = "[CQ:at,qq={0}] 为什么要打劫自己？".format(fromQQ)
                         else:
                             returnMsg = jx3Handler.rob(fromGroup, fromQQ, toQQ)
-                        if '打劫成功' in returnMsg:
+                        if '打劫成功' in returnMsg and "体力-0" not in returnMsg:
                             qiyu_type = {str(fromQQ): 'hu_xiao_shan_lin', str(toQQ): 'yin_yang_liang_jie'}
+                elif "切磋[CQ:at,qq=" in msg:
+                    msg_list = msg.split("切磋[CQ:at,qq=")
+                    if len(msg_list) == 2 and msg_list[0] == "" and msg_list[1] != "":
+                        toQQ = msg_list[1].strip('] ')
+                        if int(toQQ) == fromQQ:
+                            returnMsg = "[CQ:at,qq={0}] 没法跟自己切磋啦".format(fromQQ)
+                        else:
+                            returnMsg = jx3Handler.practise(fromQQ, toQQ)
                 elif "购买" in msg:
                     msg_list = msg.split("购买")
                     if len(msg_list) == 2 and msg_list[0] == "" and msg_list[1] != "":

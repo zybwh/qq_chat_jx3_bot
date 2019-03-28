@@ -45,9 +45,10 @@ SPEECH_ENERGY_GAIN = 5
 
 YA_BIAO_ENERGY_REQUIRED = 100
 MAX_DALIY_YA_BIAO_COUNT = 3
-DALIY_YA_BIAO_REWARD_MIN = 4000
-DALIY_YA_BIAO_REWARD_MAX = 6000
+DALIY_YA_BIAO_REWARD_MIN = 1000
+DALIY_YA_BIAO_REWARD_MAX = 3000
 DALIY_YA_BIAO_MONEY_REWARD = 50
+YA_BIAO_FACTION_POINT_GAIN = 1000
 
 WA_BAO_ENERGY_REQUIRED = 50
 MAX_DALIY_WA_BAO_COUNT = 10
@@ -58,17 +59,33 @@ MAX_DALIY_CHA_GUAN_COUNT = 5
 CHA_GUAN_ENERGY_COST = 30
 
 FACTION_REJOIN_CD_SECS = 24 * 60 * 60
-FACTION_TRANSFER_WEIWANG_COST = 20000
+FACTION_TRANSFER_WEIWANG_COST = 5000
+FACTION_QUIT_EMPTY_WEIWANG = True
 NO_FACTION_ALLOW_YA_BIAO = False
 
 ROB_ENERGY_COST = 50
 ROB_PROTECT_COUNT = 2
-ROB_PROTECT_DURATION = 60 * 60
+ROB_PROTECT_DURATION = 30 * 60
+ROB_LOSE_COOLDOWN = 10 * 60
 ROB_SAME_FACTION_PROTECTION = True
 ROB_GAIN_FACTOR_MIN = 0.05
 ROB_GAIN_FACTOR_MAX = 0.1
 ROB_LOST_MONEY = True
 ROB_LOST_WEIWANG = True
+ROB_PROTECT_NO_LOST_COUNT = 3
+ROB_DALIY_MAX_WEIWANG_GAIN = 5000
+ROB_DALIY_MAX_MONEY_GAIN = 300
+ROB_WIN_WANTED_CHANCE = 0.2
+ROB_LOSE_WANTED_CHANCE = 0.05
+ROB_WANTED_REWARD = 100
+ROB_FACTION_POINT_GAIN = 100
+
+PRACTISE_ENERGY_COST = 50
+DALIY_PRACITSE_WEIWANG_GAIN = 5000
+PRACTISE_LOSER_GAIN_PERCENTAGE = 0.5
+PRACTISE_WEIWANG_GAIN_MIN = 800
+PRACTISE_WEIWANG_GAIN_MAX = 1200
+PRACTISE_FACTION_POINT_GAIN = 50
 
 WANTED_MONEY_REWARD = 1000
 WANTED_DURATION = 24 * 60 * 60
@@ -79,22 +96,23 @@ JAIL_DURATION = 1 * 60 * 60
 JAIL_TIMES_PROTECTION = 2
 
 FACTION_DISPLAY_NAME = ['中立', '恶人谷', '浩气盟']
+FACTION_NAME_ID = ['zhongli', 'eren', 'haoqi']
 
 ITEM_LIST = [
     {"name": "zhen_cheng_zhi_xin", "display_name": "真橙之心", "rank": 2, "cost": {"money": 999}},
     {"name": "hai_shi_shan_meng", "display_name": "海誓山盟", "rank": 1, "cost": {"money": 9999}},
     {"name": "jin_zhuan", "display_name": "金砖", "rank": 5, "effect": {"money": 50}},
     {"name": "jin_ye_zi", "display_name": "金叶子", "rank": 6, "effect": {"money": 10}},
-    {"name": "zhuan_shen_can", "display_name": "转神餐", "rank": 4, "effect": {"energy": 50}, "cost": {"money": 100}},
-    {"name": "jia_zhuan_shen_can", "display_name": "佳·转神餐", "rank": 3, "effect": {"energy": 300}, "cost": {"money": 500}},
-    {"name": "rong_ding", "display_name": "熔锭", "rank": 4, "effect": {'pve_weapon': 5}, "cost": {"banggong": 5000}},
-    {"name": "mo_shi", "display_name": "磨石", "rank": 4, "effect": {'pvp_weapon': 5}, "cost": {"weiwang": 5000}},
+    {"name": "zhuan_shen_can", "display_name": "转神餐", "rank": 4, "effect": {"energy": 5}, "cost": {"money": 100}},
+    {"name": "jia_zhuan_shen_can", "display_name": "佳·转神餐", "rank": 3, "effect": {"energy": 30}, "cost": {"money": 500}},
+    {"name": "rong_ding", "display_name": "熔锭", "rank": 3, "effect": {'pve_weapon': 5}, "cost": {"banggong": 5000}},
+    {"name": "mo_shi", "display_name": "磨石", "rank": 3, "effect": {'pvp_weapon': 5}, "cost": {"weiwang": 5000}},
     {"name": "ran", "display_name": "绣", "rank": 4, "effect": {'pve_armor': 10}, "cost": {"banggong": 2000}},
     {"name": "yin", "display_name": "印", "rank": 4, "effect": {'pvp_armor': 10}, "cost": {"weiwang": 2000}},
-    {"name": "sui_rou", "display_name": "碎肉", "rank": 6, "cost": {"money": 10}},
-    {"name": "cu_bu", "display_name": "粗布", "rank": 6, "cost": {"money": 10}},
-    {"name": "gan_cao", "display_name": "甘草", "rank": 6, "cost": {"money": 10}},
-    {"name": "hong_tong", "display_name": "红铜", "rank": 6, "cost": {"money": 10}},
+    {"name": "sui_rou", "display_name": "碎肉", "rank": 5, "cost": {"money": 10}},
+    {"name": "cu_bu", "display_name": "粗布", "rank": 5, "cost": {"money": 10}},
+    {"name": "gan_cao", "display_name": "甘草", "rank": 5, "cost": {"money": 10}},
+    {"name": "hong_tong", "display_name": "红铜", "rank": 5, "cost": {"money": 10}},
     {"name": "hun_hun_zheng_ming", "display_name": "混混抓捕证明", "rank": 0}
 ]
 
@@ -134,7 +152,7 @@ QIYU_LIST = {
     'hong_fu_qi_tian': {"description": "江湖快马飞报！[CQ:at,qq={0}]侠士鸿运当头！签到时获得额外奖励。",
                         "chance": 0.1,
                         "cooldown": 0,
-                        "reward": {"money": DALIY_MONEY_REWARD, "weiwang": DALIY_REWARD_MAX, "banggong": DALIY_REWARD_MAX}},
+                        "reward": {"money": DALIY_MONEY_REWARD, "weiwang": DALIY_REWARD_MIN, "banggong": DALIY_REWARD_MIN}},
     'luan_shi_wu_ji': {"description": "江湖快马飞报！[CQ:at,qq={0}]侠士表演惊艳绝伦，不经意间触发奇遇【乱世舞姬】！倾城独立世所稀，乱世舞起影凌乱！",
                         "chance": 0.01,
                         "cooldown": 1 * 60 * 60,
@@ -190,7 +208,7 @@ def calculateRemainingTime(duration, last_time):
 def calculateGearPoint(equipment):
     weapon = equipment['weapon']
     armor = equipment['armor']
-    return {'pve': weapon['pve'] * 50 + armor['pve'] * 10, 'pvp': weapon['pvp'] * 50 + armor['pvp'] * 10}
+    return {'pve': weapon['pve'] * 50 + armor['pve'] * 20, 'pvp': weapon['pvp'] * 50 + armor['pvp'] * 20}
 
 def get_wa_bao_reward():
     max_index = 0
@@ -250,7 +268,6 @@ def use_zhen_cheng_zhi_xin(fromGroup, fromQQ, toQQ):
         CQSDK.SendGroupMsg(fromGroup, "“江湖飞马来报！[CQ:at,qq={0}] 侠士对 [CQ:at,qq={1}] 侠士使用了传说中的【真橙之心】！以此向天下宣告其爱慕之心，奉日月以为盟，昭天地以为鉴，啸山河以为证，敬鬼神以为凭。从此山高不阻其志，涧深不断其行，流年不毁其意，风霜不掩其情。纵然前路荆棘遍野，亦将坦然无惧仗剑随行。今生今世，不离不弃，永生永世，相许相从！”".format(fromQQ, toQQ))
     except Exception as e:
             logging.exception(e)
-
 
 def isTimeSame(time_struct_1, time_struct_2):
     return time_struct_1.tm_year == time_struct_2.tm_year and time_struct_1.tm_yday == time_struct_2.tm_yday 
@@ -382,16 +399,37 @@ class Jx3Handler(object):
         self.mutex.release()
 
     
-    def _reset_daliy_count(self, qq_account_str):
+    def _reset_daliy_count(self, qq_account_str=""):
         yday = time.localtime(time.time() - DALIY_REFRESH_OFFSET).tm_yday
         yday_str = str(yday)
         if yday_str not in self.daliy_action_count:
-            self.daliy_action_count[yday_str] = {}
+            self.daliy_action_count[yday_str] = {"faction": {"haoqi": {"point": 0, "reward": 0}, "eren": {"point":0, "reward": 0}}}
+            if yday == 1:
+                if "365" in self.daliy_action_count and "366" not in self.daliy_action_count:
+                    yesterday_stat = self.daliy_action_count["365"]
+                elif "366" in self.daliy_action_count:
+                    yesterday_stat = self.daliy_action_count["366"]
+                else:
+                    yesterday_stat = None
+            elif str(yday - 1) in self.daliy_action_count:
+                yesterday_stat = self.daliy_action_count[str(yday - 1)]
+            else:
+                yesterday_stat = None
+            
+            if yesterday_stat != None and 'faction' in yesterday_stat:
+                retval = self._get_faction_count()
+                self.daliy_action_count[yday_str]['faction']['haoqi']['reward'] = int(yesterday_stat['faction']['haoqi']['point'] / retval[2]) if retval[2] != 0 else 0
+                self.daliy_action_count[yday_str]['faction']['eren']['reward'] = int(yesterday_stat['faction']['eren']['point'] / retval[1]) if retval[1] != 0 else 0
+            
+            self.rob_protect = {}
             for k in self.daliy_action_count:
                 if int(k) < yday - DALIY_COUNT_SAVE_DAY:
                     self.daliy_action_count.pop(k)
+    
+        if 'faction' not in self.daliy_action_count[yday_str]:
+            self.daliy_action_count[yday_str]['faction'] = {"haoqi": {"point": 0, "reward": 0}, "eren": {"point":0, "reward": 0}}
 
-        if qq_account_str not in self.daliy_action_count[yday_str]:
+        if qq_account_str != "" and qq_account_str not in self.daliy_action_count[yday_str]:
             self.daliy_action_count[yday_str][qq_account_str] = {
                 'qiandao': False,
                 'speech_count': 0,
@@ -399,7 +437,9 @@ class Jx3Handler(object):
                 'wa_bao': {'count': 0, 'last_time': None},
                 'jailed': 0,
                 'cha_guan': {'complete_quest': [], 'current_quest': ""},
-                "speech_energy_gain": 0
+                "speech_energy_gain": 0,
+                'rob': {'weiwang': 0, 'money': 0, 'last_rob_time': None},
+                'practise': {'weiwang': 0}
             }
 
         return yday
@@ -523,13 +563,18 @@ class Jx3Handler(object):
                 self.jx3_users[qq_account_str]['money'] += DALIY_MONEY_REWARD
                 
                 self.daliy_action_count[yday_str][qq_account_str]['qiandao'] = True
-
-                returnMsg = "[CQ:at,qq={0}] 签到成功!\n今日签到奖励:\n威望+{1}\n帮贡+{2}\n金钱+{3}\n体力+{4}".format(
+                returnMsg = "[CQ:at,qq={0}] 签到成功！签到奖励: 威望+{1} 帮贡+{2} 金钱+{3} 体力+{4}".format(
                                 qq_account,
                                 weiwang_reward,
                                 banggong_reward,
                                 DALIY_MONEY_REWARD,
                                 DALIY_ENERGY_REWARD)
+                
+                faction_id = val['faction_id']
+                if faction_id != 0 and self.daliy_action_count['faction'][FACTION_NAME_ID[faction_id]]['reward'] != 0:
+                    reward = self.daliy_action_count['faction'][FACTION_NAME_ID[faction_id]]['reward']
+                    self.jx3_users[qq_account_str]['weiwang'] += reward
+                    returnMsg += "\n获得昨日阵营奖励：威望+{0}".format(reward)
             
             self.mutex.release()
             return returnMsg
@@ -668,7 +713,11 @@ class Jx3Handler(object):
                     self.jx3_users[qq_account_str]['energy'] -= YA_BIAO_ENERGY_REQUIRED
                     self.jx3_users[qq_account_str]['money'] += DALIY_YA_BIAO_MONEY_REWARD
                     self.daliy_action_count[yday_str][qq_account_str]["ya_biao"] += 1
-                    returnMsg = "[CQ:at,qq={0}] 押镖成功！\n体力-{1}\n威望+{2}\n金钱+{3}".format(qq_account, YA_BIAO_ENERGY_REQUIRED, reward, DALIY_YA_BIAO_MONEY_REWARD)
+
+                    if not NO_FACTION_ALLOW_YA_BIAO:
+                        self.daliy_action_count[yday_str]['faction'][FACTION_NAME_ID[val['faction_id']]]['point'] += YA_BIAO_FACTION_POINT_GAIN
+
+                    returnMsg = "[CQ:at,qq={0}] 押镖成功！体力-{1} 威望+{2} 金钱+{3}".format(qq_account, YA_BIAO_ENERGY_REQUIRED, reward, DALIY_YA_BIAO_MONEY_REWARD)
                 else:
                     returnMsg = "[CQ:at,qq={0}] 一天最多押镖{1}次。你已经押了{1}趟啦，明天再来吧。".format(qq_account, MAX_DALIY_YA_BIAO_COUNT)
 
@@ -739,6 +788,8 @@ class Jx3Handler(object):
                 pre_faction_id = qq_stat['faction_id']
                 self.jx3_users[qq_account_str]['faction_id'] = 0
                 self.jx3_users[qq_account_str]['faction_join_time'] = time.time()
+                if FACTION_QUIT_EMPTY_WEIWANG:
+                    self.jx3_users[qq_account_str]['weiwang'] = 0
                 returnMsg = "[CQ:at,qq={0}] 退出了江湖纷争，脱离了 {1}".format(qq_account, get_faction_display_name(pre_faction_id))
             self.mutex.release()
             return returnMsg
@@ -768,7 +819,7 @@ class Jx3Handler(object):
                 new_faction_id = 1 if pre_faction_id == 2 else 2
                 self.jx3_users[qq_account_str]['faction_id'] = new_faction_id
                 self.jx3_users[qq_account_str]['faction_join_time'] = time.time()
-                returnMsg = "[CQ:at,qq={0}] 通过地下交易，成功地脱离了 {1}，加入了 {2}。".format(qq_account, get_faction_display_name(pre_faction_id), get_faction_display_name(new_faction_id))
+                returnMsg = "[CQ:at,qq={0}] 通过地下交易，花费了{1}威望，成功地脱离了 {2}，加入了 {3}。".format(qq_account, FACTION_TRANSFER_WEIWANG_COST, get_faction_display_name(pre_faction_id), get_faction_display_name(new_faction_id))
             self.mutex.release()
             return returnMsg
         except Exception as e:
@@ -819,6 +870,12 @@ class Jx3Handler(object):
                 toQQ_str = str(toQQ)
                 toQQ_stat = self.jx3_users[toQQ_str]
 
+                yday = self._reset_daliy_count(fromQQ_str)
+                yday_str = str(yday)
+
+                if 'rob' not in self.daliy_action_count[yday_str][fromQQ_str]:
+                    self.daliy_action_count[yday_str][fromQQ_str]['rob'] = {'weiwang': 0, 'money': 0, 'last_rob_time': None}
+
                 if fromQQ_stat['faction_id'] == 0:
                     returnMsg = "[CQ:at,qq={0}] 中立阵营无法打劫，请先加入阵营。".format(fromQQ)
                 elif toQQ_stat['faction_id'] == 0:
@@ -843,6 +900,13 @@ class Jx3Handler(object):
                     returnMsg = "[CQ:at,qq={0}] 对方在监狱里蹲着呢，你这是要劫狱吗？".format(fromQQ)
                 elif fromQQ_stat['energy'] < ROB_ENERGY_COST:
                     returnMsg = "[CQ:at,qq={0}] 体力不足！无法打劫。".format(fromQQ)
+                elif self.daliy_action_count[yday_str][fromQQ_str]['rob']['last_rob_time'] != None and time.time() - self.daliy_action_count[yday_str][fromQQ_str]['rob']['last_rob_time'] < ROB_LOSE_COOLDOWN:
+                    time_val = calculateRemainingTime(ROB_LOSE_COOLDOWN, self.daliy_action_count[yday_str][fromQQ_str]['rob']['last_rob_time'])
+                    returnMsg = "[CQ:at,qq={0}] 你还需要恢复{1}小时{2}分{3}秒，无法打劫。".format(
+                                    fromQQ,
+                                    time_val['hours'],
+                                    time_val['mins'],
+                                    time_val['secs'])
                 else:
                     if fromQQ_str in self.jail_list:
                         self.jail_list.pop(fromQQ_str)
@@ -855,43 +919,95 @@ class Jx3Handler(object):
 
                     weiwang_amount = int(self.jx3_users[loser]['weiwang'] * random.uniform(ROB_GAIN_FACTOR_MIN, ROB_GAIN_FACTOR_MAX))
                     money_amount = int(self.jx3_users[loser]['money'] * random.uniform(ROB_GAIN_FACTOR_MIN, ROB_GAIN_FACTOR_MAX))
-            
-                    self.jx3_users[winner]['weiwang'] += weiwang_amount
-                    self.jx3_users[winner]['money'] += money_amount
-
-                    if ROB_LOST_WEIWANG:
-                        self.jx3_users[loser]['weiwang'] -= weiwang_amount
-                    if ROB_LOST_MONEY:
-                        self.jx3_users[loser]['money'] -= money_amount
-
-                    self.jx3_users[fromQQ_str]['energy'] -= ROB_ENERGY_COST
 
                     if toQQ_str == loser:
-                        if loser not in self.rob_protect or self.rob_protect[loser]['count'] >= ROB_PROTECT_COUNT:
+
+                        if self.daliy_action_count[yday_str][fromQQ_str]['rob']['weiwang'] < ROB_DALIY_MAX_WEIWANG_GAIN:
+                            weiwang_gain = min(weiwang_amount, ROB_DALIY_MAX_WEIWANG_GAIN - self.daliy_action_count[yday_str][fromQQ_str]['rob']['weiwang'])
+                        else:
+                            weiwang_gain = 0
+
+                        if self.daliy_action_count[yday_str][fromQQ_str]['rob']['money'] < ROB_DALIY_MAX_MONEY_GAIN and self.rob_protect[loser]['count'] <= ROB_PROTECT_NO_LOST_COUNT:
+                            money_gain = min(money_amount, ROB_DALIY_MAX_MONEY_GAIN - self.daliy_action_count[yday_str][fromQQ_str]['rob']['money'])
+                        else:
+                            money_gain = 0
+
+                        if weiwang_gain != 0 or money_gain != 0:
+                            self.jx3_users[fromQQ_str]['energy'] -= ROB_ENERGY_COST
+                            energy_cost = ROB_ENERGY_COST
+                        else:
+                            energy_cost = 0
+
+                        self.jx3_users[winner]['weiwang'] += weiwang_gain
+                        self.daliy_action_count[yday_str][fromQQ_str]['rob']['weiwang'] += weiwang_gain
+
+                        self.jx3_users[winner]['money'] += money_gain
+                        self.daliy_action_count[yday_str][fromQQ_str]['rob']['money'] += money_gain
+
+                        if loser not in self.rob_protect:
                             self.rob_protect[loser] = {'count': 0, 'rob_time': None}
-                        self.rob_protect[loser]['count'] += 1
-                        self.rob_protect[loser]['rob_time'] = time.time()
 
-                    logging.info("{0} rob {1} weiwang: {2} money: {3}".format(fromQQ, toQQ, weiwang_amount, money_amount))
+                        if money_gain != 0:
+                            self.rob_protect[loser]['count'] += 1
+                            self.rob_protect[loser]['rob_time'] = time.time()
 
-                    winnerMsg = "{0} 威望+{1} 金钱+{2} {3}".format(
-                                    getGroupNickName(fromGroup, int(winner)),
-                                    weiwang_amount,
-                                    money_amount,
-                                    "体力-{0}".format(ROB_ENERGY_COST) if winner == fromQQ_str else "")
+                        if ROB_LOST_WEIWANG and self.rob_protect[loser]['count'] <= ROB_PROTECT_NO_LOST_COUNT:
+                            weiwang_lost = weiwang_gain
+                        else:
+                            weiwang_lost = 0
+                        
+                        if ROB_LOST_MONEY and self.rob_protect[loser]['count'] <= ROB_PROTECT_NO_LOST_COUNT:
+                            money_lost = money_gain
+                        else:
+                            money_lost = 0
+
+                        self.jx3_users[loser]['weiwang'] -= weiwang_lost
+                        self.jx3_users[loser]['money'] -= money_lost
+                        
+                        returnMsg = "打劫成功！成功率：{0}%\n[CQ:at,qq={1}] 在野外打劫了 [CQ:at,qq={2}]\n{3} 威望+{4} 金钱+{5} 体力-{6}\n{7} 威望-{8} 金钱-{9}".format(
+                                        int(math.floor(success_chance * 100)),
+                                        fromQQ,
+                                        toQQ,
+                                        getGroupNickName(fromGroup, int(winner)),
+                                        weiwang_gain,
+                                        money_gain,
+                                        energy_cost,
+                                        getGroupNickName(fromGroup, int(loser)),
+                                        weiwang_lost,
+                                        money_lost)
+                        wanted_chance = ROB_WIN_WANTED_CHANCE if energy_cost != 0 else 0
+
+                        if energy_cost != 0:
+                            self.daliy_action_count[yday_str]['faction'][FACTION_NAME_ID[fromQQ_stat['faction_id']]]['point'] += ROB_FACTION_POINT_GAIN
+
+                    else:
+                        self.daliy_action_count[yday_str][fromQQ_str]['rob']['last_rob_time'] = time.time()
+                        time_val = calculateRemainingTime(ROB_LOSE_COOLDOWN, time.time())
+
+                        if self.daliy_action_count[yday_str][fromQQ_str]['rob']['weiwang'] < ROB_DALIY_MAX_WEIWANG_GAIN or self.daliy_action_count[yday_str][fromQQ_str]['rob']['money'] < ROB_DALIY_MAX_MONEY_GAIN:
+                            self.jx3_users[fromQQ_str]['energy'] -= ROB_ENERGY_COST
+                            energy_cost = ROB_ENERGY_COST
+                        else:
+                            energy_cost = 0
+
+                        returnMsg = "打劫失败！成功率：{0}%\n[CQ:at,qq={1}] 在野外打劫 [CQ:at,qq={2}] 时被反杀，需要休息{3}小时{4}分{5}秒。体力-{6}".format(
+                                        int(math.floor(success_chance * 100)),
+                                        fromQQ,
+                                        toQQ,
+                                        time_val['hours'],
+                                        time_val['mins'],
+                                        time_val['secs'],
+                                        energy_cost)
+                        wanted_chance = ROB_LOSE_WANTED_CHANCE if energy_cost != 0 else 0
                     
-                    loserMsg = "{0} 威望-{1} 金钱-{2} {3}".format(
-                                    getGroupNickName(fromGroup, int(loser)),
-                                    weiwang_amount if ROB_LOST_WEIWANG else 0,
-                                    money_amount if ROB_LOST_MONEY else 0,
-                                    "体力-{0}".format(ROB_ENERGY_COST) if loser == fromQQ_str else "")
+                    rand = random.uniform(0, 1)
+                    logging.info("wanted chance: {0} rand: {1}".format(wanted_chance, rand))
+                    if rand <= wanted_chance:
+                        import CQSDK
+                        CQSDK.SendGroupMsg(self.qq_group, returnMsg)
 
-                    returnMsg = "打劫{0}！成功率：{1}%".format("成功" if winner == fromQQ_str else "失败", int(math.floor(success_chance * 100)))
-                    returnMsg += "\n[CQ:at,qq={0}] 在野外打劫了 [CQ:at,qq={1}]\n{2}\n{3}".format(
-                                    fromQQ,
-                                    toQQ,
-                                    winnerMsg,
-                                    loserMsg)
+                        returnMsg = self._put_wanted_internal(fromQQ_str, ROB_WANTED_REWARD)
+
                 self.mutex.release()
             return returnMsg
         except Exception as e:
@@ -1136,26 +1252,28 @@ class Jx3Handler(object):
         returnMsg = "本群阵营信息\n"
         try:
             self.mutex.acquire()
-            no_faction = 0
-            hao_qi = 0
-            e_ren = 0
-            for key, value in self.jx3_users.items():
-                if value['faction_id'] == 0:
-                    no_faction += 1
-                elif value['faction_id'] == 1:
-                    e_ren += 1
-                elif value['faction_id'] == 2:
-                    hao_qi += 1
-            returnMsg += "本群为{0}群\n恶人谷人数:\t{1}\n浩气盟人数:\t{2}\n中立人数:\t{3}".format(
-                        "浩气强势" if hao_qi > e_ren else "恶人强势" if e_ren > hao_qi else "势均力敌",
-                        e_ren,
-                        hao_qi,
-                        no_faction)
+            yday = self._reset_daliy_count()
+            yday_str = str(yday)
+            retval = self._get_faction_count()
+            returnMsg += "本群为{0}群\n恶人谷人数:\t{1} 今日阵营点数：{4}\n浩气盟人数:\t{2} 今日阵营点数：{5}\n中立人数:\t{3}".format(
+                        "浩气强势" if retval[2] > retval[1] else "恶人强势" if retval[1] > retval[2] else "势均力敌",
+                        retval[1],
+                        retval[2],
+                        retval[0],
+                        self.daliy_action_count[yday_str]['faction']['eren']['point'],
+                        self.daliy_action_count[yday_str]['faction']['haoqi']['point'])
 
             self.mutex.release()
             return returnMsg
         except Exception as e:
             logging.exception(e)
+    
+    def _get_faction_count(self):
+        retval = [0, 0, 0]
+        for key, value in self.jx3_users.items():
+            retval[value['faction_id']] += 1
+        return retval
+
     
     def get_pve_gear_point_rank(self):
         returnMsg = "本群pve装备排行榜"
@@ -1279,23 +1397,11 @@ class Jx3Handler(object):
                     returnMsg = "[CQ:at,qq={0}] 对方今天已经被抓进去{1}次了，无法悬赏。".format(fromQQ, JAIL_TIMES_PROTECTION)
                 else:
                     self.jx3_users[fromQQ_str]['money'] -= WANTED_MONEY_REWARD
-                    if toQQ_str in self.wanted_list:
-                        if time.time() - self.wanted_list[toQQ_str]['wanted_time'] > WANTED_DURATION:
-                            self.wanted_list[toQQ_str]['reward'] = WANTED_MONEY_REWARD
-                        else:
-                            self.wanted_list[toQQ_str]['reward'] += WANTED_MONEY_REWARD
-    
-                        self.wanted_list[toQQ_str]['wanted_time'] = time.time()
-                    else:
-                        self.wanted_list[toQQ_str] = {'reward': WANTED_MONEY_REWARD, 'wanted_time': time.time(), 'failed_try': {}}
-                    
+
                     import CQSDK
                     CQSDK.SendGroupMsg(self.qq_group, "[CQ:at,qq={0}] 悬赏成功！\n金钱-{1}".format(fromQQ, WANTED_MONEY_REWARD))
 
-                    returnMsg = "江湖恩怨一朝清，惟望群侠多援手。现有人愿付{0}金对 {1} 进行悬赏，总赏金已达{2}金，众侠士切勿错过。".format(
-                                    WANTED_MONEY_REWARD,
-                                    getGroupNickName(self.qq_group, int(toQQ)),
-                                    self.wanted_list[toQQ_str]['reward'])
+                    returnMsg = self._put_wanted_internal(toQQ_str, WANTED_MONEY_REWARD)
 
                 self.mutex.release()
             return returnMsg
@@ -1303,6 +1409,22 @@ class Jx3Handler(object):
             logging.exception(e)
         finally:
             self.writeToJsonFile()
+
+    def _put_wanted_internal(self, toQQ_str, money_amount):
+        if toQQ_str in self.wanted_list:
+            if time.time() - self.wanted_list[toQQ_str]['wanted_time'] > WANTED_DURATION:
+                self.wanted_list[toQQ_str]['reward'] = money_amount
+            else:
+                self.wanted_list[toQQ_str]['reward'] += money_amount
+
+            self.wanted_list[toQQ_str]['wanted_time'] = time.time()
+        else:
+            self.wanted_list[toQQ_str] = {'reward': money_amount, 'wanted_time': time.time(), 'failed_try': {}}
+        
+        return "江湖恩怨一朝清，惟望群侠多援手。现有人愿付{0}金对 {1} 进行悬赏，总赏金已达{2}金，众侠士切勿错过。".format(
+                                money_amount,
+                                getGroupNickName(self.qq_group, int(toQQ_str)),
+                                self.wanted_list[toQQ_str]['reward'])
 
     def get_wanted_list(self):
         returnMsg = "本群悬赏榜"
@@ -1648,5 +1770,89 @@ class Jx3Handler(object):
         finally:
             self.writeToJsonFile()
     
-    # def practise(self, fromQQ, toQQ):
-        
+    def practise(self, fromQQ, toQQ):
+        returnMsg = ""
+        try:
+            self.mutex.acquire()
+            fromQQ_str = str(fromQQ)
+            toQQ_str = str(toQQ)
+            fromQQ_stat = self.jx3_users[fromQQ_str]
+            toQQ_stat = self.jx3_users[toQQ_str]
+
+            yday = self._reset_daliy_count(toQQ_str)
+            yday_str = str(yday)
+
+            if fromQQ_stat['faction_id'] == 0:
+                returnMsg = "[CQ:at,qq={0}] 中立阵营无法切磋，请先加入阵营。".format(fromQQ)
+            elif toQQ_stat['faction_id'] == 0:
+                returnMsg = "[CQ:at,qq={0}] 对方是中立阵营，无法切磋。".format(fromQQ)
+            elif fromQQ_stat['faction_id'] != toQQ_stat['faction_id'] and ROB_SAME_FACTION_PROTECTION:
+                returnMsg = "[CQ:at,qq={0}] 不同阵营无法切磋！".format(fromQQ)
+            elif fromQQ_str in self.jail_list and time.time() - self.jail_list[fromQQ_str] < JAIL_DURATION:
+                    time_val = calculateRemainingTime(JAIL_DURATION, self.jail_list[fromQQ_str])
+                    returnMsg = "[CQ:at,qq={0}] 老实点，你还要在监狱里蹲{1}小时{2}分{3}秒。".format(
+                                    fromQQ,
+                                    time_val['hours'],
+                                    time_val['mins'],
+                                    time_val['secs'])
+            elif toQQ_str in self.jail_list and time.time() - self.jail_list[toQQ_str] < JAIL_DURATION:
+                    returnMsg = "[CQ:at,qq={0}] 对方在监狱里蹲着呢，没法跟你切磋。".format(fromQQ)
+            elif self.jx3_users[fromQQ_str]['energy'] < PRACTISE_ENERGY_COST:
+                returnMsg = "[CQ:at,qq={0}] 体力不足！需要消耗{1}体力。".format(fromQQ, WANTED_ENERGY_COST)
+            else:
+                battle_result = self._calculate_battle(fromQQ_str, toQQ_str, 'pvp')
+                winner = battle_result['winner']
+                loser = battle_result['loser']
+                success_chance = battle_result['success_chance']
+
+                if 'practise' not in self.daliy_action_count[yday_str][toQQ_str]:
+                    self.daliy_action_count[yday_str][fromQQ_str]['practise'] = {'weiwang': 0}
+                if 'practise' not in self.daliy_action_count[yday_str][toQQ_str]:
+                    self.daliy_action_count[yday_str][toQQ_str]['practise'] = {'weiwang': 0}
+
+                weiwang_amount = random.randint(PRACTISE_WEIWANG_GAIN_MIN, PRACTISE_WEIWANG_GAIN_MAX)
+
+                if self.daliy_action_count[yday_str][winner]['practise']['weiwang'] < DALIY_PRACITSE_WEIWANG_GAIN:
+                    winner_weiwang_gain = min(weiwang_amount, DALIY_PRACITSE_WEIWANG_GAIN - self.daliy_action_count[yday_str][winner]['practise']['weiwang'])
+                else:
+                    winner_weiwang_gain = 0
+                
+                if winner_weiwang_gain != 0 and self.daliy_action_count[yday_str][loser]['practise']['weiwang'] < DALIY_PRACITSE_WEIWANG_GAIN:
+                    loser_weiwang_gain = min(int(weiwang_amount * PRACTISE_LOSER_GAIN_PERCENTAGE), DALIY_PRACITSE_WEIWANG_GAIN - self.daliy_action_count[yday_str][loser]['practise']['weiwang'])
+                else:
+                    loser_weiwang_gain = 0
+                
+                if (winner_weiwang_gain != 0 and winner == fromQQ_str) or (loser_weiwang_gain != 0 and loser == fromQQ_str):
+                    energy_cost = PRACTISE_ENERGY_COST
+                else:
+                    energy_cost = 0
+
+                self.jx3_users[fromQQ_str]['energy'] -= energy_cost
+                
+                self.jx3_users[winner]['weiwang'] += winner_weiwang_gain
+                self.daliy_action_count[yday_str][winner]['practise']['weiwang'] += winner_weiwang_gain
+                self.jx3_users[loser]['weiwang'] += loser_weiwang_gain
+                self.daliy_action_count[yday_str][loser]['practise']['weiwang'] += loser_weiwang_gain
+            
+                if energy_cost != 0:
+                    self.daliy_action_count[yday_str]['faction'][FACTION_NAME_ID[fromQQ_stat['faction_id']]]['point'] += PRACTISE_FACTION_POINT_GAIN
+
+                returnMsg = "[CQ:at,qq={0}]与[CQ:at,qq={1}]进行了切磋。{2} 战胜了 {3}，成功率{4}%。\n{5} 威望+{6} {7}\n{8} 威望+{9} {10}".format(
+                                fromQQ,
+                                toQQ,
+                                getGroupNickName(self.qq_group, int(winner)),
+                                getGroupNickName(self.qq_group, int(loser)),
+                                int(math.floor(success_chance * 100)),
+                                getGroupNickName(self.qq_group, int(winner)),
+                                winner_weiwang_gain,
+                                "体力-{0}".format(energy_cost) if winner == fromQQ_str else "",
+                                getGroupNickName(self.qq_group, int(loser)),
+                                loser_weiwang_gain,
+                                "体力-{0}".format(energy_cost) if loser == fromQQ_str else "")
+
+            self.mutex.release()
+            return returnMsg
+        except Exception as e:
+            logging.exception(e)
+        finally:
+            self.writeToJsonFile()
