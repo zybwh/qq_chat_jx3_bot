@@ -13,7 +13,7 @@
 剑三中恶小帮 神隐@乾坤一掷
 
 # 使用
-前往 release page，下载最新的 com.github.zybwh.qq_chat_jx3_bot.cpk 放在酷Q/app里，重启即可
+前往 release page，下载最新的 com.github.zybwh.qq_chat_jx3_bot.v_x_y_z.zip 解压放在酷Q/app里，重启即可
 
 # release
 https://github.com/zybwh/qq_chat_jx3_bot/releases
