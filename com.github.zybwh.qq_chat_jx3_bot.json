@@ -5,7 +5,7 @@
   "ret": 1,
   "apiver": 9,
   "name": "神隐112-剑三群聊助手",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "version_id": 1,
   "author": "zybwh",
   "description": "专门为剑三玩家设计的群聊助手，带有一些趣味性功能。",
@@ -102,20 +102,20 @@
     "function": "_eventDisable"
   }
 ],
-"menu": [ // 设置菜单（发布前请删除无用菜单，如果无需设置菜单请全部删除）
-  {
-    "name": "重新初始化", //菜单名称
-    "function": "_menuReInit" //菜单对应函数
-  },
-  {
-    "name": "菜单01", //菜单名称
-    "function": "_menu01" //菜单对应函数
-  },
-  {
-    "name": "菜单02", //菜单名称
-    "function": "_menu02" //菜单对应函数
-  }
-],
+// "menu": [ // 设置菜单（发布前请删除无用菜单，如果无需设置菜单请全部删除）
+//   {
+//     "name": "重新初始化", //菜单名称
+//     "function": "_menuReInit" //菜单对应函数
+//   },
+//   {
+//     "name": "菜单01", //菜单名称
+//     "function": "_menu01" //菜单对应函数
+//   },
+//   {
+//     "name": "菜单02", //菜单名称
+//     "function": "_menu02" //菜单对应函数
+//   }
+// ],
 "status": [ // 悬浮窗状态（见 com.example.status 样例）
 
 ],

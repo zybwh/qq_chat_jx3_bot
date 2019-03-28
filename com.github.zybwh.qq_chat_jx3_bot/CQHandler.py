@@ -25,7 +25,8 @@ try:
 except Exception as e:
     logging.exception(e)
 
-DATABASE_PATH = os.path.join('data', 'app', 'com.github.qq_jx3_chat_bot')
+DATABASE_PATH = os.path.join('data', 'app', 'com.github.zybwh.qq_chat_jx3_bot')
+OLD_DATABASE_PATH = os.path.join('data', 'app', 'com.github.qq_chat_jx3_bot')
 GROUP_DATA_JSON_FILE = os.path.join(DATABASE_PATH, 'jx3_group.json')
 HELP_URL = 'https://www.jianshu.com/p/94b3cf27dcd7'
 
@@ -37,6 +38,10 @@ class CQHandler(object):
     def __init__(self):
         logging.info('__init__')
         try:
+            if os.path.exists(OLD_DATABASE_PATH) and not os.path.exists(DATABASE_PATH):
+                logging.info("found old database path! moving to new path...")
+                os.rename(OLD_DATABASE_PATH, DATABASE_PATH)
+
             if not os.path.exists(DATABASE_PATH):
                 os.makedirs(DATABASE_PATH)
             

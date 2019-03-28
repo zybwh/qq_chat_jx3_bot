@@ -24,7 +24,8 @@ import random
 
 from threading import Lock
 
-DATABASE_PATH = os.path.join('data', 'app', 'com.github.qq_jx3_chat_bot')
+DATABASE_PATH = os.path.join('data', 'app', 'com.github.zybwh.qq_chat_jx3_bot')
+OLD_DATABASE_PATH = os.path.join('data', 'app', 'com.github.qq_chat_jx3_bot')
 
 DATA_JSON_FILE = os.path.join(DATABASE_PATH, 'jx3.json')
 DATA_JSON_FILE_OLD = os.path.join(DATABASE_PATH, 'jx3.json.old')
@@ -63,6 +64,11 @@ NO_FACTION_ALLOW_YA_BIAO = False
 ROB_ENERGY_COST = 50
 ROB_PROTECT_COUNT = 2
 ROB_PROTECT_DURATION = 60 * 60
+ROB_SAME_FACTION_PROTECTION = True
+ROB_GAIN_FACTOR_MIN = 0.05
+ROB_GAIN_FACTOR_MAX = 0.1
+ROB_LOST_MONEY = True
+ROB_LOST_WEIWANG = True
 
 WANTED_MONEY_REWARD = 1000
 WANTED_DURATION = 24 * 60 * 60
@@ -292,6 +298,10 @@ class Jx3Handler(object):
     def __init__(self, qq_group):
         logging.info('Jx3Handler __init__')
         self.qq_group = qq_group # int
+
+        if os.path.exists(OLD_DATABASE_PATH) and not os.path.exists(DATABASE_PATH):
+            logging.info("found old database path! moving to new path...")
+            os.rename(OLD_DATABASE_PATH, DATABASE_PATH)
 
         self.json_file_folder = os.path.join(DATABASE_PATH, str(qq_group))
         self.json_file_path = os.path.join(self.json_file_folder, 'data.json')
@@ -813,7 +823,7 @@ class Jx3Handler(object):
                     returnMsg = "[CQ:at,qq={0}] 中立阵营无法打劫，请先加入阵营。".format(fromQQ)
                 elif toQQ_stat['faction_id'] == 0:
                     returnMsg = "[CQ:at,qq={0}] 对方是中立阵营，无法打劫。".format(fromQQ)
-                elif fromQQ_stat['faction_id'] == toQQ_stat['faction_id']:
+                elif fromQQ_stat['faction_id'] == toQQ_stat['faction_id'] and ROB_SAME_FACTION_PROTECTION:
                     returnMsg = "[CQ:at,qq={0}] 同阵营无法打劫！".format(fromQQ)
                 elif toQQ_str in self.rob_protect and ROB_PROTECT_COUNT != 0 and self.rob_protect[toQQ_str]['count'] >= ROB_PROTECT_COUNT and (time.time() - self.rob_protect[toQQ_str]['rob_time']) <= ROB_PROTECT_DURATION:
                     time_val = calculateRemainingTime(ROB_PROTECT_DURATION, self.rob_protect[toQQ_str]['rob_time'])
@@ -843,13 +853,16 @@ class Jx3Handler(object):
                     loser = battle_result['loser']
                     success_chance = battle_result['success_chance']
 
-                    weiwang_amount = int(self.jx3_users[loser]['weiwang'] * random.uniform(0.1, 0.2))
-                    money_amount = int(self.jx3_users[loser]['money'] * random.uniform(0.1, 0.2))
+                    weiwang_amount = int(self.jx3_users[loser]['weiwang'] * random.uniform(ROB_GAIN_FACTOR_MIN, ROB_GAIN_FACTOR_MAX))
+                    money_amount = int(self.jx3_users[loser]['money'] * random.uniform(ROB_GAIN_FACTOR_MIN, ROB_GAIN_FACTOR_MAX))
+            
                     self.jx3_users[winner]['weiwang'] += weiwang_amount
-                    self.jx3_users[loser]['weiwang'] -= weiwang_amount
-
                     self.jx3_users[winner]['money'] += money_amount
-                    self.jx3_users[loser]['money'] -= money_amount
+
+                    if ROB_LOST_WEIWANG:
+                        self.jx3_users[loser]['weiwang'] -= weiwang_amount
+                    if ROB_LOST_MONEY:
+                        self.jx3_users[loser]['money'] -= money_amount
 
                     self.jx3_users[fromQQ_str]['energy'] -= ROB_ENERGY_COST
 
@@ -861,15 +874,24 @@ class Jx3Handler(object):
 
                     logging.info("{0} rob {1} weiwang: {2} money: {3}".format(fromQQ, toQQ, weiwang_amount, money_amount))
 
-                    returnMsg = "打劫{0}！成功率：{1}%".format("成功" if winner == fromQQ_str else "失败", int(math.floor(success_chance * 100)))
-                    returnMsg += "\n[CQ:at,qq={0}] 在野外打劫了 [CQ:at,qq={1}]\n{2} 威望+{4} 金钱+{5} 体力-{6}\n{3} 威望-{4} 金钱-{5}".format(
-                                    fromQQ,
-                                    toQQ,
+                    winnerMsg = "{0} 威望+{1} 金钱+{2} {3}".format(
                                     getGroupNickName(fromGroup, int(winner)),
-                                    getGroupNickName(fromGroup, int(loser)),
                                     weiwang_amount,
                                     money_amount,
-                                    ROB_ENERGY_COST)
+                                    "体力-{0}".format(ROB_ENERGY_COST) if winner == fromQQ_str else "")
+                    
+                    loserMsg = "{0} 威望-{1} 金钱-{2} {3}".format(
+                                    getGroupNickName(fromGroup, int(loser)),
+                                    weiwang_amount if ROB_LOST_WEIWANG else 0,
+                                    money_amount if ROB_LOST_MONEY else 0,
+                                    "体力-{0}".format(ROB_ENERGY_COST) if loser == fromQQ_str else "")
+
+                    returnMsg = "打劫{0}！成功率：{1}%".format("成功" if winner == fromQQ_str else "失败", int(math.floor(success_chance * 100)))
+                    returnMsg += "\n[CQ:at,qq={0}] 在野外打劫了 [CQ:at,qq={1}]\n{2}\n{3}".format(
+                                    fromQQ,
+                                    toQQ,
+                                    winnerMsg,
+                                    loserMsg)
                 self.mutex.release()
             return returnMsg
         except Exception as e:
@@ -1025,7 +1047,7 @@ class Jx3Handler(object):
                             if reward_item_name not in self.jx3_users[qq_account_str]['bag']:
                                     self.jx3_users[qq_account_str]['bag'][reward_item_name] = 0
                             self.jx3_users[qq_account_str]['bag'][reward_item_name] += 1
-                            returnMsg += "\n你一铲子下去，挖到了一个神秘的东西\n{0}+1\n体力-{1}".format(
+                            returnMsg += "\n你一铲子下去，挖到了一个神秘的东西: {0}+1 体力-{1}".format(
                                             get_item_display_name(reward_item_name),
                                             WA_BAO_ENERGY_REQUIRED)
                 else:
@@ -1625,3 +1647,6 @@ class Jx3Handler(object):
             logging.exception(e)
         finally:
             self.writeToJsonFile()
+    
+    # def practise(self, fromQQ, toQQ):
+        
