@@ -1961,6 +1961,8 @@ class Jx3Handler(object):
                 loser = battle_result['loser']
                 success_chance = battle_result['success_chance']
 
+                self.jx3_users[qq_account_str]['energy'] -= JJC_ENERGY_COST
+
                 if winner == qq_account_str:
                     
                     if jjc_stat['win'] < DALIY_JJC_DOUBLE_REWARD_COUNT:
@@ -1979,6 +1981,8 @@ class Jx3Handler(object):
                         score_reward = JJC_REWARD_RANK * reward_modifier
                         score_lost = 0
                     
+                    double_msg = " (每日{1}场双倍奖励加成中：{0}/{1})".format(jjc_stat['win'] + 1, DALIY_JJC_DOUBLE_REWARD_COUNT) if reward_modifier == 2 else ""
+                    
                     self.daliy_action_count[yday_str][qq_account_str]['jjc']['score'] += score_reward
                     self.daliy_action_count[yday_str][qq_account_str]['jjc']['last_time'] = time.time()
 
@@ -1996,7 +2000,7 @@ class Jx3Handler(object):
                                     weiwang_reward,
                                     score_reward,
                                     JJC_ENERGY_COST,
-                                    " (每日{1}场双倍奖励加成中：{0}/{1})".format(jjc_stat['win'] + 1, DALIY_JJC_DOUBLE_REWARD_COUNT) if reward_modifier == 2 else "",
+                                    double_msg,
                                     getGroupNickName(self.qq_group, int(random_person)),
                                     score_lost)
                     
@@ -2024,11 +2028,12 @@ class Jx3Handler(object):
                     self.daliy_action_count[yday_str][random_person]['jjc']['win'] += 1
                     self.daliy_action_count[yday_str][qq_account_str]['jjc']['lose'] += 1
 
-                    returnMsg = "[CQ:at,qq={0}] 战斗结果：失败！成功率：{1}%\n {2} 分数-{3}；{4} 分数+{5}".format(
+                    returnMsg = "[CQ:at,qq={0}] 战斗结果：失败！成功率：{1}%\n {2} 分数-{3} 体力-{4}；{5} 分数+{6}".format(
                                     qq_account_str,
                                     int(math.floor(success_chance * 100)),
                                     getGroupNickName(self.qq_group, int(qq_account)),
                                     score_lost,
+                                    JJC_ENERGY_COST,
                                     getGroupNickName(self.qq_group, int(random_person)),
                                     score_reward)
                     
