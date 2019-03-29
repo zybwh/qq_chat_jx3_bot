@@ -2092,4 +2092,11 @@ class Jx3Handler(object):
     
     def _get_daliy_list(self, yday_str):
         logging.info([(k, v) for k, v in self.daliy_action_count[yday_str].items() if k not in ['jjc', 'faction']])
-        return [(k, v) for k, v in self.daliy_action_count[yday_str].items() if k not in ['jjc', 'faction']]
+        return_list = []
+        for k, v in self.daliy_action_count[yday_str].items():
+            if k not in ['jjc', 'faction']:
+                for d_k, d_v in daliy_dict.items():
+                    if d_k not in v:
+                        v[d_k] = d_v
+                return_list.append((k, v))
+        return return_list
