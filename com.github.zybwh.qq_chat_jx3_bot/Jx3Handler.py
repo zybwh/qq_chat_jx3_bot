@@ -9,14 +9,6 @@ import logging
 import time
 import math
 
-logging.basicConfig(
-    level       = logging.INFO,
-    format      = '%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
-    datefmt     = '%Y-%m-%d %H:%M:%S',
-    filename    = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'CQHanlder.log'),
-    filemode    = 'w+'
-)
-
 import sqlite3
 import json
 import copy
@@ -386,6 +378,14 @@ class Jx3Handler(object):
                         logging.info("loading old file complete")
                 except Exception as e:
                     logging.exception(e)
+        
+        logging.basicConfig(
+            level       = logging.INFO,
+            format      = '%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+            datefmt     = '%Y-%m-%d %H:%M:%S',
+            filename    = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'CQHandler_{0}.log'.format(self.qq_group)),
+            filemode    = 'w+'
+        )
 
         self.mutex = Lock()
         

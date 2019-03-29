@@ -14,7 +14,7 @@ logging.basicConfig(
     level       = logging.INFO,
     format      = '%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
     datefmt     = '%Y-%m-%d %H:%M:%S',
-    filename    = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'CQHanlder.log'),
+    filename    = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'CQHandler.log'),
     filemode    = 'w+'
 )
 
