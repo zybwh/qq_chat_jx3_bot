@@ -593,7 +593,7 @@ class Jx3Handler(object):
                                 DALIY_ENERGY_REWARD)
                 
                 faction_id = val['faction_id']
-                if faction_id != 0 and self.daliy_action_count['faction'][FACTION_NAME_ID[faction_id]]['reward'] != 0:
+                if faction_id != 0 and 'faction' in self.daliy_action_count and self.daliy_action_count['faction'][FACTION_NAME_ID[faction_id]]['reward'] != 0:
                     reward = self.daliy_action_count['faction'][FACTION_NAME_ID[faction_id]]['reward']
                     self.jx3_users[qq_account_str]['weiwang'] += reward
                     returnMsg += "\n获得昨日阵营奖励：威望+{0}".format(reward)
