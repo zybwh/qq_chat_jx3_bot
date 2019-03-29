@@ -2090,7 +2090,7 @@ class Jx3Handler(object):
                     jjc_status['score'] // 100,
                     jjc_status['win'],
                     jjc_status['lose'],
-                    int(math.floor(jjc_status['win'] / (jjc_status['win'] + jjc_status['lose']) * 100)) if (jjc_status['win'] + jjc_status['lose']) > 0 else 100)
+                    int(math.floor(jjc_status['win'] * 100 / (jjc_status['win'] + jjc_status['lose']))) if (jjc_status['win'] + jjc_status['lose']) > 0 else 100)
 
         except Exception as e:
             logging.exception(e)
