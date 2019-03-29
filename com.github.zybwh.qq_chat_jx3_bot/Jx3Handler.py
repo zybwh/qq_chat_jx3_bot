@@ -174,7 +174,7 @@ QIYU_LIST = {
                         "reward": {"weiwang": 5000}},
     'hu_you_cang_sheng': {"description": "江湖快马飞报！[CQ:at,qq={0}]侠士尽心保护他人，不经意间触发奇遇【护佑苍生】！苍生天下系于一心，此份重担能否一肩担起，与其共勉！",
                         "chance": 0.05,
-                        "cooldown": 0,
+                        "cooldown": 2 * 60 * 60,
                         "reward": {"weiwang": 5000}},
     'fu_yao_jiu_tian': {"description": "江湖快马飞报！[CQ:at,qq={0}]侠士轻功盖世，触发奇遇【扶摇九天】！正是御风行千里，扶摇红尘巅",
                         "chance": 0.01,
