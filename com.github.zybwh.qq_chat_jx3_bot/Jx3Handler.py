@@ -435,8 +435,8 @@ class Jx3Handler(object):
                     self.daliy_action_count[yday_str]['faction']['eren']['reward'] = int(yesterday_stat['faction']['eren']['point'] / retval[1]) if retval[1] != 0 else 0
             
                 if 'jjc' in yesterday_stat:
-                    self.daliy_action_count[yday_str]['jjc']['season'] = yesterday_stat['season'] + (1 if yesterday_stat['day'] >= JJC_DAYS_PER_SEASON else 0)
-                    self.daliy_action_count[yday_str]['jjc']['day'] = yesterday_stat['day'] + 1 if yesterday_stat['day'] < JJC_DAYS_PER_SEASON else 0
+                    self.daliy_action_count[yday_str]['jjc']['season'] = yesterday_stat['jjc']['season'] + (1 if yesterday_stat['jjc']['day'] >= JJC_DAYS_PER_SEASON else 0)
+                    self.daliy_action_count[yday_str]['jjc']['day'] = yesterday_stat['jjc']['day'] + 1 if yesterday_stat['jjc']['day'] < JJC_DAYS_PER_SEASON else 0
 
             self.rob_protect = {}
             for k in self.daliy_action_count:
@@ -1994,7 +1994,7 @@ class Jx3Handler(object):
                                     weiwang_reward,
                                     score_reward,
                                     JJC_ENERGY_COST,
-                                    " (每日{1}场双倍奖励加成中：{0}/{1})".format({jjc_stat['win'] + 1, DALIY_JJC_DOUBLE_REWARD_COUNT}) if reward_modifier == 2 else "",
+                                    " (每日{1}场双倍奖励加成中：{0}/{1})".format(jjc_stat['win'] + 1, DALIY_JJC_DOUBLE_REWARD_COUNT) if reward_modifier == 2 else "",
                                     getGroupNickName(self.qq_group, int(random_person)),
                                     score_lost)
                     
