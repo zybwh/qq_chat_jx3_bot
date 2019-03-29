@@ -209,6 +209,19 @@ STAT_DISPLAY_NAME = {
 
 QIYU_CHANCE = 0.1
 
+daliy_dict = {
+                'qiandao': False,
+                'speech_count': 0,
+                'ya_biao': 0,
+                'wa_bao': {'count': 0, 'last_time': None},
+                'jailed': 0,
+                'cha_guan': {'complete_quest': [], 'current_quest': ""},
+                "speech_energy_gain": 0,
+                'rob': {'weiwang': 0, 'money': 0, 'last_rob_time': None},
+                'practise': {'weiwang': 0},
+                'jjc': {'score': 0, 'last_time': None, 'win': 0, 'lose': 0}
+            }
+
 def calculateRemainingTime(duration, last_time):
     remain_secs = int(math.floor(duration - (time.time() - last_time)))
     hours = remain_secs // 3600
@@ -452,18 +465,7 @@ class Jx3Handler(object):
 
     def _add_new_daliy_record(self, yday_str, qq_account_str):
         if qq_account_str != "" and qq_account_str not in self.daliy_action_count[yday_str]:
-            self.daliy_action_count[yday_str][qq_account_str] = {
-                'qiandao': False,
-                'speech_count': 0,
-                'ya_biao': 0,
-                'wa_bao': {'count': 0, 'last_time': None},
-                'jailed': 0,
-                'cha_guan': {'complete_quest': [], 'current_quest': ""},
-                "speech_energy_gain": 0,
-                'rob': {'weiwang': 0, 'money': 0, 'last_rob_time': None},
-                'practise': {'weiwang': 0},
-                'jjc': {'score': 0, 'last_time': None, 'win': 0, 'lose': 0}
-            }
+            self.daliy_action_count[yday_str][qq_account_str] = daliy_dict
     
     def getCommandList(self):
         return self.commandList
@@ -2053,7 +2055,7 @@ class Jx3Handler(object):
             rank_list = sorted(self._get_daliy_list(yday_str), lambda x, y: cmp(x[1]['jjc']['score'], y[1]['jjc']['score']), reverse=True)
             list_len = len(rank_list)
             for i in range(10):
-                if i < list_len and rank_list[i][1]['jjc']['score'] != 0:
+                if i < list_len and 'jjc' in rank_list[i][1] and rank_list[i][1]['jjc']['score'] != 0:
                     returnMsg += '\n{0}. {1} {2}'.format(
                         i + 1,
                         getGroupNickName(self.qq_group, int(rank_list[i][0])), 
@@ -2089,4 +2091,5 @@ class Jx3Handler(object):
             logging.exception(e)
     
     def _get_daliy_list(self, yday_str):
+        logging.info([(k, v) for k, v in self.daliy_action_count[yday_str].items() if k not in ['jjc', 'faction']])
         return [(k, v) for k, v in self.daliy_action_count[yday_str].items() if k not in ['jjc', 'faction']]
