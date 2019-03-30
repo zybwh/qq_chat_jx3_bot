@@ -1091,7 +1091,8 @@ class Jx3Handler(object):
                     else:
                         returnMsg = "[CQ:at,qq={0}] ¹ºÂòÊ§°Ü£¡\n¹ºÂò1¸ö {1} ÐèÒª:{2}".format(qq_account, item_display_name, print_cost(cost_list))
                     self.mutex.release()
-                return returnMsg
+            
+            return returnMsg
         except Exception as e:
             logging.exception(e)
         finally:
