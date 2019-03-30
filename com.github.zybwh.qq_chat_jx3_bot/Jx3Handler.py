@@ -283,7 +283,7 @@ def getGroupNickName(fromGroup, fromQQ):
     import CQSDK
     from CQGroupMemberInfo import CQGroupMemberInfo
     info = CQGroupMemberInfo(CQSDK.GetGroupMemberInfoV2(fromGroup, fromQQ))
-    return info.Card if info.Card != None and info.Card != "" else info.Nickname
+    return info.Card if info.Card != None and info.Card != "" else info.Nickname if info.Nickname != None else str(fromQQ)
 
 def use_zhen_cheng_zhi_xin(fromGroup, fromQQ, toQQ):
     import CQSDK
@@ -452,7 +452,8 @@ class Jx3Handler(object):
                     self.daliy_action_count[yday_str]['jjc']['day'] = yesterday_stat['jjc']['day'] + 1 if yesterday_stat['jjc']['day'] < JJC_DAYS_PER_SEASON else 0
 
             self.rob_protect = {}
-            for k in self.daliy_action_count:
+            keyy = list(self.daliy_action_count.keys())
+            for k in keyy:
                 if int(k) < yday - DALIY_COUNT_SAVE_DAY:
                     self.daliy_action_count.pop(k)
     
@@ -465,7 +466,7 @@ class Jx3Handler(object):
 
     def _add_new_daliy_record(self, yday_str, qq_account_str):
         if qq_account_str != "" and qq_account_str not in self.daliy_action_count[yday_str]:
-            self.daliy_action_count[yday_str][qq_account_str] = daliy_dict
+            self.daliy_action_count[yday_str][qq_account_str] = copy.deepcopy(daliy_dict)
     
     def getCommandList(self):
         return self.commandList
@@ -951,6 +952,9 @@ class Jx3Handler(object):
                             weiwang_gain = min(weiwang_amount, ROB_DALIY_MAX_WEIWANG_GAIN - self.daliy_action_count[yday_str][fromQQ_str]['rob']['weiwang'])
                         else:
                             weiwang_gain = 0
+
+                        if loser not in self.rob_protect:
+                            self.rob_protect[loser] = {"count": 0, "rob_time": None}
 
                         if self.daliy_action_count[yday_str][fromQQ_str]['rob']['money'] < ROB_DALIY_MAX_MONEY_GAIN and self.rob_protect[loser]['count'] <= ROB_PROTECT_NO_LOST_COUNT:
                             money_gain = min(money_amount, ROB_DALIY_MAX_MONEY_GAIN - self.daliy_action_count[yday_str][fromQQ_str]['rob']['money'])

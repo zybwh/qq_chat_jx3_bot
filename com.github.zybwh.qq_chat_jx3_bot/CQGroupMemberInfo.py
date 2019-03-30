@@ -21,6 +21,8 @@ class CQGroupMemberInfo(object):
     IsAllowedToModifyCard   = None
 
     def __init__(self, data, is_base64 = True):
+        if data == None:
+            return
         data = base64.decodestring(data) if is_base64 else data
         info = CQUnpack(data)
         self.GroupID                    = info.GetLong()
