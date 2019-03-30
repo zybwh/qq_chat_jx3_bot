@@ -236,13 +236,13 @@ class CQHandler(object):
                 elif "抓捕[CQ:at,qq=" in msg:
                     msg_list = msg.split("抓捕[CQ:at,qq=")
                     if len(msg_list) == 2 and msg_list[0] == "" and msg_list[1] != "":
-                            toQQ = msg_list[1].strip('] ')
-                            if int(toQQ) == fromQQ:
-                                returnMsg = "[CQ:at,qq={0}] 就算你有悬赏，也不能抓捕自己啊。".format(fromQQ)
-                            else:
-                                returnMsg = jx3Handler.catch_wanted(fromQQ, toQQ)
-                            if '成功抓捕' in returnMsg:
-                                qiyu_type = {str(fromQQ): 'qing_feng_bu_wang', str(toQQ): 'yin_yang_liang_jie'}
+                        toQQ = msg_list[1].strip('] ')
+                        if int(toQQ) == fromQQ:
+                            returnMsg = "[CQ:at,qq={0}] 就算你有悬赏，也不能抓捕自己啊。".format(fromQQ)
+                        else:
+                            returnMsg = jx3Handler.catch_wanted(fromQQ, toQQ)
+                        if '成功抓捕' in returnMsg:
+                            qiyu_type = {str(fromQQ): 'qing_feng_bu_wang', str(toQQ): 'yin_yang_liang_jie'}
                 elif msg == "茶馆":
                     returnMsg = jx3Handler.get_cha_guan_quest(fromQQ)
                 elif msg == "交任务":
@@ -253,6 +253,12 @@ class CQHandler(object):
                     returnMsg = jx3Handler.catch_hun_hun(fromQQ)
                 elif msg == "参加名剑大会":
                     returnMsg = jx3Handler.jjc(fromQQ)
+                elif "加入门派" in msg:
+                    msg_list = msg.split("加入门派")
+                    if len(msg_list) == 2 and msg_list[0] == "" and msg_list[1] != "":
+                        returnMsg = jx3Handler.join_class(fromQQ, msg_list[1])
+                elif msg == "挥泪斩情丝":
+                    returnMsg = jx3Handler.remove_lover(fromQQ)
             elif msg in jx3Handler.getCommandList():
                 returnMsg = "大侠还未注册！无法使用指令"
 

@@ -207,6 +207,24 @@ STAT_DISPLAY_NAME = {
     "energy": "体力"
 }
 
+CLASS_LIST = [
+    '无门派',
+    '天策',
+    '纯阳',
+    '少林',
+    '七秀',
+    '万花',
+    '藏剑',
+    '五毒',
+    '唐门',
+    '明教',
+    '丐帮',
+    '苍云',
+    '长歌',
+    '霸刀',
+    '蓬莱'
+]
+
 QIYU_CHANCE = 0.1
 
 daliy_dict = {
@@ -452,8 +470,8 @@ class Jx3Handler(object):
                     self.daliy_action_count[yday_str]['jjc']['day'] = yesterday_stat['jjc']['day'] + 1 if yesterday_stat['jjc']['day'] < JJC_DAYS_PER_SEASON else 0
 
             self.rob_protect = {}
-            keyy = list(self.daliy_action_count.keys())
-            for k in keyy:
+
+            for k in list(self.daliy_action_count.keys()):
                 if int(k) < yday - DALIY_COUNT_SAVE_DAY:
                     self.daliy_action_count.pop(k)
     
@@ -548,7 +566,7 @@ class Jx3Handler(object):
             return "[CQ:at,qq={0}]\n情缘:\t\t{1}\n门派:\t\t{2}\n阵营:\t\t{3}\n威望:\t\t{4}\n帮贡:\t\t{5}\n金钱:\t\t{6}G\nPVP装分:\t{7}\nPVE装分:\t{8}\n资历:\t\t{9}\n签到状态:\t{10}\n签到次数:\t{11}\n奇遇:\t\t{12}\n注册时间:\t{13}\n今日发言:\t{14}\n体力:\t\t{15}".format(
                     qq_account,
                     "" if val['lover'] == 0 else getGroupNickName(qq_group, val['lover']),
-                    "无门派" if val['class_id'] == 0 else val['class_id'],
+                    CLASS_LIST[val['class_id']],
                     get_faction_display_name(val['faction_id']),
                     val['weiwang'],
                     val['banggong'],
@@ -2109,3 +2127,42 @@ class Jx3Handler(object):
                         v[d_k] = d_v
                 return_list.append((k, v))
         return return_list
+    
+    def join_class(self, qq_account, class_display_name):
+        returnMsg = ""
+        try:
+            self.mutex.acquire()
+            qq_account_str = str(qq_account)
+
+            if self.jx3_users[qq_account_str]['class_id'] != 0:
+                returnMsg = "[CQ:at,qq={0}] 你已经加入了门派了！".format(qq_account)
+            elif class_display_name in CLASS_LIST:
+                self.jx3_users[qq_account_str]['class_id'] = CLASS_LIST.index(class_display_name)
+                returnMsg = "[CQ:at,qq={0}] 加入门派{1}！".format(qq_account, class_display_name)
+    
+            self.mutex.release()
+            return returnMsg
+        except Exception as e:
+            logging.exception(e)
+        finally:
+            self.writeToJsonFile()
+    
+    def remove_lover(self, qq_account):
+        returnMsg = ""
+        try:
+            self.mutex.acquire()
+            qq_account_str = str(qq_account)
+
+            if self.jx3_users[qq_account_str]['lover'] == 0:
+                returnMsg = "[CQ:at,qq={0}] 你没有情缘，别乱用。".format(qq_account)
+            else:
+                self.jx3_users[qq_account_str]['lover'] = 0
+                love_time = time.time() - self.jx3_users[qq_account_str]['lover_time']
+                self.jx3_users[qq_account_str]['lover_time'] = None
+                returnMsg = "[CQ:at,qq={0}] 决定去寻找新的旅程。".format(qq_account)
+            self.mutex.release()
+            return returnMsg
+        except Exception as e:
+            logging.exception(e)
+        finally:
+            self.writeToJsonFile()
