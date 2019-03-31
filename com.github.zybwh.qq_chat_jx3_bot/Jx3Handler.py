@@ -353,6 +353,7 @@ class Jx3Handler(object):
     wanted_list = {}
     jail_list = {}
     qiyu_status = {}
+    group_info = []
 
     def __init__(self, qq_group):
         logging.info('Jx3Handler __init__')
@@ -384,6 +385,7 @@ class Jx3Handler(object):
                     self.wanted_list = copy.deepcopy(get_key_or_return_default(data, "wanted_list", {}))
                     self.jail_list = copy.deepcopy(get_key_or_return_default(data, "jail_list", {}))
                     self.qiyu_status = copy.deepcopy(get_key_or_return_default(data, "qiyu_status", {}))
+                    self.group_info = copy.deepcopy(get_key_or_return_default(data, "group_info", {}))
                     logging.info("loading complete")
             except Exception as e:
                 load_old_file = True
@@ -401,6 +403,7 @@ class Jx3Handler(object):
                         self.wanted_list = copy.deepcopy(get_key_or_return_default(data, "wanted_list", {}))
                         self.jail_list = copy.deepcopy(get_key_or_return_default(data, "jail_list", {}))
                         self.qiyu_status = copy.deepcopy(get_key_or_return_default(data, "qiyu_status", {}))
+                        self.group_info = copy.deepcopy(get_key_or_return_default(data, "group_info", {}))
                         logging.info("loading old file complete")
                 except Exception as e:
                     logging.exception(e)
@@ -433,7 +436,8 @@ class Jx3Handler(object):
                     "equipment": self.equipment,
                     "wanted_list": self.wanted_list,
                     "jail_list": self.jail_list,
-                    "qiyu_status": self.qiyu_status
+                    "qiyu_status": self.qiyu_status,
+                    "group_info": self.group_info
                 }
                 f.write(json.dumps(data, ensure_ascii=False, encoding='gbk'))
         except Exception as e:
@@ -2167,3 +2171,134 @@ class Jx3Handler(object):
             logging.exception(e)
         finally:
             self.writeToJsonFile()
+        
+    def create_group(self, qq_account):
+        returnMsg = ""
+        try:
+            self.mutex.acquire()
+            qq_account_str = str(qq_account)
+
+            group = self._get_group_by_leader(qq_account_str)
+
+            if group != None:
+                returnMsg = "[CQ:at,qq={0}] 你已经创建了一个队伍了！".format(qq_account)
+            else:
+                group = self._get_group_by_member(qq_account_str)
+                
+                if group != None:
+                    returnMsg = "[CQ:at,qq={0}] 你已经加入了 {1} 的队伍！".format(qq_account, getGroupNickName(self.qq_group, int(group.get_leader())))
+                else:
+                    self.group_info.append(Group(qq_account_str))
+                    returnMsg = "[CQ:at,qq={0}] 创建队伍成功！请让队友输入 加入队伍[CQ:at,qq={0}] 加入队伍。".format(qq_account)
+
+            self.mutex.release()
+            return returnMsg
+        except Exception as e:
+            logging.exception(e)
+        finally:
+            self.writeToJsonFile()
+    
+    def join_group(self, qq_account, leader):
+        returnMsg = ""
+        try:
+            self.mutex.acquire()
+            qq_account_str = str(qq_account)
+            leader_str = str(leader)
+
+            group = self._get_group_by_leader(qq_account_str)
+
+            if group != None:
+                returnMsg = "[CQ:at,qq={0}] 你已经创建了一个队伍，不能加入其他人的队伍，输入 退出队伍 退出当前队伍。".format(qq_account)
+            else:
+                group = self._get_group_by_member(qq_account_str)
+                if group != None:
+                    returnMsg = "[CQ:at,qq={0}] 你已经加入了 {1} 的队伍，输入 退出队伍 退出当前队伍".format(qq_account, group.get_leader())
+                else:
+                    group = self._get_group_by_leader(leader_str)
+                    if group == None:
+                        returnMsg = "[CQ:at,qq={0}] 队伍不存在。".format(qq_account)
+                    elif not group.is_group_joinable():
+                        returnMsg = "[CQ:at,qq={0}] 队伍已满，无法加入。".format(qq_account)
+                    else:
+                        group.add_member(qq_account_str)
+                        returnMsg = "[CQ:at,qq={0}] 成功加入 {1} 的队伍。".format(qq_account, getGroupNickName(self.qq_group, int(leader)))
+
+            self.mutex.release()
+            return returnMsg
+        except Exception as e:
+            logging.exception(e)
+        finally:
+            self.writeToJsonFile()
+    
+    def get_group_info(self, qq_account):
+        returnMsg = ""
+        try:
+            self.mutex.acquire()
+            qq_account_str = str(qq_account)
+
+            group = self._get_group_by_leader(qq_account_str)
+
+            if group == None:
+                group = self._get_group_by_member(qq_account_str)
+                
+            if group == None:
+                returnMsg = "[CQ:at,qq={0}] 你没有加入任何队伍。".format(qq_account)
+            else:
+                returnMsg = "[CQ:at,qq={0}] 当前队伍信息：\n队长：{1} pve装分：{2}".format(
+                    qq_account_str,
+                    getGroupNickName(self.qq_group, group.get_leader()),
+                    self.jx3_users[group.get_leader()]['pve_gear_point'])
+                for member in group.get_member_list():
+                    returnMsg += "\n{0} pve装分：{1}".format(
+                        getGroupNickName(self.qq_group, member),
+                        self.jx3_users[member]['pve_gear_point'])
+
+            self.mutex.release()
+            return returnMsg
+        except Exception as e:
+            logging.exception(e)
+    
+    def _get_group_by_leader(self, leader_str):
+        for group in self.group_info:
+            if group.is_leader():
+                return group
+        return None
+    
+    def _get_group_by_member(self, qq_account_str):
+        for group in self.group_info:
+            if group.is_member_in_group(qq_account_str):
+                return group
+        return None
+
+
+class Group(object):
+    _leader = ""
+    _member_list = []
+    _create_time = None
+
+    MAX_GROUP_MEMBER = 4
+
+    def __init__(self, leader):
+        self._leader = leader
+        self._create_time = time.time()
+    
+    def is_member_in_group(self, member):
+        return member in self._member_list
+    
+    def is_leader(self, leader):
+        return self._leader == leader
+    
+    def get_leader(self):
+        return self._leader
+    
+    def add_member(self, member):
+        self._member_list.append(member)
+    
+    def remove_member(self, member):
+        self._member_list.remove(member)
+    
+    def is_group_joinable(self):
+        return len(self._member_list) < self.MAX_GROUP_MEMBER
+    
+    def get_member_list(self):
+        return _member_list
