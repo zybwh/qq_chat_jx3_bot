@@ -1,20 +1,25 @@
+# -*- coding:gbk -*-
+
+import sys
+reload(sys)
+sys.setdefaultencoding('gbk')
 
 CLASS_LIST = {
-    'da_xia': 'æ— é—¨æ´¾',
-    'tian_ce': 'å¤©ç­–',
-    'chun_yang': 'çº¯é˜³',
-    'shao_lin': 'å°‘æ—',
-    'qi_xiu': 'ä¸ƒç§€',
-    'wan_hua': 'ä¸‡èŠ±',
-    'cang_jian': 'è—å‰‘',
-    'wu_du': 'äº”æ¯’',
-    'tang_men': 'å”é—¨',
-    'ming_jiao': 'æ˜æ•™',
-    'gai_bang': 'ä¸å¸®',
-    'cang_yun': 'è‹äº‘',
-    'chang_ge': 'é•¿æ­Œ',
-    'ba_dao': 'éœ¸åˆ€',
-    'peng_lai': 'è“¬è±'
+    'da_xia': 'ÎŞÃÅÅÉ',
+    'tian_ce': 'Ìì²ß',
+    'chun_yang': '´¿Ñô',
+    'shao_lin': 'ÉÙÁÖ',
+    'qi_xiu': 'ÆßĞã',
+    'wan_hua': 'Íò»¨',
+    'cang_jian': '²Ø½£',
+    'wu_du': 'Îå¶¾',
+    'tang_men': 'ÌÆÃÅ',
+    'ming_jiao': 'Ã÷½Ì',
+    'gai_bang': 'Ø¤°ï',
+    'cang_yun': '²ÔÔÆ',
+    'chang_ge': '³¤¸è',
+    'ba_dao': '°Ôµ¶',
+    'peng_lai': 'ÅîÀ³'
 }
 
 OLD_CLASS_LIST_TO_NEW_LIST = [

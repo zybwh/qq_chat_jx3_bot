@@ -1,4 +1,3 @@
-
 def get_key_or_return_default(dictionary, key, default_value):
     return dictionary[key] if key in dictionary else default_value
 

@@ -1,66 +1,72 @@
+# -*- coding:gbk -*-
+
+import sys
+reload(sys)
+sys.setdefaultencoding('gbk')
+
 import Utils
 
 QIYU_LIST = {
     'hong_fu_qi_tian': {
-        "display_name": 'é¸¿è¿å½“å¤´',
-        "description": "æ±Ÿæ¹–å¿«é©¬é£žæŠ¥ï¼[CQ:at,qq={0}]ä¾ å£«ç­¾åˆ°æ—¶æ´ªç¦é™ä¸´ï¼Œä¸ç»æ„é—´å‡ºå‘å¥‡é‡ã€é¸¿è¿å½“å¤´ã€‘ï¼ç­¾åˆ°æ—¶èŽ·å¾—é¢å¤–å¥–åŠ±ã€‚",
+        "display_name": 'ºèÔËµ±Í·',
+        "description": "½­ºþ¿ìÂí·É±¨£¡[CQ:at,qq={0}]ÏÀÊ¿Ç©µ½Ê±ºé¸£½µÁÙ£¬²»¾­Òâ¼ä³ö·¢ÆæÓö¡¾ºèÔËµ±Í·¡¿£¡Ç©µ½Ê±»ñµÃ¶îÍâ½±Àø¡£",
         "chance": 0.1,
         "cooldown": 0,
         "reward": {"money": DALIY_MONEY_REWARD, "weiwang": DALIY_REWARD_MIN, "banggong": DALIY_REWARD_MIN}
     },
     'luan_shi_wu_ji': {
-        "display_name": 'ä¹±ä¸–èˆžå§¬',
-        "description": "æ±Ÿæ¹–å¿«é©¬é£žæŠ¥ï¼[CQ:at,qq={0}]ä¾ å£«è¡¨æ¼”æƒŠè‰³ç»ä¼¦ï¼Œä¸ç»æ„é—´è§¦å‘å¥‡é‡ã€ä¹±ä¸–èˆžå§¬ã€‘ï¼å€¾åŸŽç‹¬ç«‹ä¸–æ‰€ç¨€ï¼Œä¹±ä¸–èˆžèµ·å½±å‡Œä¹±ï¼",
+        "display_name": 'ÂÒÊÀÎè¼§',
+        "description": "½­ºþ¿ìÂí·É±¨£¡[CQ:at,qq={0}]ÏÀÊ¿±íÑÝ¾ªÑÞ¾øÂ×£¬²»¾­Òâ¼ä´¥·¢ÆæÓö¡¾ÂÒÊÀÎè¼§¡¿£¡Çã³Ç¶ÀÁ¢ÊÀËùÏ¡£¬ÂÒÊÀÎèÆðÓ°ÁèÂÒ£¡",
         "chance": 0.01,
         "cooldown": 1 * 60 * 60,
         "reward": {"money": 200, "energy": 100}
     },
     'hu_xiao_shan_lin': {
-        "display_name": 'è™Žå•¸å±±æž—',
-        "description": "æ±Ÿæ¹–å¿«é©¬é£žæŠ¥ï¼[CQ:at,qq={0}]ä¾ å£«æ­£åœ¨æµ´è¡€å¥‹æˆ˜ï¼Œä¸ç»æ„é—´è§¦å‘å¥‡é‡ã€è™Žå•¸å±±æž—ã€‘ï¼æ­£æ‰€è°“åå¹´ç£¨ä¸€å‰‘ï¼Œä¸æ¼å…¶é”‹èŠ’ã€‚åªå¾…å‰‘éž˜å‡ºï¼Œæ–©å°½æ•Œé¦–é¢…ã€‚",
+        "display_name": '»¢Ð¥É½ÁÖ',
+        "description": "½­ºþ¿ìÂí·É±¨£¡[CQ:at,qq={0}]ÏÀÊ¿ÕýÔÚÔ¡Ñª·ÜÕ½£¬²»¾­Òâ¼ä´¥·¢ÆæÓö¡¾»¢Ð¥É½ÁÖ¡¿£¡ÕýËùÎ½Ê®ÄêÄ¥Ò»½££¬²»Â©Æä·æÃ¢¡£Ö»´ý½£ÇÊ³ö£¬Õ¶¾¡µÐÊ×Â­¡£",
         "chance": 0.05,
         "cooldown": 2 * 60 * 60,
         "reward": {"weiwang": 5000}
     },
     'hu_you_cang_sheng': {
-        "display_name": 'æŠ¤ä½‘è‹ç”Ÿ',
-        "description": "æ±Ÿæ¹–å¿«é©¬é£žæŠ¥ï¼[CQ:at,qq={0}]ä¾ å£«å°½å¿ƒä¿æŠ¤ä»–äººï¼Œä¸ç»æ„é—´è§¦å‘å¥‡é‡ã€æŠ¤ä½‘è‹ç”Ÿã€‘ï¼è‹ç”Ÿå¤©ä¸‹ç³»äºŽä¸€å¿ƒï¼Œæ­¤ä»½é‡æ‹…èƒ½å¦ä¸€è‚©æ‹…èµ·ï¼Œä¸Žå…¶å…±å‹‰ï¼",
+        "display_name": '»¤ÓÓ²ÔÉú',
+        "description": "½­ºþ¿ìÂí·É±¨£¡[CQ:at,qq={0}]ÏÀÊ¿¾¡ÐÄ±£»¤ËûÈË£¬²»¾­Òâ¼ä´¥·¢ÆæÓö¡¾»¤ÓÓ²ÔÉú¡¿£¡²ÔÉúÌìÏÂÏµÓÚÒ»ÐÄ£¬´Ë·ÝÖØµ£ÄÜ·ñÒ»¼çµ£Æð£¬ÓëÆä¹²Ãã£¡",
         "chance": 0.05,
         "cooldown": 2 * 60 * 60,
         "reward": {"weiwang": 5000}
     },
     'fu_yao_jiu_tian': {
-        "display_name": 'æ‰¶æ‘‡ä¹å¤©',
-        "description": "æ±Ÿæ¹–å¿«é©¬é£žæŠ¥ï¼[CQ:at,qq={0}]ä¾ å£«è½»åŠŸç›–ä¸–ï¼Œè§¦å‘å¥‡é‡ã€æ‰¶æ‘‡ä¹å¤©ã€‘ï¼æ­£æ˜¯å¾¡é£Žè¡Œåƒé‡Œï¼Œæ‰¶æ‘‡çº¢å°˜å·…",
+        "display_name": '·öÒ¡¾ÅÌì',
+        "description": "½­ºþ¿ìÂí·É±¨£¡[CQ:at,qq={0}]ÏÀÊ¿Çá¹¦¸ÇÊÀ£¬´¥·¢ÆæÓö¡¾·öÒ¡¾ÅÌì¡¿£¡ÕýÊÇÓù·çÐÐÇ§Àï£¬·öÒ¡ºì³¾áÛ",
         "chance": 0.01,
         "cooldown": 1 * 60 * 60,
         "reward": {"money": 200, "energy": 100}
     },
     'cha_guan_qi_yuan': {
-        "display_name": 'èŒ¶é¦†å¥‡ç¼˜',
-        "description": "æ±Ÿæ¹–å¿«é©¬é£žæŠ¥ï¼[CQ:at,qq={0}]ä¾ å£«æ­£åœ¨èŒ¶é¦†é—²åï¼Œä¸ç»æ„é—´è§¦å‘å¥‡é‡ã€èŒ¶é¦†å¥‡ç¼˜ã€‘ï¼æ­£æ˜¯ï¼šå±å’¤æ±Ÿæ¹–ï¼Œä¸è§ç¾Žäººé¡¾æ€€ã€‚èŒ¶é¦†é—²åï¼Œå´é‡ç­‰é—²æ˜¯éžï¼",
+        "display_name": '²è¹ÝÆæÔµ',
+        "description": "½­ºþ¿ìÂí·É±¨£¡[CQ:at,qq={0}]ÏÀÊ¿ÕýÔÚ²è¹ÝÏÐ×ø£¬²»¾­Òâ¼ä´¥·¢ÆæÓö¡¾²è¹ÝÆæÔµ¡¿£¡ÕýÊÇ£ºß³ßå½­ºþ£¬²»¼ûÃÀÈË¹Ë»³¡£²è¹ÝÏÐ×ø£¬È´ÓöµÈÏÐÊÇ·Ç£¡",
         "chance": 0.05,
         "cooldown": 2 * 60 * 60,
         "require": {'money': 10000},
         "reward": {"money": 1000, "banggong": 5000}
     },
     'qing_feng_bu_wang': {
-        "display_name": "æ¸…é£Žæ•çŽ‹",
-        "description": "æ±Ÿæ¹–å¿«é©¬é£žæŠ¥ï¼[CQ:at,qq={0}]ä¾ å£«æ­£åœ¨è¡Œä¾ æ±Ÿæ¹–ï¼Œä¸ç»æ„é—´è§¦å‘å¥‡é‡ã€æ¸…é£Žæ•çŽ‹ã€‘ï¼",
+        "display_name": "Çå·ç²¶Íõ",
+        "description": "½­ºþ¿ìÂí·É±¨£¡[CQ:at,qq={0}]ÏÀÊ¿ÕýÔÚÐÐÏÀ½­ºþ£¬²»¾­Òâ¼ä´¥·¢ÆæÓö¡¾Çå·ç²¶Íõ¡¿£¡",
         "chance": 0.05,
         "cooldown": 0,
         "reward": {"money": 500, "weiwang": 5000}
     },
     'san_shan_si_hai': {
-        "display_name": "ä¸‰å±±å››æµ·",
-        "description": "æ±Ÿæ¹–å¿«é©¬é£žæŠ¥ï¼[CQ:at,qq={0}]ä¾ å£«ç¦è‡³å¿ƒçµï¼Œä¸ç»æ„é—´è§¦å‘å¥‡é‡ã€ä¸‰å±±å››æµ·ã€‘ï¼æ­£æ˜¯ï¼šç¿»éä¸‰å±±æ£å››æµ·ï¼Œè¡Œå°½å¤©æ¶¯è§…çœŸé‡‘ã€‚",
+        "display_name": "ÈýÉ½ËÄº£",
+        "description": "½­ºþ¿ìÂí·É±¨£¡[CQ:at,qq={0}]ÏÀÊ¿¸£ÖÁÐÄÁé£¬²»¾­Òâ¼ä´¥·¢ÆæÓö¡¾ÈýÉ½ËÄº£¡¿£¡ÕýÊÇ£º·­±éÈýÉ½µ·ËÄº££¬ÐÐ¾¡ÌìÑÄÃÙÕæ½ð¡£",
         "chance": 0.01,
         "cooldown": 2 * 60 * 60,
         "reward": {"money": 1000}
     },
     'yin_yang_liang_jie': {
-        "display_name": "é˜´é˜³ä¸¤ç•Œ",
-        "description": "æ±Ÿæ¹–å¿«é©¬é£žæŠ¥ï¼[CQ:at,qq={0}]ä¾ å£«ç¦ç¼˜éžæµ…ï¼Œè§¦å‘å¥‡é‡ã€é˜´é˜³ä¸¤ç•Œã€‘ï¼Œæ­¤åƒå¤å¥‡ç¼˜å°†å¼€å¯æ€Žæ ·çš„å¥‡å¦™é™…é‡ï¼Œä»¤äººç¥žå¾€ï¼",
+        "display_name": "ÒõÑôÁ½½ç",
+        "description": "½­ºþ¿ìÂí·É±¨£¡[CQ:at,qq={0}]ÏÀÊ¿¸£Ôµ·ÇÇ³£¬´¥·¢ÆæÓö¡¾ÒõÑôÁ½½ç¡¿£¬´ËÇ§¹ÅÆæÔµ½«¿ªÆôÔõÑùµÄÆæÃî¼ÊÓö£¬ÁîÈËÉñÍù£¡",
         "chance": 0.05,
         "cooldown": 24 * 60 * 60,
         "require": {"pvp_gear_point": 3000, "pve_gear_point": 3000},

@@ -1,26 +1,50 @@
+# -*- coding:gbk -*-
+
+import sys
+reload(sys)
+sys.setdefaultencoding('gbk')
+
 import Utils
 
 ITEM_LIST = {
-    "zhen_cheng_zhi_xin": {"display_name": "çœŸæ©™ä¹‹å¿ƒ", "rank": 2, "cost": {"money": 999}},
-    "hai_shi_shan_meng": {"display_name": "æµ·èª“å±±ç›Ÿ", "rank": 1, "cost": {"money": 9999}},
-    "jin_zhuan": {"display_name": "é‡‘ç –", "rank": 5, "effect": {"money": 50}},
-    "jin_ye_zi": {"display_name": "é‡‘å¶å­", "rank": 6, "effect": {"money": 10}},
-    "zhuan_shen_can": {"display_name": "è½¬ç¥é¤", "rank": 5, "effect": {"energy": 5}, "cost": {"money": 100}},
-    "jia_zhuan_shen_can": {"display_name": "ä½³Â·è½¬ç¥é¤", "rank": 3, "effect": {"energy": 30}, "cost": {"money": 500}},
-    "rong_ding": {"display_name": "ç†”é”­", "rank": 3, "effect": {'pve_weapon': 5}, "cost": {"banggong": 5000}},
-    "mo_shi": {"display_name": "ç£¨çŸ³", "rank": 3, "effect": {'pvp_weapon': 5}, "cost": {"weiwang": 5000}},
-    "ran": {"display_name": "ç»£", "rank": 0, "effect": {'pve_armor': 10}},
-    "xiu": {"display_name": "ç»£", "rank": 4, "effect": {'pve_armor': 10}, "cost": {"banggong": 2000}},
-    "yin": {"display_name": "å°", "rank": 4, "effect": {'pvp_armor': 10}, "cost": {"weiwang": 2000}},
-    "sui_rou": {"display_name": "ç¢è‚‰", "rank": 4, "cost": {"money": 10}},
-    "cu_bu": {"display_name": "ç²—å¸ƒ", "rank": 4, "cost": {"money": 10}},
-    "gan_cao": {"display_name": "ç”˜è‰", "rank": 4, "cost": {"money": 10}},
-    "hong_tong": {"display_name": "çº¢é“œ", "rank": 4, "cost": {"money": 10}},
-    "hun_hun_zheng_ming": {"display_name": "æ··æ··æŠ“æ•è¯æ˜", "rank": 0}
+    "zhen_cheng_zhi_xin": {
+        "display_name": "Õæ³ÈÖ®ĞÄ",
+        "rank": 2, 
+        "cost": {"money": 999},
+        'firework': [
+            "    [CQ:face,id=145][CQ:face,id=145]    [CQ:face,id=145][CQ:face,id=145]    \n[CQ:face,id=145]         [CQ:face,id=145]         [CQ:face,id=145]\n    [CQ:face,id=145]                [CQ:face,id=145]\n          [CQ:face,id=145]    [CQ:face,id=145]\n               [CQ:face,id=145]",
+            "¡°½­ºş·ÉÂíÀ´±¨£¡[CQ:at,qq={0}] ÏÀÊ¿¶Ô [CQ:at,qq={1}] ÏÀÊ¿Ê¹ÓÃÁË´«ËµÖĞµÄ¡¾Õæ³ÈÖ®ĞÄ¡¿£¡ÒÔ´ËÏòÌìÏÂĞû¸æÆä°®Ä½Ö®ĞÄ£¬·îÈÕÔÂÒÔÎªÃË£¬ÕÑÌìµØÒÔÎª¼ø£¬Ğ¥É½ºÓÒÔÎªÖ¤£¬¾´¹íÉñÒÔÎªÆ¾¡£´Ó´ËÉ½¸ß²»×èÆäÖ¾£¬½§Éî²»¶ÏÆäĞĞ£¬Á÷Äê²»»ÙÆäÒâ£¬·çËª²»ÑÚÆäÇé¡£×İÈ»Ç°Â·¾£¼¬±éÒ°£¬Òà½«Ì¹È»ÎŞ¾åÕÌ½£ËæĞĞ¡£½ñÉú½ñÊÀ£¬²»Àë²»Æú£¬ÓÀÉúÓÀÊÀ£¬ÏàĞíÏà´Ó£¡¡±"
+        ]
+    },
+    "hai_shi_shan_meng": {"display_name": "º£ÊÄÉ½ÃË", "rank": 1, "cost": {"money": 9999}},
+    "jin_zhuan": {"display_name": "½ğ×©", "rank": 5, "effect": {"money": 50}},
+    "jin_ye_zi": {"display_name": "½ğÒ¶×Ó", "rank": 6, "effect": {"money": 10}},
+    "zhuan_shen_can": {"display_name": "×ªÉñ²Í", "rank": 5, "effect": {"energy": 5}, "cost": {"money": 100}},
+    "jia_zhuan_shen_can": {"display_name": "¼Ñ¡¤×ªÉñ²Í", "rank": 3, "effect": {"energy": 30}, "cost": {"money": 500}},
+    "rong_ding": {"display_name": "ÈÛ¶§", "rank": 3, "effect": {'pve_weapon': 5}, "cost": {"banggong": 5000}},
+    "mo_shi": {"display_name": "Ä¥Ê¯", "rank": 3, "effect": {'pvp_weapon': 5}, "cost": {"weiwang": 5000}},
+    "ran": {"display_name": "Ğå", "rank": 0, "effect": {'pve_armor': 10}},
+    "xiu": {"display_name": "Ğå", "rank": 4, "effect": {'pve_armor': 10}, "cost": {"banggong": 2000}},
+    "yin": {"display_name": "Ó¡", "rank": 4, "effect": {'pvp_armor': 10}, "cost": {"weiwang": 2000}},
+    "sui_rou": {"display_name": "ËéÈâ", "rank": 4, "cost": {"money": 10}},
+    "cu_bu": {"display_name": "´Ö²¼", "rank": 4, "cost": {"money": 10}},
+    "gan_cao": {"display_name": "¸Ê²İ", "rank": 4, "cost": {"money": 10}},
+    "hong_tong": {"display_name": "ºìÍ­", "rank": 4, "cost": {"money": 10}},
+    "hun_hun_zheng_ming": {"display_name": "»ì»ì×¥²¶Ö¤Ã÷", "rank": 0}
+}
+
+USER_STAT_DISPLAY = {
+    'banggong': '',
+    'weiwang': '',
+    'money': '',
+    'energy': ''
 }
 
 def load_item_data(data, item_list):
     return {k: {'object': item_list[k], 'count': v} for k, v in data.items()}
+
+def get_item_display_name(item_name):
+    return ITEM_LIST[item_name]['display_name'] if item_name in ITEM_LIST else ""
 
 def Jx3Item(object):
     _name = ''
@@ -28,6 +52,7 @@ def Jx3Item(object):
     _rank = 0
     _cost = {}
     _effect = {}
+    _firework = []
 
     def __init__(self, name, data):
         self._name = name
@@ -35,3 +60,47 @@ def Jx3Item(object):
         self._rank = data['rank']
         self._cost = Utils.get_key_or_return_default(data, 'cost', {})
         self._effect = Utils.get_key_or_return_default(data, 'effect', {})
+        self._firework = Utils.get_key_or_return_default(data, 'firework', [])
+    
+    def is_firework(self):
+        return self._firework != []
+    
+    def use_item(self, user, amount, toQQ, group):
+        if self._firework != []:
+            return self.use_firework(user.get_qq_account_str(), toQQ, group)
+        returnMsg = "[CQ:at,qq={0}]\nÊ¹ÓÃ {1} x {2}\n"
+        for stat, v in self._effect.items():
+            if stat in USER_STAT_DISPLAY:
+                if stat == 'weiwang':
+                    user.modify_weiwang(v * item_amount)
+                elif stat == 'banggong':
+                    user.modify_banggong(v * item_amount)
+                elif stat == 'money':
+                    user.modify_money(v * item_amount)
+                elif stat == 'energy':
+                    user.modify_energy(v * item_amount)
+                returnMsg += "{0}+{1} ".format(USER_STAT_DISPLAY[stat], v * item_amount)
+            elif k == 'pve_weapon':
+                self.equipment[qq_account_str]['weapon']['pve'] += v * item_amount
+                returnMsg += "\nÎäÆ÷pveÉËº¦+{0}".format(v * item_amount)
+                self._update_gear_point(qq_account_str)
+            elif k == 'pvp_weapon':
+                self.equipment[qq_account_str]['weapon']['pvp'] += v * item_amount
+                returnMsg += "\nÎäÆ÷pvpÉËº¦+{0}".format(v * item_amount)
+                self._update_gear_point(qq_account_str)
+            elif k == 'pve_armor':
+                self.equipment[qq_account_str]['armor']['pve'] += v * item_amount
+                returnMsg += "\n·À¾ßpveÑªÁ¿+{0}".format(v * item_amount)
+                self._update_gear_point(qq_account_str)
+            elif k == 'pvp_armor':
+                self.equipment[qq_account_str]['armor']['pvp'] += v * item_amount
+                returnMsg += "\n·À¾ßpvpÑªÁ¿+{0}".format(v * item_amount)
+                self._update_gear_point(qq_account_str)
+        return returnMsg
+
+    def use_firework(self, fromQQ, toQQ, group):
+        import CQSDK
+        for msg in self._firework:
+            if msg != "" and group != "":
+                CQSDK.SendGroupMsg(int(group), msg.format(fromQQ, toQQ))
+        return ""

@@ -1,3 +1,9 @@
+# -*- coding:gbk -*-
+
+import sys
+reload(sys)
+sys.setdefaultencoding('gbk')
+
 import Utils
 import Jx3Item
 
@@ -18,8 +24,8 @@ daliy_dict = {
 }
 
 default_equipment = {
-    'weapon': {"display_name": "å¤§ä¾ å‰‘", 'pvp': 10, 'pve': 10}, 
-    'armor': {"display_name": "å¤§ä¾ è¡£", 'pvp': 100, 'pve': 100}
+    'weapon': {"display_name": "´óÏÀ½£", 'pvp': 10, 'pve': 10}, 
+    'armor': {"display_name": "´óÏÀÒÂ", 'pvp': 100, 'pve': 100}
 }
 
 class Jx3User(object):
@@ -32,6 +38,7 @@ class Jx3User(object):
     _weiwang = 0
     _money = 0
     _banggong = 0
+    _energy = 0
 
     _achievement = {}
 
@@ -40,17 +47,13 @@ class Jx3User(object):
 
     _qiyu = {}
 
-    _energy = 0
-    register_time = None
-    
+    register_time = None    
     _qiandao_count = 0
 
-    _bag = {}
-
     _today = 0
-
     _daliy_count = {}
 
+    _bag = {}
     _equipment = {}
 
     def __init__(self, data={})
@@ -78,6 +81,9 @@ class Jx3User(object):
         self._bag = Utils.get_key_or_return_default(data, 'bag', {})
         self._equipment = Utils.get_key_or_return_default(data, 'equipment', copy.deepcopy(default_equipment))
 
+        self._today = Utils.get_key_or_return_default(data, 'today', 0)
+        self._daliy_count = Utils.get_key_or_return_default(data, 'daliy_count', {})
+
     def dump_data(self):
         return {
             'qq_account_str': self._qq_account_str,
@@ -94,11 +100,13 @@ class Jx3User(object):
             'qiyu': {k: v['count'] for k, v in self_qiyu.items()},
             'register_time': self._register_time,
             'bag': {k, v['count'] for k, v in self._bag.items()},
-            'equipment': self._equipment
+            'equipment': self._equipment,
+            'today': self._today,
+            'daliy_count': self._daliy_count
         }
     
     def get_info(self, qq_group):
-        return "[CQ:at,qq={0}]\næƒ…ç¼˜:\t\t{1}\né—¨æ´¾:\t\t{2}\né˜µè¥:\t\t{3}\nå¨æœ›:\t\t{4}\nå¸®è´¡:\t\t{5}\né‡‘é’±:\t\t{6}G\nä½“åŠ›:\t{7}\nç­¾åˆ°çŠ¶æ€:\t{8}\nå¥‡é‡:\t\t{9}\nä»Šæ—¥å‘è¨€:\t{10}".format(
+        return "[CQ:at,qq={0}]\nÇéÔµ:\t\t{1}\nÃÅÅÉ:\t\t{2}\nÕóÓª:\t\t{3}\nÍþÍû:\t\t{4}\n°ï¹±:\t\t{5}\n½ðÇ®:\t\t{6}G\nÌåÁ¦:\t{7}\nÇ©µ½×´Ì¬:\t{8}\nÆæÓö:\t\t{9}\n½ñÈÕ·¢ÑÔ:\t{10}".format(
             self._qq_account_str,
             "" if self._lover == 0 else Utils.get_group_nick_name(int(qq_group), int(self._lover)),
             self._class_ptr.get_display_name(),
@@ -112,15 +120,15 @@ class Jx3User(object):
             self._daliy_count['speech_count'])
     
     def qiandao(self, weiwang_reward, banggong_reward, money_reward, energy_gain):
-        self._weiwang += weiwang_reward
-        self._banggong += banggong_reward
-        self._energy += energy_gain
-        self._money += money_reward
+        self.modify_weiwang(weiwang_reward)
+        self.modify_banggong(banggong_reward)
+        self.modify_money(money_reward)
+        self.modify_energy(energy_gain)
         
         self._qiandao_count += 1
 
         self._daliy_count['qiandao'] = True
-        returnMsg = "[CQ:at,qq={0}] ç­¾åˆ°æˆåŠŸï¼ç­¾åˆ°å¥–åŠ±: å¨æœ›+{1} å¸®è´¡+{2} é‡‘é’±+{3} ä½“åŠ›+{4}".format(
+        returnMsg = "[CQ:at,qq={0}] Ç©µ½³É¹¦£¡Ç©µ½½±Àø: ÍþÍû+{1} °ï¹±+{2} ½ðÇ®+{3} ÌåÁ¦+{4}".format(
             qq_account,
             weiwang_reward,
             banggong_reward,
@@ -131,41 +139,84 @@ class Jx3User(object):
 
         if faction_reward != 0:
             self._weiwang += faction_reward
-            returnMsg += "\nèŽ·å¾—æ˜¨æ—¥é˜µè¥å¥–åŠ±ï¼šå¨æœ›+{0}".format(faction_reward)
+            returnMsg += "\n»ñµÃ×òÈÕÕóÓª½±Àø£ºÍþÍû+{0}".format(faction_reward)
         
         return returnMsg
     
+    def modify_weiwang(self, weiwang_reward):
+        self._weiwang += int(weiwang_reward)
+    
+    def modify_banggong(self, banggong_reward):
+        self._banggong += int(banggong_reward)
+    
+    def modify_money(self, money_reward):
+        self._money += int(money_reward)
+    
+    def modify_energy(self, energy_reward):
+        self._energy += int(energy_reward)
+
     def has_qiandao(self):
         return self._daliy_count['qiandao']
+    
+    def has_energy(self, energy_require):
+        return self._energy >= energy_require
 
     def add_speech_count(self, speech_energy_gain, max_speech_energy_gain):
         self._daliy_count['speech_count'] += 1
 
         if self._daliy_count['speech_energy_gain'] < max_speech_energy_gain:
             self._daliy_count['speech_energy_gain'] += speech_energy_gain
-            self._energy += speech_energy_gain
+            self.modify_energy(speech_energy_gain)
+    
+    def can_ya_biao(self, daliy_max_ya_biao_count):
+        return self._daliy_count['ya_biao'] < daliy_max_ya_biao_count
+
+    def ya_biao(self, weiwang_reward, money_reward, energy_cost):
+        self.modify_weiwang(weiwang_reward)
+        self.modify_money(money_reward)
+        self.modify_energy(0 - energy_cost)
+        self._daliy_count['ya_biao'] += 1
+
+    def get_faction(self):
+        return self._faction_ptr
+    
+    def get_faction_join_time(self):
+        return self._faction_join_time
+    
+    def get_lover(self):
+        return self._lover
+    
+    def get_qq_account_str(self):
+        return self._qq_account_str
     
     def addd_lover(self, lover_str):
         self._lover = lover_str
         self._lover_time = time.time()
+
+    def join_faction(self, faction_ptr):
+        self._faction_ptr.remove_member(self._qq_account_str)
+        self._faction_ptr = faction_ptr
+        self._faction_ptr.add_member(self._qq_account_str)
+        self._faction_join_time = time.time()
     
     def display_bag(self):
         returnMsg = ""
-        for item, amount in self._bag.items():
-            returnMsg += "\n{0} x {1}".format(item.get_display_name(), amount)
+        for item_name, v in self._bag.items():
+            if v['amount'] != 0:
+                returnMsg += "\n{0} x {1}".format(v['object'].get_display_name(), v['amount'])
         
         if returnMsg == "":
-            returnMsg = "\nç©ºç©ºå¦‚ä¹Ÿ"
+            returnMsg = "\n¿Õ¿ÕÈçÒ²"
         return returnMsg
     
-    def check_item(self, item):
-        return item in self.bag
-    
-    def use_item(self, item, amount):
-        returnMsg = item.use_item(self, amount)
-        self.bag[item] -= amount
-        if self.bag[item] == 0:
-            self.bag.pop(item)
+    def check_item(self, item_name):
+        return item_name in self.bag
+
+    def use_item(self, item_name, amount=1, toQQ="", qq_group=""):
+        returnMsg = self._bag[item_name]['object'].use_item(self, amount, toQQ, qq_group)
+        self._bag[item_name]['amount'] -= amount
+        if self._bag[item_name]['amount'] == 0:
+            self.bag.pop(item_name)
         return returnMsg
     
     def buy_item(self, item, amount):
@@ -191,7 +242,7 @@ class Jx3User(object):
     def get_pve_gear_point(self):
         weapon = equipment['weapon']
         armor = equipment['armor']
-        return weapon['pve'] * 50 + armor['pve'] * 20
+        return weapon['pve'] * 50 + armor['pve'] * 10
     
     def get_pvp_gear_point(self):
         weapon = equipment['weapon']

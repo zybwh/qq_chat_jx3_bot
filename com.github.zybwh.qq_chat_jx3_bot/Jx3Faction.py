@@ -1,7 +1,13 @@
+# -*- coding:gbk -*-
+
+import sys
+reload(sys)
+sys.setdefaultencoding('gbk')
+
 FACTION_LIST = {
-    'zhong_li': '‰∏≠Á´ã',
-    'e_ren': 'ÊÅ∂‰∫∫Ë∞∑',
-    'hao_qi': 'Êµ©Ê∞îÁõü'
+    'zhong_li': '÷–¡¢',
+    'e_ren': '∂Ò»Àπ»',
+    'hao_qi': '∫∆∆¯√À'
 }
 
 OLD_FACTION_LIST = [
@@ -14,6 +20,11 @@ def convert_old_faction_id_to_new_faction_id(old_id):
     if old_id in OLD_FACTION_LIST:
         return old_id
     return OLD_FACTION_LIST[old_id]
+
+def convert_display_name_to_faction_id(display_name):
+    if display_name in FACTION_LIST.values():
+        return FACTION_LIST.keys()[FACTION_LIST.values().index(display_name)]
+    return ""
 
 class Jx3Faction(object):
     _name = ''
@@ -33,11 +44,26 @@ class Jx3Faction(object):
     def get_display_name(self):
         return self._display_name
     
+    def is_zhong_li(self):
+        return self._name == 'zhong_li'
+    
     def reset_daliy_count(self, yday):
-        if yday != self._today and self._name != 'zhong_li':
+        if yday != self._today and not self.is_zhong_li():
             self._today = yday
             self._yesterday_score_reward = self._today_score / len(self._member_list)
             self._today_score = 0
     
+    def score_gain(self, score_gain):
+        _today_score += score_gain
+    
     def get_yesterday_faction_reward(self):
         return _yesterday_score_reward
+    
+    def is_member(self, qq_account_str):
+        return qq_account_str in self._member_list
+    
+    def add_member(self, qq_acount_str):
+        self._member_list.append(qq_acount_str)
+
+    def remove_member(self, qq_acount_str):
+        self._member_list.remove(qq_acount_str)
