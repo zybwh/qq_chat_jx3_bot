@@ -259,6 +259,31 @@ class CQHandler(object):
                         returnMsg = jx3Handler.join_class(fromQQ, msg_list[1])
                 elif msg == "挥泪斩情丝":
                     returnMsg = jx3Handler.remove_lover(fromQQ)
+                elif msg == "创建队伍":
+                    returnMsg = jx3Handler.create_group(fromQQ)
+                elif "加入队伍[CQ:at,qq=" in msg:
+                    msg_list = msg.split("加入队伍[CQ:at,qq=")
+                    if len(msg_list) == 2 and msg_list[0] == "" and msg_list[1] != "":
+                        toQQ = msg_list[1].strip('] ')
+                        if int(toQQ) == fromQQ:
+                            returnMsg = "[CQ:at,qq={0}] 无法加入自己的队伍。".format(fromQQ)
+                        else:
+                            returnMsg = jx3Handler.join_group(fromQQ, toQQ)
+                elif msg == "查看队伍":
+                    returnMsg = jx3Handler.get_group_info(fromQQ)
+                elif msg == "退出队伍":
+                    returnMsg = jx3Handler.quit_group(fromQQ)
+                elif msg == "副本列表":
+                    returnMsg = jx3Handler.list_dungeon(fromQQ)
+                elif "进入副本" in msg:
+                    msg_list = msg.split("进入副本")
+                    if len(msg_list) == 2 and msg_list[0] == "" and msg_list[1] != "":
+                        returnMsg = jx3Handler.start_dungeon(fromQQ, msg_list[1])
+                elif msg == "攻击boss":
+                    returnMsg = jx3Handler.attack_boss(fromQQ)
+                elif msg == "查看boss":
+                    returnMsg = jx3Handler.get_current_boss_info(fromQQ)
+
             elif msg in jx3Handler.getCommandList():
                 returnMsg = "大侠还未注册！无法使用指令"
 

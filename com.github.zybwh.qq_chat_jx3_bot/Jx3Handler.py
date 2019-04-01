@@ -106,6 +106,11 @@ JJC_REWARD_RANK_MODIFIER = 0.1
 DALIY_JJC_DOUBLE_REWARD_COUNT = 5
 JJC_DAYS_PER_SEASON = 7
 
+DUNGEON_MAX_ATTACK_COUNT = 5
+DUNGEON_ATTACK_COOLDOWN = 10
+DUNGEON_ENERGY_REQUIRED = 100
+
+
 FACTION_DISPLAY_NAME = ['中立', '恶人谷', '浩气盟']
 FACTION_NAME_ID = ['zhongli', 'eren', 'haoqi']
 
@@ -152,10 +157,91 @@ CHA_GUAN_QUEST_INFO = {
 
 NPC_LIST = {
     "hun_hun": {
+        "display_name": "熊痴",
         "equipment": {'weapon': {"display_name": "混混棍", 'pvp': 0, 'pve': 10}, 
                         'armor': {"display_name": "混混衣", 'pvp': 0, 'pve': 50}},
         "reward": {"money": 50},
         "reward_chance": 0.5
+    },
+    'xiong_chi': {
+        "display_name": "熊痴",
+        "equipment": {'weapon': {"display_name": "“熊痴拳套", 'pvp': 0, 'pve': 100}, 
+                        'armor': {"display_name": "熊痴衣", 'pvp': 0, 'pve': 500}},
+        "reward": {
+            "money": 200,
+            "banggong": 2000,
+        },
+        "reward_chance": 1,
+        "reward_item": {
+            "rong_ding": 0.2,
+            "ran": 0.4
+        }
+    },
+    'deng_wen_feng': {
+        "display_name": "邓文峰",
+        "equipment": {'weapon': {"display_name": "“邓文峰枪", 'pvp': 0, 'pve': 200},
+                        'armor': {"display_name": "邓文峰衣", 'pvp': 0, 'pve': 1500}},
+        "reward": {
+            "money": 300,
+            "banggong": 5000,
+        },
+        "buff": [
+            {
+                "display_name": "邓家阵法",
+                "description": "武器攻击+50%",
+                "weapon": 1.5,
+                "chance": 0.1,
+            },
+            {
+                "display_name": "邓家将",
+                "description": "武器攻击+20%",
+                "weapon": 1.2,
+                "chance": 0.3
+            }
+        ],
+        "reward_chance": 1,
+        "reward_item": {
+            "rong_ding": 0.6,
+            "ran": 1
+        }
+    },
+    'shang_zhong_yong': {
+        "display_name": "商仲永",
+        "equipment": {'weapon': {"display_name": "“商仲永扇", 'pvp': 0, 'pve': 200}, 
+                        'armor': {"display_name": "商仲永衣", 'pvp': 0, 'pve': 3000}},
+        "reward": {
+            "money": 500,
+            "banggong": 10000,
+        },
+        "buff": [
+            {
+                "display_name": "木人阵攻击",
+                "description": "武器攻击+50%",
+                "weapon": 1.5,
+                "chance": 0.1,
+            }
+        ],
+        "debuff": [
+            {
+                "display_name": "八卦阵防御",
+                "description": "武器攻击-50%",
+                "weapon": 0.5,
+                "chance": 0.2,
+            },
+            {
+                "display_name": "天雷阵防御",
+                "description": "武器攻击-20%",
+                "weapon": 0.8,
+                "chance": 0.4
+            }
+        ],
+        "reward_chance": 1,
+        "reward_item": {
+            "rong_ding": 1,
+            "ran": 1,
+            "jia_zhuan_shen_can": 1,
+            "zhen_cheng_zhi_xin": 0.1
+        }
     }
 }
 
@@ -200,6 +286,17 @@ QIYU_LIST = {
                         "reward": {"money": 500, "weiwang": 5000}},
 }
 
+DUNGEON_LIST = {
+    'san_cai_zhen': {
+        "display_name": "三才阵",
+        "recommand_pve_gear_point": 10000,
+        "boss": ['xiong_chi', 'deng_wen_feng', 'shang_zhong_yong'],
+        "reward": {
+            "banggong": 2000
+        }
+    }
+}
+
 STAT_DISPLAY_NAME = {
     "weiwang": "威望",
     "banggong": "帮贡",
@@ -237,8 +334,15 @@ daliy_dict = {
                 "speech_energy_gain": 0,
                 'rob': {'weiwang': 0, 'money': 0, 'last_rob_time': None},
                 'practise': {'weiwang': 0},
-                'jjc': {'score': 0, 'last_time': None, 'win': 0, 'lose': 0}
+                'jjc': {'score': 0, 'last_time': None, 'win': 0, 'lose': 0},
+                'dungeon': {}
             }
+
+def get_dungeon_id_by_display_name(display_name):
+    for k, v in DUNGEON_LIST.items():
+        if v['display_name'] == display_name:
+            return k
+    return ""
 
 def calculateRemainingTime(duration, last_time):
     remain_secs = int(math.floor(duration - (time.time() - last_time)))
@@ -250,7 +354,7 @@ def calculateRemainingTime(duration, last_time):
 def calculateGearPoint(equipment):
     weapon = equipment['weapon']
     armor = equipment['armor']
-    return {'pve': weapon['pve'] * 50 + armor['pve'] * 20, 'pvp': weapon['pvp'] * 50 + armor['pvp'] * 20}
+    return {'pve': weapon['pve'] * 50 + armor['pve'] * 10, 'pvp': weapon['pvp'] * 50 + armor['pvp'] * 10}
 
 def get_wa_bao_reward():
     max_index = 0
@@ -300,7 +404,7 @@ def isItemUsable(item):
 def getGroupNickName(fromGroup, fromQQ):
     import CQSDK
     from CQGroupMemberInfo import CQGroupMemberInfo
-    info = CQGroupMemberInfo(CQSDK.GetGroupMemberInfoV2(fromGroup, fromQQ))
+    info = CQGroupMemberInfo(CQSDK.GetGroupMemberInfoV2(int(fromGroup), int(fromQQ)))
     return info.Card if info.Card != None and info.Card != "" else info.Nickname if info.Nickname != None else str(fromQQ)
 
 def use_zhen_cheng_zhi_xin(fromGroup, fromQQ, toQQ):
@@ -354,6 +458,10 @@ class Jx3Handler(object):
     jail_list = {}
     qiyu_status = {}
     group_info = []
+    dungeon_status = {}
+
+    is_locked = False
+
 
     def __init__(self, qq_group):
         logging.info('Jx3Handler __init__')
@@ -385,7 +493,9 @@ class Jx3Handler(object):
                     self.wanted_list = copy.deepcopy(get_key_or_return_default(data, "wanted_list", {}))
                     self.jail_list = copy.deepcopy(get_key_or_return_default(data, "jail_list", {}))
                     self.qiyu_status = copy.deepcopy(get_key_or_return_default(data, "qiyu_status", {}))
-                    self.group_info = copy.deepcopy(get_key_or_return_default(data, "group_info", {}))
+                    for g in data['group_info']:
+                        self.group_info.append(Group(data=g))
+                    self.dungeon_status = copy.deepcopy(get_key_or_return_default(data, "dungeon_status", {}))
                     logging.info("loading complete")
             except Exception as e:
                 load_old_file = True
@@ -403,7 +513,9 @@ class Jx3Handler(object):
                         self.wanted_list = copy.deepcopy(get_key_or_return_default(data, "wanted_list", {}))
                         self.jail_list = copy.deepcopy(get_key_or_return_default(data, "jail_list", {}))
                         self.qiyu_status = copy.deepcopy(get_key_or_return_default(data, "qiyu_status", {}))
-                        self.group_info = copy.deepcopy(get_key_or_return_default(data, "group_info", {}))
+                        self.dungeon_status = copy.deepcopy(get_key_or_return_default(data, "dungeon_status", {}))
+                        for g in data['group_info']:
+                            self.group_info.append(Group(data=g))
                         logging.info("loading old file complete")
                 except Exception as e:
                     logging.exception(e)
@@ -437,7 +549,8 @@ class Jx3Handler(object):
                     "wanted_list": self.wanted_list,
                     "jail_list": self.jail_list,
                     "qiyu_status": self.qiyu_status,
-                    "group_info": self.group_info
+                    "group_info": [g.dump_data() for g in self.group_info],
+                    "dungeon_status": self.dungeon_status
                 }
                 f.write(json.dumps(data, ensure_ascii=False, encoding='gbk'))
         except Exception as e:
@@ -474,6 +587,8 @@ class Jx3Handler(object):
                     self.daliy_action_count[yday_str]['jjc']['day'] = yesterday_stat['jjc']['day'] + 1 if yesterday_stat['jjc']['day'] < JJC_DAYS_PER_SEASON else 0
 
             self.rob_protect = {}
+            self.dungeon_status = {}
+            self.group_info = []
 
             for k in list(self.daliy_action_count.keys()):
                 if int(k) < yday - DALIY_COUNT_SAVE_DAY:
@@ -874,16 +989,21 @@ class Jx3Handler(object):
         finally:
             self.writeToJsonFile()
     
-    def _calculate_battle(self, fromQQ_str, toQQ_str, gear_mode, fromQQ_modifier=1, toQQ_modifier=1):
+    def _calculate_battle(self, fromQQ_str, toQQ_str, gear_mode, fromQQ_modifier=1, toQQ_modifier=1, custom_from_qq_equipment={}, custom_to_qq_equipment={}):
 
-        if toQQ_str in NPC_LIST:
+        if custom_to_qq_equipment != {}:
+            toQQ_equipment = custom_to_qq_equipment
+        elif toQQ_str in NPC_LIST:
             toQQ_equipment = NPC_LIST[toQQ_str]['equipment']
-            toQQ_gear_point = calculateGearPoint(toQQ_equipment)[gear_mode] * toQQ_modifier
         else:
             toQQ_equipment = self.equipment[toQQ_str]
-            toQQ_gear_point = calculateGearPoint(toQQ_equipment)[gear_mode] * toQQ_modifier
 
-        fromQQ_equipment = self.equipment[fromQQ_str]
+        toQQ_gear_point = calculateGearPoint(toQQ_equipment)[gear_mode] * toQQ_modifier
+
+        if custom_from_qq_equipment != {}:
+            fromQQ_equipment = custom_from_qq_equipment
+        else:
+            fromQQ_equipment = self.equipment[fromQQ_str]
         fromQQ_gear_point = calculateGearPoint(fromQQ_equipment)[gear_mode] * fromQQ_modifier
 
         random_base = random.uniform(0.4, 0.5)
@@ -1930,8 +2050,8 @@ class Jx3Handler(object):
                                     time_val['hours'],
                                     time_val['mins'],
                                     time_val['secs'])
-            elif self.jx3_users[qq_account_str]['energy'] < PRACTISE_ENERGY_COST:
-                returnMsg = "[CQ:at,qq={0}] 体力不足！需要消耗{1}体力。".format(qq_account, WANTED_ENERGY_COST)
+            elif self.jx3_users[qq_account_str]['energy'] < JJC_ENERGY_COST:
+                returnMsg = "[CQ:at,qq={0}] 体力不足！需要消耗{1}体力。".format(qq_account, JJC_ENERGY_COST)
             elif self.daliy_action_count[yday_str][qq_account_str]['jjc']['last_time'] != None and time.time() - self.daliy_action_count[yday_str][qq_account_str]['jjc']['last_time'] < JJC_COOLDOWN:
                     time_val = calculateRemainingTime(JJC_COOLDOWN, self.daliy_action_count[yday_str][qq_account_str]['jjc']['last_time'])
                     returnMsg = "[CQ:at,qq={0}] 你刚排过名剑大会了，请过{1}小时{2}分钟{3}秒后再来吧。".format(
@@ -2161,9 +2281,12 @@ class Jx3Handler(object):
             if self.jx3_users[qq_account_str]['lover'] == 0:
                 returnMsg = "[CQ:at,qq={0}] 你没有情缘，别乱用。".format(qq_account)
             else:
-                self.jx3_users[qq_account_str]['lover'] = 0
+                lover = self.jx3_users[qq_account_str]['lover']
                 love_time = time.time() - self.jx3_users[qq_account_str]['lover_time']
                 self.jx3_users[qq_account_str]['lover_time'] = None
+                self.jx3_users[qq_account_str]['lover'] = 0
+                self.jx3_users[str(lover)]['lover_time'] = None
+                self.jx3_user[str(lover)]['lover'] = 0
                 returnMsg = "[CQ:at,qq={0}] 决定去寻找新的旅程。".format(qq_account)
             self.mutex.release()
             return returnMsg
@@ -2188,8 +2311,8 @@ class Jx3Handler(object):
                 if group != None:
                     returnMsg = "[CQ:at,qq={0}] 你已经加入了 {1} 的队伍！".format(qq_account, getGroupNickName(self.qq_group, int(group.get_leader())))
                 else:
-                    self.group_info.append(Group(qq_account_str))
-                    returnMsg = "[CQ:at,qq={0}] 创建队伍成功！请让队友输入 加入队伍[CQ:at,qq={0}] 加入队伍。".format(qq_account)
+                    self.group_info.append(Group(leader=qq_account_str))
+                    returnMsg = "[CQ:at,qq={0}] 创建队伍成功！请让队友输入【加入队伍[CQ:at,qq={0}]】加入队伍。\n进入副本后此队伍无法被加入，请确认人数正确后再进入副本。".format(qq_account)
 
             self.mutex.release()
             return returnMsg
@@ -2208,17 +2331,19 @@ class Jx3Handler(object):
             group = self._get_group_by_leader(qq_account_str)
 
             if group != None:
-                returnMsg = "[CQ:at,qq={0}] 你已经创建了一个队伍，不能加入其他人的队伍，输入 退出队伍 退出当前队伍。".format(qq_account)
+                returnMsg = "[CQ:at,qq={0}] 你已经创建了一个队伍，不能加入其他人的队伍，输入【退出队伍】退出当前队伍。".format(qq_account)
             else:
                 group = self._get_group_by_member(qq_account_str)
                 if group != None:
-                    returnMsg = "[CQ:at,qq={0}] 你已经加入了 {1} 的队伍，输入 退出队伍 退出当前队伍".format(qq_account, group.get_leader())
+                    returnMsg = "[CQ:at,qq={0}] 你已经加入了 {1} 的队伍，输入【退出队伍】退出当前队伍".format(qq_account, group.get_leader())
                 else:
                     group = self._get_group_by_leader(leader_str)
                     if group == None:
                         returnMsg = "[CQ:at,qq={0}] 队伍不存在。".format(qq_account)
                     elif not group.is_group_joinable():
                         returnMsg = "[CQ:at,qq={0}] 队伍已满，无法加入。".format(qq_account)
+                    elif leader_str in self.dungeon_status:
+                        returnMsg = "[CQ:at,qq={0}] {1} 的队伍正在副本里，无法加入。".format(qq_account, getGroupNickName(self.qq_group, int(leader)))
                     else:
                         group.add_member(qq_account_str)
                         returnMsg = "[CQ:at,qq={0}] 成功加入 {1} 的队伍。".format(qq_account, getGroupNickName(self.qq_group, int(leader)))
@@ -2244,23 +2369,51 @@ class Jx3Handler(object):
             if group == None:
                 returnMsg = "[CQ:at,qq={0}] 你没有加入任何队伍。".format(qq_account)
             else:
+                logging.info(group)
                 returnMsg = "[CQ:at,qq={0}] 当前队伍信息：\n队长：{1} pve装分：{2}".format(
                     qq_account_str,
-                    getGroupNickName(self.qq_group, group.get_leader()),
+                    getGroupNickName(self.qq_group, int(group.get_leader())),
                     self.jx3_users[group.get_leader()]['pve_gear_point'])
-                for member in group.get_member_list():
-                    returnMsg += "\n{0} pve装分：{1}".format(
-                        getGroupNickName(self.qq_group, member),
-                        self.jx3_users[member]['pve_gear_point'])
+                if group.get_member_list() != []:
+                    for member in group.get_member_list():
+                        returnMsg += "\n{0} pve装分：{1}".format(
+                            getGroupNickName(self.qq_group, int(member)),
+                            self.jx3_users[member]['pve_gear_point'])
 
             self.mutex.release()
             return returnMsg
         except Exception as e:
             logging.exception(e)
     
+    def quit_group(self, qq_account):
+        returnMsg = ""
+        try:
+            self.mutex.acquire()
+            qq_account_str = str(qq_account)
+
+            group = self._get_group_by_leader(qq_account_str)
+
+            if group == None:
+                group = self._get_group_by_member(qq_account_str)
+                if group == None:
+                    returnMsg = "[CQ:at,qq={0}] 你不在任何队伍里。".format(qq_account, group.get_leader())
+                else:
+                    group.remove_member(qq_account_str)
+                    returnMsg = "[CQ:at,qq={0}] 你离开了 {1} 的队伍。".format(getGroupNickName(self.qq_group, int(group.get_leader)))
+            else:
+                self.group_info.remove(group)
+                returnMsg = "[CQ:at,qq={0}] 你的队伍解散了。".format(qq_account)
+
+            self.mutex.release()
+            return returnMsg
+        except Exception as e:
+            logging.exception(e)
+        finally:
+            self.writeToJsonFile()
+    
     def _get_group_by_leader(self, leader_str):
         for group in self.group_info:
-            if group.is_leader():
+            if group.is_leader(leader_str):
                 return group
         return None
     
@@ -2269,7 +2422,329 @@ class Jx3Handler(object):
             if group.is_member_in_group(qq_account_str):
                 return group
         return None
+    
+    def list_dungeon(self, qq_account):
+        returnMsg = ""
+        try:
+            self.mutex.acquire()
+            qq_account_str = str(qq_account)
 
+            returnMsg = "[CQ:at,qq={0}] 副本列表：".format(qq_account)
+            yday = self._reset_daliy_count(qq_account_str)
+            yday_str = str(yday)
+
+            if 'dungeon' not in self.daliy_action_count[yday_str][qq_account_str]:
+                self.daliy_action_count[yday_str][qq_account_str]['dungeon'] = {}
+
+            for k, v in DUNGEON_LIST.items():
+                has_cd = k in self.daliy_action_count[yday_str][qq_account_str]['dungeon'] and self.daliy_action_count[yday_str][qq_account_str]['dungeon'][k] == True
+                returnMsg += "\n{0} {1}".format(v['display_name'], "已攻略" if has_cd else "可攻略")
+
+            self.mutex.release()
+            return returnMsg
+        except Exception as e:
+            logging.exception(e)
+        finally:
+            self.writeToJsonFile()
+
+    def start_dungeon(self, qq_account, dungeon_name):
+        returnMsg = ""
+        try:
+            self.mutex.acquire()
+            qq_account_str = str(qq_account)
+
+            dungeon_id = get_dungeon_id_by_display_name(dungeon_name)
+            yday = self._reset_daliy_count(qq_account_str)
+            yday_str = str(yday)
+
+            if 'dungeon' not in self.daliy_action_count[yday_str][qq_account_str]:
+                self.daliy_action_count[yday_str][qq_account_str]['dungeon'] = {}
+
+            if dungeon_id != "":
+                group = self._get_group_by_member(qq_account_str)
+                if group != None:
+                    returnMsg = "[CQ:at,qq={0}] 你不是队长！无法使用此命令。".format(qq_account)
+                else:
+                    group = self._get_group_by_leader(qq_account_str)
+                    if group == None:
+                        returnMsg = "[CQ:at,qq={0}] 必须创建队伍才能进入副本。".format(qq_account)
+                    else:
+                        if qq_account_str in self.dungeon_status:
+                            returnMsg = "[CQ:at,qq={0}] 你已经在副本里了。".format(qq_account)
+                        else:
+                            if dungeon_id in self.daliy_action_count[yday_str][qq_account_str]['dungeon'] and self.daliy_action_count[yday_str][qq_account_str]['dungeon'][dungeon_id] == True:
+                                returnMsg = "[CQ:at,qq={0}] 你有此副本cd，无法进入。".format(qq_account)
+                            else:
+                                has_cd = False
+                                for m in group.get_member_list():
+                                    if dungeon_id in self.daliy_action_count[yday_str][str(m)]['dungeon'] and self.daliy_action_count[yday_str][str(m)]['dungeon'][dungeon_id] == True:
+                                        has_cd = True
+                                if has_cd:
+                                    returnMsg = "[CQ:at,qq={0}] 你的队友有此副本cd，无法进入。".format(qq_account)
+                                else:
+                                    if self.jx3_users[qq_account_str]['energy'] < DUNGEON_ENERGY_REQUIRED:
+                                        returnMsg = "[CQ:at,qq={0}] 你的体力不足，进入副本需要耗费体力：{1}".format(qq_account, DUNGEON_ENERGY_REQUIRED)
+                                    else:
+                                        has_energy = True
+                                        energy_msg = ""
+                                        for m in group.get_member_list():
+                                            if self.jx3_suers[str(m)]['energy'] < DUNGEON_ENERGY_REQUIRED:
+                                                energy_msg += "[CQ:at,qq={0}] ".format(m)
+                                                has_energy = False
+                                        
+                                        if has_energy and energy_msg != "":
+                                            returnMsg = "{0} 体力不足，进入副本需要耗费体力：{1}".format(energy_msg, DUNGEON_ENERGY_REQUIRED)
+                                        else:
+
+                                            self.dungeon_status[qq_account_str] = copy.deepcopy(DUNGEON_LIST[dungeon_id])
+                                            self.dungeon_status[qq_account_str]['boss_detail'] = []
+                                            self.dungeon_status[qq_account_str]['attack_count'] = {}
+                                            for boss_id in self.dungeon_status[qq_account_str]['boss']:
+                                                boss = copy.deepcopy(NPC_LIST[boss_id])
+                                                boss['remain_hp'] = boss['equipment']['armor']['pve']
+                                                self.dungeon_status[qq_account_str]['boss_detail'].append(boss)
+
+                                            self.daliy_action_count[yday_str][qq_account_str]['dungeon'][dungeon_id] = True
+                                            self.jx3_users[qq_account_str]['energy'] -= DUNGEON_ENERGY_REQUIRED
+                                            energy_msg = "[CQ:at,qq={0}] ".format(qq_account_str)
+                                            for m in group.get_member_list():
+                                                self.daliy_action_count[yday_str][str(m)]['dungeon'][dungeon_id] = True
+                                                self.jx3_users[str(m)]['energy'] -= DUNGEON_ENERGY_REQUIRED
+                                                energy_msg += "[CQ:at,qq={0}] ".format(m)
+                                            returnMsg = "[CQ:at,qq={0}] 进入副本 {1} 成功！{2}体力-{3}".format(qq_account, dungeon_name, energy_msg, DUNGEON_ENERGY_REQUIRED)
+
+                                            import CQSDK
+                                            CQSDK.SendGroupMsg(self.qq_group, returnMsg)
+
+                                            boss = self.dungeon_status[qq_account_str]['boss_detail'][0]
+                                            returnMsg = "boss战：{0} (1/{1})\n请输入每位队员输入【攻击boss】开始战斗。".format(boss['display_name'], len(self.dungeon_status[qq_account_str]['boss_detail']))
+
+            self.mutex.release()
+            return returnMsg
+        except Exception as e:
+            logging.exception(e)
+        finally:
+            self.writeToJsonFile()
+    
+    def attack_boss(self, qq_account):
+        returnMsg = ""
+        try:
+            self.mutex.acquire()
+            qq_account_str = str(qq_account)
+
+            group = self._get_group_by_leader(qq_account_str)
+
+            dungeon = {}
+            leader = ""
+
+            if group == None:
+                group = self._get_group_by_member(qq_account_str)
+
+                if group != None:
+                    leader = group.get_leader()
+                    dungeon = self.dungeon_status[str(leader)]
+            else:
+                dungeon = self.dungeon_status[qq_account_str]
+                leader = qq_account_str
+
+            if dungeon != {} and leader != "":
+                current_boss = dungeon['boss_detail'][0]
+
+                if qq_account_str not in dungeon['attack_count']:
+                    dungeon['attack_count'][qq_account_str] = {'damage': 0, 'available_attack': DUNGEON_MAX_ATTACK_COUNT, 'last_attack_time': None}
+                
+                if dungeon['attack_count'][qq_account_str]['last_attack_time'] != None and dungeon['attack_count'][qq_account_str]['available_attack'] < DUNGEON_MAX_ATTACK_COUNT:
+                    count = int(math.floor((time.time() - dungeon['attack_count'][qq_account_str]['last_attack_time']) / float(DUNGEON_ATTACK_COOLDOWN)))
+                    min_count = min(count, DUNGEON_MAX_ATTACK_COUNT - dungeon['attack_count'][qq_account_str]['available_attack'])
+                    dungeon['attack_count'][qq_account_str]['available_attack'] += min_count
+                    if min_count > 0:
+                        dungeon['attack_count'][qq_account_str]['last_attack_time'] = time.time()
+
+                if dungeon['attack_count'][qq_account_str]['available_attack'] < 1:
+                    time_val = calculateRemainingTime(DUNGEON_ATTACK_COOLDOWN, dungeon['attack_count'][qq_account_str]['last_attack_time'])
+                    returnMsg = "[CQ:at,qq={0}] 你没有攻击次数啦，还需要等{1}小时{2}分{3}秒。".format(
+                                    qq_account_str,
+                                    time_val['hours'],
+                                    time_val['mins'],
+                                    time_val['secs'])
+                else:
+                    boss_equipment = copy.deepcopy(current_boss['equipment'])
+                    qq_equipment = copy.deepcopy(self.equipment[qq_account_str])
+                    buff_msg = ""
+                    if 'buff' in current_boss:
+                        modifier = {}
+                        for buff in current_boss['buff']:
+                            rand = random.uniform(0, 1)
+                            if rand < buff['chance']:
+                                modifier = copy.deepcopy(buff)
+                        
+                        if modifier != {}:
+                            boss_equipment['weapon']['pve'] = int(boss_equipment['weapon']['pve'] * modifier['weapon'])
+                            buff_msg = "\n{0}使出了招数：{1}。{2}".format(current_boss['display_name'], modifier['display_name'], modifier['description'])
+                    
+                    debuff_msg = ""
+                    if 'debuff' in current_boss:
+                        modifier = {}
+                        for buff in current_boss['debuff']:
+                            rand = random.uniform(0, 1)
+                            if rand < buff['chance']:
+                                modifier = copy.deepcopy(buff)
+                        
+                        if modifier != {}:
+                            qq_equipment['weapon']['pve'] = int(qq_equipment['weapon']['pve'] * modifier['weapon'])
+                            debuff_msg = "\n{0}使出了招数：{1}。{2}".format(current_boss['display_name'], modifier['display_name'], modifier['description'])
+                    
+                    battle_result = self._calculate_battle(qq_account_str, '', 'pve', custom_from_qq_equipment=qq_equipment, custom_to_qq_equipment=boss_equipment)
+
+                    winner = battle_result['winner']
+                    loser = battle_result['loser']
+                    success_chance = battle_result['success_chance']
+
+                    returnMsg = "[CQ:at,qq={0}] 你对{1}发起了攻击。剩余攻击次数：{2}/{3}".format(qq_account, current_boss['display_name'], dungeon['attack_count'][qq_account_str]['available_attack'] - 1, DUNGEON_MAX_ATTACK_COUNT) + buff_msg + debuff_msg
+
+                    if winner == qq_account_str:
+                        damage = int(min(qq_equipment['weapon']['pve'], current_boss['remain_hp']))
+                        dungeon['attack_count'][qq_account_str]['damage'] += damage
+                        dungeon['attack_count'][qq_account_str]['available_attack'] -= 1
+                        dungeon['attack_count'][qq_account_str]['last_attack_time'] = time.time()
+                        current_boss['remain_hp'] -= damage
+
+                        returnMsg += "\n攻击成功！成功率：{0}%，造成伤害：{1}。{2}血量：{3}/{4}".format(
+                            int(math.floor(success_chance * 100)),
+                            qq_equipment['weapon']['pve'],
+                            current_boss['display_name'],
+                            current_boss['remain_hp'],
+                            boss_equipment['armor']['pve'])
+                        
+                        if current_boss['remain_hp'] == 0:
+                            import CQSDK
+                            CQSDK.SendGroupMsg(self.qq_group, returnMsg)
+                            
+                            reward_msg = ""
+                            for k, v in current_boss['reward'].items():
+                                if k in self.jx3_users[group.get_leader()]:
+                                    self.jx3_users[group.get_leader()][k] += v
+                                
+                                for m in group.get_member_list():
+                                    if k in self.jx3_users[m]:
+                                        self.jx3_users[m][k] += v
+                                reward_msg += "{0} + {1} ".format(STAT_DISPLAY_NAME[k], v)
+                            
+                            item_reward_msg = ""
+                            for k, v in current_boss['reward_item'].items():
+                                rand = random.uniform(0, 1)
+                                if rand <= v:
+                                    if k not in self.jx3_users[group.get_leader()]['bag']:
+                                        self.jx3_users[group.get_leader()]['bag'][k] = 0
+                                    self.jx3_users[group.get_leader()]['bag'][k] += 1
+                                    item_reward_msg += "\n{0}获得额外奖励：{1} x 1 概率：{2}%".format(getGroupNickName(self.qq_group, int(group.get_leader())), get_item_display_name(k), int(v * 100))
+                                for m in group.get_member_list():
+                                    rand = random.uniform(0, 1)
+                                    if rand <= v:
+                                        if k not in self.jx3_users[m]['bag']:
+                                            self.jx3_users[m]['bag'][k] = 0
+                                        self.jx3_users[m]['bag'][k] += 1
+                                        item_reward_msg += "\n{0}获得额外奖励：{1} x 1 概率：{2}%".format(getGroupNickName(self.qq_group, int(m)), get_item_display_name(k), int(v * 100))
+
+                            mvp = sorted(dungeon['attack_count'].items(), lambda x, y: cmp(x[1]['damage'], y[1]['damage']), reverse=True)[0]
+                            returnMsg = "{0}成功被击倒！每人获得奖励：{1}{2}\nmvp：{3} 伤害：{4}".format(
+                                current_boss['display_name'],
+                                reward_msg,
+                                item_reward_msg,
+                                getGroupNickName(self.qq_group, int(mvp[0])), mvp[1]['damage'])
+
+                            dungeon['attack_count'] = {}
+                            dungeon['boss_detail'].pop(0)
+
+                            CQSDK.SendGroupMsg(self.qq_group, returnMsg)
+                            if len(dungeon['boss_detail']) > 0:
+                                next_boss =  dungeon['boss_detail'][0]
+                                returnMsg = "boss战：{0} ({1}/{2})\n请输入每位队员输入【攻击boss】开始战斗。".format(
+                                    next_boss['display_name'], 
+                                    len(dungeon['boss']) - len(dungeon['boss_detail']) + 1,
+                                    len(dungeon['boss']))
+                            else:
+                                returnMsg = "副本已结束！恭喜通关{0}！全员获得通关奖励：".format(dungeon['display_name'])
+                                reward_msg = ""
+                                for k, v in dungeon['reward'].items():
+                                    if k in self.jx3_users[group.get_leader()]:
+                                        self.jx3_users[group.get_leader()][k] += v
+                                    
+                                    for m in group.get_member_list():
+                                        if k in self.jx3_users[m]:
+                                            self.jx3_users[m][k] += v
+                                    reward_msg += "{0} + {1} ".format(STAT_DISPLAY_NAME[k], v)
+                                returnMsg += reward_msg
+                                CQSDK.SendGroupMsg(self.qq_group, returnMsg)
+                                returnMsg = "队伍已解散。"
+                                self.group_info.remove(group)
+                                self.dungeon_status.pop(str(leader))
+                    else:
+                        dungeon['attack_count'][qq_account_str]['available_attack'] -= 1
+                        dungeon['attack_count'][qq_account_str]['last_attack_time'] = time.time()
+                        returnMsg += "\n攻击失败！成功率：{0}%。{1}血量：{2}/{3}".format(
+                            int(math.floor(success_chance * 100)),
+                            current_boss['display_name'],
+                            current_boss['remain_hp'],
+                            boss_equipment['armor']['pve'])
+
+            self.mutex.release()
+            return returnMsg
+        except Exception as e:
+            logging.exception(e)
+        finally:
+            self.writeToJsonFile()
+
+    def get_current_boss_info(self, qq_account):
+        returnMsg = ""
+        try:
+            self.mutex.acquire()
+            qq_account_str = str(qq_account)
+
+            group = self._get_group_by_leader(qq_account_str)
+
+            dungeon = {}
+            leader = ""
+
+            if group == None:
+                group = self._get_group_by_member(qq_account_str)
+                if group != None:
+                    leader = str(group.get_leader())
+                    dungeon = get_key_or_return_default(self.dungeon_status, leader, {})
+            else:
+                leader = qq_account_str
+                dungeon = get_key_or_return_default(self.dungeon_status, leader, {})
+
+            if dungeon != {} and leader != "":
+                current_boss = dungeon['boss_detail'][0]
+                rank_list = sorted(dungeon['attack_count'].items(), lambda x, y: cmp(x[1]['damage'], y[1]['damage']), reverse=True)
+                list_len = len(rank_list)
+                damage_msg = ""
+                for i in range(5):
+                    if i < list_len:
+                        damage_msg += '\n{0}. {1} {2}'.format(
+                            i + 1,
+                            getGroupNickName(self.qq_group, int(rank_list[i][0])), 
+                            rank_list[i][1]['damage'])
+                    else:
+                        break
+                returnMsg = "[CQ:at,qq={0}] 当前副本：{1} 当前boss：{2} {3}/{4}\n血量：{5}/{6} pve装分：{7}\n伤害排行榜：{8}".format(
+                    qq_account,
+                    dungeon['display_name'],
+                    current_boss['display_name'],
+                    len(dungeon['boss']) - len(dungeon['boss_detail']) + 1,
+                    len(dungeon['boss']),
+                    current_boss['remain_hp'],
+                    current_boss['equipment']['armor']['pve'],
+                    calculateGearPoint(current_boss['equipment'])['pve'],
+                    damage_msg)
+
+            self.mutex.release()
+            return returnMsg
+        except Exception as e:
+            logging.exception(e)
+        finally:
+            self.writeToJsonFile()
 
 class Group(object):
     _leader = ""
@@ -2278,9 +2753,14 @@ class Group(object):
 
     MAX_GROUP_MEMBER = 4
 
-    def __init__(self, leader):
-        self._leader = leader
-        self._create_time = time.time()
+    def __init__(self, leader="", data={}):
+        if data == {}:
+            self._leader = leader
+            self._create_time = time.time()
+        else:
+            self._leader = data['leader']
+            self._create_time = data['create_time']
+            self._member_list = data['member_list']
     
     def is_member_in_group(self, member):
         return member in self._member_list
@@ -2301,4 +2781,11 @@ class Group(object):
         return len(self._member_list) < self.MAX_GROUP_MEMBER
     
     def get_member_list(self):
-        return _member_list
+        return self._member_list
+    
+    def dump_data(self):
+        return {
+            "leader": self._leader,
+            "member_list": self._member_list,
+            "create_time": self._create_time
+        }
