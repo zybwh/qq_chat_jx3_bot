@@ -24,6 +24,14 @@ import random
 
 from threading import Lock
 
+import Utils
+import Jx3Class
+import Jx3User
+import Jx3Faction
+import Jx3Achievement
+import Jx3Qiyu
+import Jx3Item
+
 DATABASE_PATH = os.path.join('data', 'app', 'com.github.zybwh.qq_chat_jx3_bot')
 OLD_DATABASE_PATH = os.path.join('data', 'app', 'com.github.qq_chat_jx3_bot')
 
@@ -109,24 +117,6 @@ JJC_DAYS_PER_SEASON = 7
 FACTION_DISPLAY_NAME = ['中立', '恶人谷', '浩气盟']
 FACTION_NAME_ID = ['zhongli', 'eren', 'haoqi']
 
-ITEM_LIST = [
-    {"name": "zhen_cheng_zhi_xin", "display_name": "真橙之心", "rank": 2, "cost": {"money": 999}},
-    {"name": "hai_shi_shan_meng", "display_name": "海誓山盟", "rank": 1, "cost": {"money": 9999}},
-    {"name": "jin_zhuan", "display_name": "金砖", "rank": 5, "effect": {"money": 50}},
-    {"name": "jin_ye_zi", "display_name": "金叶子", "rank": 6, "effect": {"money": 10}},
-    {"name": "zhuan_shen_can", "display_name": "转神餐", "rank": 5, "effect": {"energy": 5}, "cost": {"money": 100}},
-    {"name": "jia_zhuan_shen_can", "display_name": "佳·转神餐", "rank": 3, "effect": {"energy": 30}, "cost": {"money": 500}},
-    {"name": "rong_ding", "display_name": "熔锭", "rank": 3, "effect": {'pve_weapon': 5}, "cost": {"banggong": 5000}},
-    {"name": "mo_shi", "display_name": "磨石", "rank": 3, "effect": {'pvp_weapon': 5}, "cost": {"weiwang": 5000}},
-    {"name": "ran", "display_name": "绣", "rank": 4, "effect": {'pve_armor': 10}, "cost": {"banggong": 2000}},
-    {"name": "yin", "display_name": "印", "rank": 4, "effect": {'pvp_armor': 10}, "cost": {"weiwang": 2000}},
-    {"name": "sui_rou", "display_name": "碎肉", "rank": 4, "cost": {"money": 10}},
-    {"name": "cu_bu", "display_name": "粗布", "rank": 4, "cost": {"money": 10}},
-    {"name": "gan_cao", "display_name": "甘草", "rank": 4, "cost": {"money": 10}},
-    {"name": "hong_tong", "display_name": "红铜", "rank": 4, "cost": {"money": 10}},
-    {"name": "hun_hun_zheng_ming", "display_name": "混混抓捕证明", "rank": 0}
-]
-
 CHA_GUAN_QUEST_INFO = {
     "cha_guan_sui_rou": {"display_name": "茶馆：碎肉", 
                             "description": "需要提交一份碎肉，可在商店购买。",
@@ -159,47 +149,6 @@ NPC_LIST = {
     }
 }
 
-QIYU_LIST = {
-    'hong_fu_qi_tian': {"description": "江湖快马飞报！[CQ:at,qq={0}]侠士鸿运当头！签到时获得额外奖励。",
-                        "chance": 0.1,
-                        "cooldown": 0,
-                        "reward": {"money": DALIY_MONEY_REWARD, "weiwang": DALIY_REWARD_MIN, "banggong": DALIY_REWARD_MIN}},
-    'luan_shi_wu_ji': {"description": "江湖快马飞报！[CQ:at,qq={0}]侠士表演惊艳绝伦，不经意间触发奇遇【乱世舞姬】！倾城独立世所稀，乱世舞起影凌乱！",
-                        "chance": 0.01,
-                        "cooldown": 1 * 60 * 60,
-                        "reward": {"money": 200, "energy": 100}},
-    'hu_xiao_shan_lin': {"description": "江湖快马飞报！[CQ:at,qq={0}]侠士正在浴血奋战，不经意间触发奇遇【虎啸山林】！正所谓十年磨一剑，不漏其锋芒。只待剑鞘出，斩尽敌首颅。",
-                        "chance": 0.05,
-                        "cooldown": 2 * 60 * 60,
-                        "reward": {"weiwang": 5000}},
-    'hu_you_cang_sheng': {"description": "江湖快马飞报！[CQ:at,qq={0}]侠士尽心保护他人，不经意间触发奇遇【护佑苍生】！苍生天下系于一心，此份重担能否一肩担起，与其共勉！",
-                        "chance": 0.05,
-                        "cooldown": 2 * 60 * 60,
-                        "reward": {"weiwang": 5000}},
-    'fu_yao_jiu_tian': {"description": "江湖快马飞报！[CQ:at,qq={0}]侠士轻功盖世，触发奇遇【扶摇九天】！正是御风行千里，扶摇红尘巅",
-                        "chance": 0.01,
-                        "cooldown": 1 * 60 * 60,
-                        "reward": {"money": 200, "energy": 100}},
-    'cha_guan_qi_yuan': {"description": "江湖快马飞报！[CQ:at,qq={0}]侠士正在茶馆闲坐，不经意间触发奇遇【茶馆奇缘】！正是：叱咤江湖，不见美人顾怀。茶馆闲坐，却遇等闲是非！",
-                        "chance": 0.05,
-                        "cooldown": 2 * 60 * 60,
-                        "require": {'money': 10000},
-                        "reward": {"money": 1000, "banggong": 5000}},
-    'qing_feng_bu_wang': {"description": "江湖快马飞报！[CQ:at,qq={0}]侠士正在行侠江湖，不经意间触发奇遇【清风捕王】！",
-                        "chance": 0.05,
-                        "cooldown": 0,
-                        "reward": {"money": 500, "weiwang": 5000}},
-    'san_shan_si_hai': {"description": "江湖快马飞报！[CQ:at,qq={0}]侠士福至心灵，不经意间触发奇遇【三山四海】！正是：翻遍三山捣四海，行尽天涯觅真金。",
-                        "chance": 0.01,
-                        "cooldown": 2 * 60 * 60,
-                        "reward": {"money": 1000}},
-    'yin_yang_liang_jie': {"description": "江湖快马飞报！[CQ:at,qq={0}]侠士福缘非浅，触发奇遇【阴阳两界】，此千古奇缘将开启怎样的奇妙际遇，令人神往！",
-                        "chance": 0.05,
-                        "cooldown": 24 * 60 * 60,
-                        "require": {"pvp_gear_point": 3000, "pve_gear_point": 3000},
-                        "reward": {"money": 500, "weiwang": 5000}},
-}
-
 STAT_DISPLAY_NAME = {
     "weiwang": "威望",
     "banggong": "帮贡",
@@ -207,23 +156,24 @@ STAT_DISPLAY_NAME = {
     "energy": "体力"
 }
 
-CLASS_LIST = [
-    '无门派',
-    '天策',
-    '纯阳',
-    '少林',
-    '七秀',
-    '万花',
-    '藏剑',
-    '五毒',
-    '唐门',
-    '明教',
-    '丐帮',
-    '苍云',
-    '长歌',
-    '霸刀',
-    '蓬莱'
-]
+CLASS_LIST = {
+    'da_xia': '无门派',
+    'tian_ce': '天策',
+    'chun_yang': '纯阳',
+    'shao_lin': '少林',
+    'qi_xiu': '七秀',
+    'wan_hua': '万花',
+    'cang_jian': '藏剑',
+    'wu_du': '五毒',
+    'tang_men': '唐门',
+    'ming_jiao': '明教',
+    'gai_bang': '丐帮',
+    'cang_yun': '苍云',
+    'chang_ge': '长歌',
+    'ba_dao': '霸刀',
+    'peng_lai': '蓬莱'
+}
+
 
 QIYU_CHANCE = 0.1
 
@@ -246,11 +196,6 @@ def calculateRemainingTime(duration, last_time):
     mins = (remain_secs - hours * 3600) // 60
     secs = remain_secs - hours * 3600 - mins * 60
     return {'hours': hours, 'mins': mins, 'secs': secs}
-
-def calculateGearPoint(equipment):
-    weapon = equipment['weapon']
-    armor = equipment['armor']
-    return {'pve': weapon['pve'] * 50 + armor['pve'] * 20, 'pvp': weapon['pvp'] * 50 + armor['pvp'] * 20}
 
 def get_wa_bao_reward():
     max_index = 0
@@ -345,7 +290,16 @@ class Jx3Handler(object):
         "茶馆",
         "交任务", "抓捕混混"]
 
-    jx3_users = {}
+    _jx3_class = {}
+    _jx3_users = {}
+    _jx3_faction = {}
+    _jx3_qiyu = {}
+    _jx3_item = {}
+    _jjc_data = {
+        'season': 1,
+        'day': 0
+    }
+    _jjc_history = {}
     lover_pending = {}
     daliy_action_count = {}
     rob_protect = {}
@@ -354,6 +308,8 @@ class Jx3Handler(object):
     jail_list = {}
     qiyu_status = {}
     group_info = []
+
+    _today = 0
 
     def __init__(self, qq_group):
         logging.info('Jx3Handler __init__')
@@ -368,6 +324,8 @@ class Jx3Handler(object):
         self.json_file_path_old = os.path.join(self.json_file_folder, 'data.json.old')
         self.json_file_path_old_2 = os.path.join(self.json_file_folder, 'data.json.old2')
 
+        self._init_game_data()
+
         if not os.path.exists(self.json_file_folder):
             logging.info("path not exist. create a new one: {0}", self.json_file_folder)
             os.makedirs(self.json_file_folder)
@@ -377,7 +335,12 @@ class Jx3Handler(object):
             try:
                 with open(self.json_file_path, 'r') as f:
                     data = json.loads(f.readline(), encoding='gbk')
-                    self.jx3_users = copy.deepcopy(get_key_or_return_default(data, "jx3_users", {}))
+                    if 'equipment' in data:
+                        for k, v in data['equipment'].items():
+                            if k in data['jx3_users']:
+                                data['jx3_users'][k]['equipment'] = v
+                    self.equipment = copy.deepcopy(get_key_or_return_default(data, "equipment", {}))
+                    self._load_users(get_key_or_return_default(data, "jx3_users", {}))
                     self.lover_pending = copy.deepcopy(get_key_or_return_default(data, "lover_pending", {}))
                     self.daliy_action_count = copy.deepcopy(get_key_or_return_default(data, "daliy_action_count", {}))
                     self.rob_protect = copy.deepcopy(get_key_or_return_default(data, "rob_protect", {}))
@@ -395,7 +358,7 @@ class Jx3Handler(object):
                 try:
                     with open(self.json_file_path_old, 'r') as f:
                         data = json.loads(f.readline(), encoding='gbk')
-                        self.jx3_users = copy.deepcopy(get_key_or_return_default(data, "jx3_users", {}))
+                        self._load_users(copy.deepcopy(get_key_or_return_default(data, "jx3_users", {})))
                         self.lover_pending = copy.deepcopy(get_key_or_return_default(data, "lover_pending", {}))
                         self.daliy_action_count = copy.deepcopy(get_key_or_return_default(data, "daliy_action_count", {}))
                         self.rob_protect = copy.deepcopy(get_key_or_return_default(data, "rob_protect", {}))
@@ -429,7 +392,7 @@ class Jx3Handler(object):
 
             with open(self.json_file_path, 'w', ) as f:
                 data = {
-                    "jx3_users": self.jx3_users,
+                    "jx3_users": self._dump_user_data(),
                     "lover_pending": self.lover_pending,
                     "daliy_action_count": self.daliy_action_count,
                     "rob_protect": self.rob_protect,
@@ -443,52 +406,89 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
         self.mutex.release()
-
     
-    def _reset_daliy_count(self, qq_account_str=""):
+    def _init_game_data(self):
+        self._init_class_data()
+        self._init_faction_data()
+        self._init_qiyu_data()
+        self._init_item_data()
+    
+    def _init_class_data(self):
+        for k, v in Jx3Class.CLASS_LIST.items():
+            self._jx3_class[k] = Jx3Class.Jx3Class(k, v)
+    
+    def _init_faction_data(self):
+        for k, v in Jx3Faction.FACTION_LIST.items():
+            self._jx3_faction[k] = Jx3Faction.Jx3Faction(k, v)
+    
+    def _init_qiyu_data(self):
+        for k, v in Jx3Qiyu.QIYU_LIST.items():
+            self._jx3_qiyu[k] = Jx3Qiyu.Jx3Qiyu(k, v)
+    
+    def _init_item_data(self):
+        for k, v in Jx3Item.ITEM_LIST.items():
+            self._jx3_item[k] = Jx3Item.Jx3Item(k, v)
+
+    def _load_users(self, user_data):
+        if user_data == {}:
+            return
+        for k, v in user_data.items():
+            data = {
+                'qq_account_str': str(k),
+                'class_ptr': self._jx3_class[Jx3Class.convert_old_class_id_to_new_class_id(v['class_id'])],
+                'faction_ptr': self._jx3_faction[Jx3Faction.convert_old_faction_id_to_new_faction_id(v['faction_id'])],
+                'faction_join_time': v['faction_join_time'],
+                'weiwang': v['weiwang'],
+                'banggong': v['banggong'],
+                'money': v['money'],
+                'energy': v['energy'],
+                'achievement': Jx3Achievement.convert_old_achievement_to_new(v['achievement']),
+                'lover': v['lover'],
+                'lover_time': v['lover_time'],
+                'qiyu': Jx3Qiyu.convert_old_qiyu_to_new_list(v['qiyu']),
+                'register_time': v['register_time'],
+                'bag': Jx3Item.load_item_data(v['bag'], self._jx3_item),
+                'equipment': v['equipment'],
+                'daliy_count' = v['daliy_count']
+            }
+            self._jx3_users[k] = Jx3User.Jx3User(data)
+    
+    def _dump_user_data(self):
+        user_data = {}
+        for k, v in self._jx3_users.items():
+            user_data[k] = v.dump_data()
+        return user_data
+
+    def _reset_daliy_count(self):
         yday = time.localtime(time.time() - DALIY_REFRESH_OFFSET).tm_yday
-        yday_str = str(yday)
-        if yday_str not in self.daliy_action_count:
-            self.daliy_action_count[yday_str] = {"jjc": {"season": 0, "day": 0}, "faction": {"haoqi": {"point": 0, "reward": 0}, "eren": {"point":0, "reward": 0}}}
-            if yday == 1:
-                if "365" in self.daliy_action_count and "366" not in self.daliy_action_count:
-                    yesterday_stat = self.daliy_action_count["365"]
-                elif "366" in self.daliy_action_count:
-                    yesterday_stat = self.daliy_action_count["366"]
-                else:
-                    yesterday_stat = None
-            elif str(yday - 1) in self.daliy_action_count:
-                yesterday_stat = self.daliy_action_count[str(yday - 1)]
+
+        if yday != self._today:
+            self.mutex.acquire()
+            self._today = yday
+            if self._jjc_data['day'] < JJC_DAYS_PER_SEASON:
+                keep_jjc_data = True
+                self._jjc_data['day'] += 1
             else:
-                yesterday_stat = None
+                keep_jjc_data = False
+                self._jjc_data['season'] += 1
+                self._jjc_data['day'] = 0
             
-            if yesterday_stat != None:
-                
-                if 'faction' in yesterday_stat:
-                    retval = self._get_faction_count()
-                    self.daliy_action_count[yday_str]['faction']['haoqi']['reward'] = int(yesterday_stat['faction']['haoqi']['point'] / retval[2]) if retval[2] != 0 else 0
-                    self.daliy_action_count[yday_str]['faction']['eren']['reward'] = int(yesterday_stat['faction']['eren']['point'] / retval[1]) if retval[1] != 0 else 0
+            jjc_history = {}
+            for k, v in self._jx3_users.items():
+                jjc_stat = v.reset_daliy_count(yday, keep_jjc_data)
+                if jjc_stat != {}:
+                    jjc_history[k] = jjc_stat
             
-                if 'jjc' in yesterday_stat:
-                    self.daliy_action_count[yday_str]['jjc']['season'] = yesterday_stat['jjc']['season'] + (1 if yesterday_stat['jjc']['day'] >= JJC_DAYS_PER_SEASON else 0)
-                    self.daliy_action_count[yday_str]['jjc']['day'] = yesterday_stat['jjc']['day'] + 1 if yesterday_stat['jjc']['day'] < JJC_DAYS_PER_SEASON else 0
+            if jjc_history != {}:
+                self._jjc_history[self._jjc_data['season'] - 1] = jjc_history
 
             self.rob_protect = {}
 
-            for k in list(self.daliy_action_count.keys()):
-                if int(k) < yday - DALIY_COUNT_SAVE_DAY:
-                    self.daliy_action_count.pop(k)
-    
-        if 'faction' not in self.daliy_action_count[yday_str]:
-            self.daliy_action_count[yday_str]['faction'] = {"haoqi": {"point": 0, "reward": 0}, "eren": {"point":0, "reward": 0}}
-
-        self._add_new_daliy_record(yday_str, qq_account_str)
-
-        return yday
-
-    def _add_new_daliy_record(self, yday_str, qq_account_str):
-        if qq_account_str != "" and qq_account_str not in self.daliy_action_count[yday_str]:
-            self.daliy_action_count[yday_str][qq_account_str] = copy.deepcopy(daliy_dict)
+            for k, v in self._jx3_faction.items():
+                v.reset_daliy_count(yday)
+            
+            logging.info("reset daliy count complete! newday: {0}", self._today)
+            self.mutex.release()
     
     def getCommandList(self):
         return self.commandList
@@ -499,35 +499,17 @@ class Jx3Handler(object):
             self.mutex.acquire()
 
             qq_account_str = str(qq_account)
-            if qq_account_str in self.jx3_users.keys():
+            if qq_account_str in self._jx3_users.keys():
                 returnMsg = "[CQ:at,qq={0}] 注册失败！你已经注册过了。".format(qq_account)
             else:
-                self.equipment[qq_account_str] = {
-                    'weapon': {"display_name": "大侠剑", 'pvp': 10, 'pve': 10}, 
-                    'armor': {"display_name": "大侠衣", 'pvp': 100, 'pve': 100}
+                data = {
+                    'qq_account_str' = qq_account_str
                 }
-            
-                gear_point = calculateGearPoint(self.equipment[qq_account_str])
-
-                self.jx3_users[qq_account_str] = {
-                    "class_id": 0,
-                    "faction_id": 0,
-                    "faction_join_time": None,
-                    "weiwang": 0,
-                    "banggong": 0,
-                    "money": 0,
-                    "pvp_gear_point": gear_point['pvp'],
-                    "pve_gear_point": gear_point['pve'],
-                    "achievement": 0,
-                    "lover": 0,
-                    "lover_time": None,
-                    "qiyu": 0,
-                    "energy": 0,
-                    "register_time": time.time(),
-                    "qiandao_count": 0,
-                    "bag": {}
-                }
-                returnMsg = "注册成功！\n[CQ:at,qq={0}]\n注册时间：{1}".format(qq_account, time.strftime('%Y-%m-%d', time.localtime(self.jx3_users[qq_account_str]["register_time"])))
+                self._jx3_users[qq_account_str] = Jx3User.Jx3User(data)
+                returnMsg = "注册成功！\n[CQ:at,qq={0}]\n注册时间：{1}".format(
+                    qq_account,
+                    time.strftime('%Y-%m-%d', time.localtime(self.jx3_users[qq_account_str].register_time))
+                )
         
             self.mutex.release()
             return returnMsg
@@ -536,55 +518,20 @@ class Jx3Handler(object):
         finally:
             self.writeToJsonFile()
     
-    def isUserRegister(self, qq_account):
+    def is_user_register(self, qq_account):
         try:
             return str(qq_account) in self.jx3_users.keys()
         except Exception as e:
             logging.exception(e)
     
-    # TODO: not thread safe
-    def _update_gear_point(self, qq_account_str):
-        gear_point = calculateGearPoint(self.equipment[qq_account_str])
-        self.jx3_users[qq_account_str]['pve_gear_point'] = gear_point['pve']
-        self.jx3_users[qq_account_str]['pvp_gear_point'] = gear_point['pvp']
-    
-    def getInfo(self, qq_group, qq_account):
+    def get_info(self, qq_account):
         returnMsg = ""
         try:
             self.mutex.acquire()
             qq_account_str = str(qq_account)
-            self._update_gear_point(qq_account_str)
-
-            val = self.jx3_users[qq_account_str]
-
-            yday = self._reset_daliy_count(qq_account_str)
-            yday_str = str(yday)
-
-            if self.daliy_action_count[yday_str][qq_account_str]['qiandao']:
-                qiandao_status = "已签到"
-            else:
-                qiandao_status = "未签到"
-
+            returnMsg = self.jx3_users[qq_account_str].get_info(self.qq_group)
             self.mutex.release()
-
-            return "[CQ:at,qq={0}]\n情缘:\t\t{1}\n门派:\t\t{2}\n阵营:\t\t{3}\n威望:\t\t{4}\n帮贡:\t\t{5}\n金钱:\t\t{6}G\nPVP装分:\t{7}\nPVE装分:\t{8}\n资历:\t\t{9}\n签到状态:\t{10}\n签到次数:\t{11}\n奇遇:\t\t{12}\n注册时间:\t{13}\n今日发言:\t{14}\n体力:\t\t{15}".format(
-                    qq_account,
-                    "" if val['lover'] == 0 else getGroupNickName(qq_group, val['lover']),
-                    CLASS_LIST[val['class_id']],
-                    get_faction_display_name(val['faction_id']),
-                    val['weiwang'],
-                    val['banggong'],
-                    int(val['money']),
-                    val['pvp_gear_point'],
-                    val['pve_gear_point'],
-                    val['achievement'],
-                    qiandao_status,
-                    val['qiandao_count'],
-                    val['qiyu'],
-                    time.strftime('%Y-%m-%d', time.localtime(val['register_time'])),
-                    self.daliy_action_count[yday_str][qq_account_str]['speech_count'],
-                    val['energy'])
-
+            return returnMsg
         except Exception as e:
             logging.exception(e)
 
@@ -593,36 +540,15 @@ class Jx3Handler(object):
         try:
             qq_account_str = str(qq_account)
             self.mutex.acquire()
-            val = self.jx3_users[qq_account_str]
-            
-            yday = self._reset_daliy_count(qq_account_str)
-            yday_str = str(yday)
+            val = self._jx3_users[qq_account_str]
 
-            if self.daliy_action_count[yday_str][qq_account_str]['qiandao']:
+            if val.has_qiandao():
                 returnMsg = "[CQ:at,qq={0}]今天已经签到过了!".format(qq_account)
             else:
                 banggong_reward = random.randint(DALIY_REWARD_MIN, DALIY_REWARD_MAX)
                 weiwang_reward = random.randint(DALIY_REWARD_MIN, DALIY_REWARD_MAX)
-                self.jx3_users[qq_account_str]['weiwang'] += weiwang_reward
-                self.jx3_users[qq_account_str]['banggong'] += banggong_reward
-                self.jx3_users[qq_account_str]['qiandao_count'] += 1
-                self.jx3_users[qq_account_str]['energy'] += DALIY_ENERGY_REWARD
-                self.jx3_users[qq_account_str]['money'] += DALIY_MONEY_REWARD
-                
-                self.daliy_action_count[yday_str][qq_account_str]['qiandao'] = True
-                returnMsg = "[CQ:at,qq={0}] 签到成功！签到奖励: 威望+{1} 帮贡+{2} 金钱+{3} 体力+{4}".format(
-                                qq_account,
-                                weiwang_reward,
-                                banggong_reward,
-                                DALIY_MONEY_REWARD,
-                                DALIY_ENERGY_REWARD)
-                
-                faction_id = val['faction_id']
-                if faction_id != 0 and 'faction' in self.daliy_action_count and self.daliy_action_count['faction'][FACTION_NAME_ID[faction_id]]['reward'] != 0:
-                    reward = self.daliy_action_count['faction'][FACTION_NAME_ID[faction_id]]['reward']
-                    self.jx3_users[qq_account_str]['weiwang'] += reward
-                    returnMsg += "\n获得昨日阵营奖励：威望+{0}".format(reward)
-            
+                returnMsg = val.qiandao(weiwang_reward, banggong_reward, DALIY_MONEY_REWARD, DALIY_ENERGY_REWARD)    
+        
             self.mutex.release()
             return returnMsg
         except Exception as e:
@@ -630,25 +556,12 @@ class Jx3Handler(object):
         finally:
             self.writeToJsonFile()
     
-    def addSpeechCount(self, qq_account):
+    def add_speech_count(self, qq_account):
         try:
             qq_account_str = str(qq_account)
             self.mutex.acquire()
-
-            yday = self._reset_daliy_count(qq_account_str)
-            yday_str = str(yday)
-
-            self.daliy_action_count[yday_str][qq_account_str]['speech_count'] += 1
-
-            if 'speech_energy_gain' not in self.daliy_action_count[yday_str][qq_account_str]:
-                self.daliy_action_count[yday_str][qq_account_str]['speech_energy_gain'] = 0
-            
-            if self.daliy_action_count[yday_str][qq_account_str]['speech_energy_gain'] < DALIY_MAX_SPEECH_ENERGY_GAIN:
-                self.daliy_action_count[yday_str][qq_account_str]['speech_energy_gain'] += SPEECH_ENERGY_GAIN
-                self.jx3_users[qq_account_str]['energy'] += SPEECH_ENERGY_GAIN
-            
+            self._jx3_users[qq_account_str].add_speech_count(SPEECH_ENERGY_GAIN, DALIY_MAX_SPEECH_ENERGY_GAIN)
             self.mutex.release()
-
         except Exception as e:
             logging.exception(e)
         finally:
@@ -659,7 +572,7 @@ class Jx3Handler(object):
         try:
             self.mutex.acquire()
 
-            if str(toQQ) not in self.jx3_users.keys():
+            if not self.is_user_register(toQQ):
                 returnMsg = "[CQ:at,qq={0}] 还没有注册哦，请先注册再绑定情缘！".format(toQQ)
             else:
                 fromQQ_stat = self.jx3_users[str(fromQQ)]
