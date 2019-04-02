@@ -535,6 +535,8 @@ class Jx3Handler(object):
                 logging.exception(e)
 
         self.mutex = Lock()
+
+        self.writeToJsonFile()
         
     def __del__(self):
         logging.info('Jx3Handler __del__')
