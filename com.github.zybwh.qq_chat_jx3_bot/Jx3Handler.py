@@ -2372,9 +2372,6 @@ class Jx3Handler(object):
             yday = self._reset_daliy_count()
             yday_str = str(yday)
 
-            if qq_account_str not in self.jjc_season_status:
-                self.jjc_season_status[qq_account_str] = {'score': 0, 'last_time': None, 'win': 0, 'lose': 0}
-
             rank_list = sorted(self.jjc_season_status.items(), lambda x, y: cmp(x[1]['score'], y[1]['score']), reverse=True)
             list_len = len(rank_list)
             for i in range(10):
