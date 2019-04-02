@@ -521,6 +521,18 @@ class Jx3Handler(object):
                         logging.info("loading old file complete")
                 except Exception as e:
                     logging.exception(e)
+            
+            try:
+                import CQSDK
+                from CQGroupMemberInfo import CQGroupMemberInfo
+                for k in list(self.jx3_users.keys()):
+                    info = CQGroupMemberInfo(CQSDK.GetGroupMemberInfoV2(int(self.qq_group), int(k)))
+                    logging.info(info)
+                    if info.GroupID == None and info.QQID == None:
+                        self.jx3_users.pop(k)
+                        logging.info("{0} popped".format(k))
+            except Exception as e:
+                logging.exception(e)
 
         self.mutex = Lock()
         
