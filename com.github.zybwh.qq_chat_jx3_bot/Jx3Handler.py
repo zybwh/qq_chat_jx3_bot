@@ -493,6 +493,7 @@ class Jx3Handler(object):
                     self.wanted_list = copy.deepcopy(get_key_or_return_default(data, "wanted_list", {}))
                     self.jail_list = copy.deepcopy(get_key_or_return_default(data, "jail_list", {}))
                     self.qiyu_status = copy.deepcopy(get_key_or_return_default(data, "qiyu_status", {}))
+                    self.group_info = []
                     for g in get_key_or_return_default(data, "group_info", []):
                         self.group_info.append(Group(data=g))
                     self.dungeon_status = copy.deepcopy(get_key_or_return_default(data, "dungeon_status", {}))
@@ -514,6 +515,7 @@ class Jx3Handler(object):
                         self.jail_list = copy.deepcopy(get_key_or_return_default(data, "jail_list", {}))
                         self.qiyu_status = copy.deepcopy(get_key_or_return_default(data, "qiyu_status", {}))
                         self.dungeon_status = copy.deepcopy(get_key_or_return_default(data, "dungeon_status", {}))
+                        self.group_info = []
                         for g in get_key_or_return_default(data, "group_info", []):
                             self.group_info.append(Group(data=g))
                         logging.info("loading old file complete")
@@ -2544,10 +2546,10 @@ class Jx3Handler(object):
 
                 if group != None:
                     leader = group.get_leader()
-                    dungeon = self.dungeon_status[str(leader)]
+                    dungeon = get_key_or_return_default(self.dungeon_status, str(leader), {})
             else:
-                dungeon = self.dungeon_status[qq_account_str]
                 leader = qq_account_str
+                dungeon = get_key_or_return_default(self.dungeon_status, str(leader), {}) 
 
             if dungeon != {} and leader != "":
                 current_boss = dungeon['boss_detail'][0]
@@ -2560,7 +2562,7 @@ class Jx3Handler(object):
                     min_count = min(count, DUNGEON_MAX_ATTACK_COUNT - dungeon['attack_count'][qq_account_str]['available_attack'])
                     dungeon['attack_count'][qq_account_str]['available_attack'] += min_count
                     if min_count > 0:
-                        dungeon['attack_count'][qq_account_str]['last_attack_time'] = time.time()
+                        dungeon['attack_count'][qq_account_str]['last_attack_time'] += count * DUNGEON_ATTACK_COOLDOWN
 
                 if dungeon['attack_count'][qq_account_str]['available_attack'] < 1:
                     time_val = calculateRemainingTime(DUNGEON_ATTACK_COOLDOWN, dungeon['attack_count'][qq_account_str]['last_attack_time'])
