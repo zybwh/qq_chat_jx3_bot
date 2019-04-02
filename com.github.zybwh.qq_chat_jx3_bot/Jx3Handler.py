@@ -2372,14 +2372,18 @@ class Jx3Handler(object):
             yday = self._reset_daliy_count()
             yday_str = str(yday)
 
+            if qq_account_str not in self.jjc_season_status:
+                self.jjc_season_status[qq_account_str] = {'score': 0, 'last_time': None, 'win': 0, 'lose': 0}
+
             rank_list = sorted(self.jjc_season_status.items(), lambda x, y: cmp(x[1]['score'], y[1]['score']), reverse=True)
             list_len = len(rank_list)
             for i in range(10):
                 if i < list_len and rank_list[i][1]['score'] != 0:
-                    returnMsg += '\n{0}. {1} {2}'.format(
+                    returnMsg += '\n{0}. {1} 分数：{2} 段位：{3}'.format(
                         i + 1,
                         getGroupNickName(self.qq_group, int(rank_list[i][0])),
-                        rank_list[i][1]['score'])
+                        rank_list[i][1]['score'],
+                        min(rank_list[i][1]['score'] // 100, MAX_JJC_RANK))
                 else:
                     break
 
@@ -2400,8 +2404,10 @@ class Jx3Handler(object):
             yday = self._reset_daliy_count(qq_account_str)
             yday_str = str(yday)
 
-            jjc_status = self.jjc_season_status[qq_account_str]
+            if qq_account_str not in self.jjc_season_status:
+                self.jjc_season_status[qq_account_str] = {'score': 0, 'last_time': None, 'win': 0, 'lose': 0}
 
+            jjc_status = self.jjc_season_status[qq_account_str]
 
             returnMsg = "[CQ:at,qq={0}] 本日名剑大会分数：{1} 段位：{2} 胜负：{3}/{4} 胜率：{5}%".format(
                     qq_account,
