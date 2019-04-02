@@ -1948,12 +1948,14 @@ class Jx3Handler(object):
             self.mutex.acquire()
             fromQQ_str = str(fromQQ)
             toQQ_str = str(toQQ)
-            fromQQ_stat = self.jx3_users[fromQQ_str]
-            toQQ_stat = self.jx3_users[toQQ_str]
+
 
             yday = self._reset_daliy_count(toQQ_str)
             yday_str = str(yday)
             self._add_new_daliy_record(yday_str, fromQQ_str)
+
+            fromQQ_stat = self.jx3_users[fromQQ_str]
+            toQQ_stat = self.jx3_users[toQQ_str]
 
             if fromQQ_stat['faction_id'] == 0:
                 returnMsg = "[CQ:at,qq={0}] 中立阵营无法切磋，请先加入阵营。".format(fromQQ)
