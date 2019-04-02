@@ -105,6 +105,7 @@ JJC_RANK_DIFF_PROTECTION = 2
 JJC_REWARD_RANK_MODIFIER = 0.1
 DALIY_JJC_DOUBLE_REWARD_COUNT = 5
 JJC_DAYS_PER_SEASON = 7
+MAX_JJC_RANK = 14
 
 DUNGEON_MAX_ATTACK_COUNT = 5
 DUNGEON_ATTACK_COOLDOWN = 10 * 60
@@ -460,6 +461,8 @@ class Jx3Handler(object):
     qiyu_status = {}
     group_info = []
     dungeon_status = {}
+    jjc_status = {}
+    jjc_season_status = {}
 
     is_locked = False
 
@@ -521,6 +524,8 @@ class Jx3Handler(object):
         for g in get_key_or_return_default(data, "group_info", []):
             self.group_info.append(Group(data=g))
         self.dungeon_status = copy.deepcopy(get_key_or_return_default(data, "dungeon_status", {}))
+        self.jjc_status = copy.deepcopy(get_key_or_return_default(data, "jjc_status", {'season': 1, "day": 0, "last_season_jjc_status": {}}))
+        self.jjc_season_status = copy.deepcopy(get_key_or_return_default(data, "jjc_season_status", {}))
 
     def writeToJsonFile(self):
         returnMsg = ""
@@ -546,7 +551,9 @@ class Jx3Handler(object):
                     "jail_list": self.jail_list,
                     "qiyu_status": self.qiyu_status,
                     "group_info": [g.dump_data() for g in self.group_info],
-                    "dungeon_status": self.dungeon_status
+                    "dungeon_status": self.dungeon_status,
+                    "jjc_status": self.jjc_status,
+                    "jjc_season_status":self.jjc_season_status
                 }
                 f.write(json.dumps(data, ensure_ascii=False, encoding='gbk'))
         except Exception as e:
@@ -556,7 +563,7 @@ class Jx3Handler(object):
         yday = time.localtime(time.time() - DALIY_REFRESH_OFFSET).tm_yday
         yday_str = str(yday)
         if yday_str not in self.daliy_action_count:
-            self.daliy_action_count[yday_str] = {"jjc": {"season": 0, "day": 0}, "faction": {"haoqi": {"point": 0, "reward": 0}, "eren": {"point":0, "reward": 0}}}
+            self.daliy_action_count[yday_str] = {"faction": {"haoqi": {"point": 0, "reward": 0}, "eren": {"point":0, "reward": 0}}}
             if yday == 1:
                 if "365" in self.daliy_action_count and "366" not in self.daliy_action_count:
                     yesterday_stat = self.daliy_action_count["365"]
@@ -583,6 +590,15 @@ class Jx3Handler(object):
             self.rob_protect = {}
             self.dungeon_status = {}
             self.group_info = []
+
+            if self.jjc_status == {}:
+                self.jjc_status = {'season': 1, "day": 0, "last_season_jjc_status": {}}
+
+            self.jjc_status['day'] += 1
+            if self.jjc_status['day'] > JJC_DAYS_PER_SEASON:
+                self.jjc_status['last_season_jjc_status'][str(self.jjc_status['season'])] = copy.deepcopy(self.jjc_season_status)
+                self.jjc_status['season'] += 1
+                self.jjc_season_status = {}
 
             for k in list(self.daliy_action_count.keys()):
                 if int(k) < yday - DALIY_COUNT_SAVE_DAY:
@@ -2189,8 +2205,8 @@ class Jx3Handler(object):
             yday = self._reset_daliy_count(qq_account_str)
             yday_str = str(yday)
 
-            if 'jjc' not in self.daliy_action_count[yday_str][qq_account_str]:
-                self.daliy_action_count[yday_str][qq_account_str]['jjc'] = {'score': 0, 'last_time': None, 'win': 0, 'lose': 0}
+            if qq_account_str not in self.jjc_season_status:
+                self.jjc_season_status[qq_account_str] = {'score': 0, 'last_time': None, 'win': 0, 'lose': 0}
 
             if qq_account_str in self.jail_list and time.time() - self.jail_list[qq_account_str] < JAIL_DURATION:
                     time_val = calculateRemainingTime(JAIL_DURATION, self.jail_list[qq_account_str])
@@ -2201,26 +2217,26 @@ class Jx3Handler(object):
                                     time_val['secs'])
             elif self.jx3_users[qq_account_str]['energy'] < JJC_ENERGY_COST:
                 returnMsg = "[CQ:at,qq={0}] 体力不足！需要消耗{1}体力。".format(qq_account, JJC_ENERGY_COST)
-            elif self.daliy_action_count[yday_str][qq_account_str]['jjc']['last_time'] != None and time.time() - self.daliy_action_count[yday_str][qq_account_str]['jjc']['last_time'] < JJC_COOLDOWN:
-                    time_val = calculateRemainingTime(JJC_COOLDOWN, self.daliy_action_count[yday_str][qq_account_str]['jjc']['last_time'])
+            elif self.jjc_season_status[qq_account_str]['last_time'] != None and time.time() - self.jjc_season_status[qq_account_str]['last_time'] < JJC_COOLDOWN:
+                    time_val = calculateRemainingTime(JJC_COOLDOWN, self.jjc_season_status[qq_account_str]['last_time'])
                     returnMsg = "[CQ:at,qq={0}] 你刚排过名剑大会了，请过{1}小时{2}分钟{3}秒后再来吧。".format(
                                     qq_account,
                                     time_val['hours'],
                                     time_val['mins'],
                                     time_val['secs'])
             else:
-                jjc_stat = self.daliy_action_count[yday_str][qq_account_str]['jjc']
+                jjc_stat = self.jjc_season_status[qq_account_str]
 
-                rank = jjc_stat['score'] // 100
+                rank = min(MAX_JJC_RANK, jjc_stat['score'] // 100)
 
                 available_list = list(set(self.jx3_users.keys()) - set([qq_account_str]))
                 random_person = available_list[random.randint(0, len(available_list) - 1)]
 
                 self._add_new_daliy_record(yday_str, random_person)
 
-                if 'jjc' not in self.daliy_action_count[yday_str][random_person]:
-                    self.daliy_action_count[yday_str][random_person]['jjc'] = {'score': 0, 'last_time': None, 'win': 0, 'lose': 0}
-                random_person_jjc_stat = self.daliy_action_count[yday_str][random_person]['jjc']
+                if random_person not in self.jjc_season_status:
+                    self.jjc_season_status[random_person] = {'score': 0, 'last_time': None, 'win': 0, 'lose': 0}
+                random_person_jjc_stat = self.jjc_season_status[random_person]
 
                 random_person_rank = random_person_jjc_stat['score'] // 100
 
@@ -2279,15 +2295,15 @@ class Jx3Handler(object):
 
                     double_msg = " (每日{1}场双倍奖励加成中：{0}/{1})".format(jjc_stat['win'] + 1, DALIY_JJC_DOUBLE_REWARD_COUNT) if reward_modifier == 2 else ""
 
-                    self.daliy_action_count[yday_str][qq_account_str]['jjc']['score'] += score_reward
-                    self.daliy_action_count[yday_str][qq_account_str]['jjc']['last_time'] = time.time()
+                    self.jjc_season_status[qq_account_str]['score'] += score_reward
+                    self.jjc_season_status[qq_account_str]['last_time'] = time.time()
 
-                    if self.daliy_action_count[yday_str][random_person]['jjc']['score'] < JJC_REWARD_RANK:
+                    if self.jjc_season_status[random_person]['score'] < JJC_REWARD_RANK:
                         score_lost = 0
 
-                    self.daliy_action_count[yday_str][random_person]['jjc']['score'] -= score_lost
-                    self.daliy_action_count[yday_str][qq_account_str]['jjc']['win'] += 1
-                    self.daliy_action_count[yday_str][random_person]['jjc']['lose'] += 1
+                    self.jjc_season_status[random_person]['score'] -= score_lost
+                    self.jjc_season_status[qq_account_str]['win'] += 1
+                    self.jjc_season_status[random_person]['lose'] += 1
 
                     returnMsg = "[CQ:at,qq={0}] 战斗结果：胜利！成功率：{1}%\n {2} 威望+{3} 分数+{4} 体力-{5}{6}\n{7} 分数-{8}".format(
                                     qq_account_str,
@@ -2300,7 +2316,7 @@ class Jx3Handler(object):
                                     getGroupNickName(self.qq_group, int(random_person)),
                                     score_lost)
 
-                    new_rank = self.daliy_action_count[yday_str][qq_account_str]['jjc']['score'] // 100
+                    new_rank = self.jjc_season_status[qq_account_str]['score'] // 100
                     if  new_rank != rank:
                         returnMsg += "\n段位变更为：{0}".format(new_rank)
                 else:
@@ -2314,15 +2330,15 @@ class Jx3Handler(object):
                         score_reward = JJC_REWARD_RANK
                         score_lost = 0
 
-                    if self.daliy_action_count[yday_str][qq_account_str]['jjc']['score'] < JJC_REWARD_RANK:
+                    if self.jjc_season_status[qq_account_str]['score'] < JJC_REWARD_RANK:
                         score_lost = 0
-                    self.daliy_action_count[yday_str][qq_account_str]['jjc']['score'] -= score_lost
+                    self.jjc_season_status[qq_account_str]['score'] -= score_lost
 
-                    self.daliy_action_count[yday_str][qq_account_str]['jjc']['last_time'] = time.time()
-                    self.daliy_action_count[yday_str][random_person]['jjc']['score'] += score_reward
+                    self.jjc_season_status[qq_account_str]['last_time'] = time.time()
+                    self.jjc_season_status[random_person]['score'] += score_reward
 
-                    self.daliy_action_count[yday_str][random_person]['jjc']['win'] += 1
-                    self.daliy_action_count[yday_str][qq_account_str]['jjc']['lose'] += 1
+                    self.jjc_season_status[random_person]['win'] += 1
+                    self.jjc_season_status[qq_account_str]['lose'] += 1
 
                     returnMsg = "[CQ:at,qq={0}] 战斗结果：失败！成功率：{1}%\n {2} 分数-{3} 体力-{4}；{5} 分数+{6}".format(
                                     qq_account_str,
@@ -2333,7 +2349,7 @@ class Jx3Handler(object):
                                     getGroupNickName(self.qq_group, int(random_person)),
                                     score_reward)
 
-                    new_rank = self.daliy_action_count[yday_str][qq_account_str]['jjc']['score'] // 100
+                    new_rank = self.jjc_season_status[qq_account_str]['score'] // 100
                     if  new_rank != rank:
                         returnMsg += "\n段位变更为：{0}".format(new_rank)
 
@@ -2351,20 +2367,19 @@ class Jx3Handler(object):
         self.mutex.acquire()
 
         try:
-            returnMsg = "本日名剑大会排名榜"
-            # returnMsg = "名剑大会排名榜 赛季：{0} 天数：{1}".format(self.daliy_action_count['jjc']['season'], self.daliy_action_count['jjc']['days'])
+            returnMsg = "名剑大会排名榜 赛季：{0} 天数：{1}".format(self.jjc_status['season'], self.jjc_status['day'])
 
             yday = self._reset_daliy_count()
             yday_str = str(yday)
 
-            rank_list = sorted(self._get_daliy_list(yday_str), lambda x, y: cmp(x[1]['jjc']['score'], y[1]['jjc']['score']), reverse=True)
+            rank_list = sorted(self.jjc_season_status.items(), lambda x, y: cmp(x[1]['score'], y[1]['score']), reverse=True)
             list_len = len(rank_list)
             for i in range(10):
-                if i < list_len and 'jjc' in rank_list[i][1] and rank_list[i][1]['jjc']['score'] != 0:
+                if i < list_len and rank_list[i][1]['score'] != 0:
                     returnMsg += '\n{0}. {1} {2}'.format(
                         i + 1,
                         getGroupNickName(self.qq_group, int(rank_list[i][0])),
-                        rank_list[i][1]['jjc']['score'])
+                        rank_list[i][1]['score'])
                 else:
                     break
 
@@ -2385,7 +2400,7 @@ class Jx3Handler(object):
             yday = self._reset_daliy_count(qq_account_str)
             yday_str = str(yday)
 
-            jjc_status = self.daliy_action_count[yday_str][qq_account_str]['jjc']
+            jjc_status = self.jjc_season_status[qq_account_str]
 
 
             returnMsg = "[CQ:at,qq={0}] 本日名剑大会分数：{1} 段位：{2} 胜负：{3}/{4} 胜率：{5}%".format(
