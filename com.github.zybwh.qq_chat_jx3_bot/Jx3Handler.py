@@ -2510,7 +2510,7 @@ class Jx3Handler(object):
             else:
                 group = self._get_group_by_member(qq_account_str)
                 if group != None:
-                    returnMsg = "[CQ:at,qq={0}] 你已经加入了 {1} 的队伍，输入【退出队伍】退出当前队伍".format(qq_account, group.get_leader())
+                    returnMsg = "[CQ:at,qq={0}] 你已经加入了 {1} 的队伍，输入【退出队伍】退出当前队伍".format(qq_account, getGroupNickName(self.qq_group, int(group.get_leader())))
                 else:
                     group = self._get_group_by_leader(leader_str)
                     if group == None:
