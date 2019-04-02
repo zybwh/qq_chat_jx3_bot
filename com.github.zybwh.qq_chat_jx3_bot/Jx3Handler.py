@@ -493,7 +493,7 @@ class Jx3Handler(object):
                     self.wanted_list = copy.deepcopy(get_key_or_return_default(data, "wanted_list", {}))
                     self.jail_list = copy.deepcopy(get_key_or_return_default(data, "jail_list", {}))
                     self.qiyu_status = copy.deepcopy(get_key_or_return_default(data, "qiyu_status", {}))
-                    for g in data['group_info']:
+                    for g in get_key_or_return_default(data, "group_info", []):
                         self.group_info.append(Group(data=g))
                     self.dungeon_status = copy.deepcopy(get_key_or_return_default(data, "dungeon_status", {}))
                     logging.info("loading complete")
@@ -514,7 +514,7 @@ class Jx3Handler(object):
                         self.jail_list = copy.deepcopy(get_key_or_return_default(data, "jail_list", {}))
                         self.qiyu_status = copy.deepcopy(get_key_or_return_default(data, "qiyu_status", {}))
                         self.dungeon_status = copy.deepcopy(get_key_or_return_default(data, "dungeon_status", {}))
-                        for g in data['group_info']:
+                        for g in get_key_or_return_default(data, "group_info", []):
                             self.group_info.append(Group(data=g))
                         logging.info("loading old file complete")
                 except Exception as e:
