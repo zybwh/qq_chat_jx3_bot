@@ -2492,7 +2492,7 @@ class Jx3Handler(object):
                                         has_energy = True
                                         energy_msg = ""
                                         for m in group.get_member_list():
-                                            if self.jx3_suers[str(m)]['energy'] < DUNGEON_ENERGY_REQUIRED:
+                                            if self.jx3_users[str(m)]['energy'] < DUNGEON_ENERGY_REQUIRED:
                                                 energy_msg += "[CQ:at,qq={0}] ".format(m)
                                                 has_energy = False
                                         
