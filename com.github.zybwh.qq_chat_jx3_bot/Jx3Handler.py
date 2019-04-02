@@ -2610,7 +2610,6 @@ class Jx3Handler(object):
                         damage = int(min(qq_equipment['weapon']['pve'], current_boss['remain_hp']))
                         dungeon['attack_count'][qq_account_str]['damage'] += damage
                         dungeon['attack_count'][qq_account_str]['available_attack'] -= 1
-                        dungeon['attack_count'][qq_account_str]['last_attack_time'] = time.time()
                         current_boss['remain_hp'] -= damage
 
                         returnMsg += "\n攻击成功！成功率：{0}%，造成伤害：{1}。{2}血量：{3}/{4}".format(
