@@ -146,7 +146,9 @@ class CQHandler(object):
                     if len(msg_list) == 2 and msg_list[0] == "" and msg_list[1] != "":
                         toQQ = msg_list[1].strip('] ')
                         if int(toQQ) == fromQQ:
-                            returnMsg = "[CQ:at,qq={0}]为什么要和自己绑定情缘？你也太惨了吧".format(fromQQ)
+                            returnMsg = "[CQ:at,qq={0}] 为什么要和自己绑定情缘？你也太惨了吧".format(fromQQ)
+                        elif not jx3Handler.isUserRegister(str(toQQ)):
+                            returnMsg = "[CQ:at,qq={0}] 对方尚未注册。".format(fromQQ)
                         else:
                             returnMsg = jx3Handler.addLover(fromQQ, toQQ)
                 elif msg == "同意":
@@ -174,6 +176,8 @@ class CQHandler(object):
                         toQQ = msg_list[1].strip('] ')
                         if int(toQQ) == fromQQ:
                             returnMsg = "[CQ:at,qq={0}] 为什么要打劫自己？".format(fromQQ)
+                        elif not jx3Handler.isUserRegister(str(toQQ)):
+                            returnMsg = "[CQ:at,qq={0}] 对方尚未注册。".format(fromQQ)
                         else:
                             returnMsg = jx3Handler.rob(fromGroup, fromQQ, toQQ)
                         if '打劫成功' in returnMsg and "体力-0" not in returnMsg:
@@ -184,6 +188,8 @@ class CQHandler(object):
                         toQQ = msg_list[1].strip('] ')
                         if int(toQQ) == fromQQ:
                             returnMsg = "[CQ:at,qq={0}] 没法跟自己切磋啦".format(fromQQ)
+                        elif not jx3Handler.isUserRegister(str(toQQ)):
+                            returnMsg = "[CQ:at,qq={0}] 对方尚未注册。".format(fromQQ)
                         else:
                             returnMsg = jx3Handler.practise(fromQQ, toQQ)
                 elif "购买" in msg:
@@ -201,6 +207,8 @@ class CQHandler(object):
                             toQQ = msg_list[1].strip('] ')
                             if int(toQQ) == fromQQ:
                                 returnMsg = "[CQ:at,qq={0}] 不能对自己使用真橙之心".format(fromQQ)
+                            elif not jx3Handler.isUserRegister(str(toQQ)):
+                                returnMsg = "[CQ:at,qq={0}] 对方尚未注册。".format(fromQQ)
                             else:
                                 returnMsg = jx3Handler.use_firework("真橙之心", fromQQ, toQQ)
                     else:
@@ -239,6 +247,8 @@ class CQHandler(object):
                         toQQ = msg_list[1].strip('] ')
                         if int(toQQ) == fromQQ:
                             returnMsg = "[CQ:at,qq={0}] 就算你有悬赏，也不能抓捕自己啊。".format(fromQQ)
+                        elif not jx3Handler.isUserRegister(str(toQQ)):
+                            returnMsg = "[CQ:at,qq={0}] 对方尚未注册。".format(fromQQ)
                         else:
                             returnMsg = jx3Handler.catch_wanted(fromQQ, toQQ)
                         if '成功抓捕' in returnMsg:
@@ -267,6 +277,8 @@ class CQHandler(object):
                         toQQ = msg_list[1].strip('] ')
                         if int(toQQ) == fromQQ:
                             returnMsg = "[CQ:at,qq={0}] 无法加入自己的队伍。".format(fromQQ)
+                        elif not jx3Handler.isUserRegister(str(toQQ)):
+                            returnMsg = "[CQ:at,qq={0}] 对方尚未注册。".format(fromQQ)
                         else:
                             returnMsg = jx3Handler.join_group(fromQQ, toQQ)
                 elif msg == "查看队伍":

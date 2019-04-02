@@ -133,23 +133,23 @@ ITEM_LIST = [
 ]
 
 CHA_GUAN_QUEST_INFO = {
-    "cha_guan_sui_rou": {"display_name": "茶馆：碎肉", 
+    "cha_guan_sui_rou": {"display_name": "茶馆：碎肉",
                             "description": "需要提交一份碎肉，可在商店购买。",
                             "require": {"sui_rou": 1},
                             "reward": {"money": 50, "banggong": 500}},
-    "cha_guan_cu_bu": {"display_name": "茶馆：粗布", 
+    "cha_guan_cu_bu": {"display_name": "茶馆：粗布",
                             "description": "需要提交一份粗布，可在商店购买。",
                             "require": {"cu_bu": 1},
                             "reward": {"money": 50, "banggong": 500}},
-    "cha_guan_gan_cao": {"display_name": "茶馆：甘草", 
+    "cha_guan_gan_cao": {"display_name": "茶馆：甘草",
                             "description": "需要提交一份甘草，可在商店购买。",
                             "require": {"gan_cao": 1},
                             "reward": {"money": 50, "banggong": 500}},
-    "cha_guan_hong_tong": {"display_name": "茶馆：红铜", 
+    "cha_guan_hong_tong": {"display_name": "茶馆：红铜",
                             "description": "需要提交一份红铜，可在商店购买。",
                             "require": {"hong_tong": 1},
                             "reward": {"money": 50, "banggong": 500}},
-    "cha_guan_hun_hun": {"display_name": "茶馆：抓捕混混", 
+    "cha_guan_hun_hun": {"display_name": "茶馆：抓捕混混",
                             "description": "抓捕混混三个。使用指令 抓捕混混",
                             "require": {"hun_hun_zheng_ming": 3},
                             "reward": {"money": 50, "banggong": 500}}
@@ -158,14 +158,14 @@ CHA_GUAN_QUEST_INFO = {
 NPC_LIST = {
     "hun_hun": {
         "display_name": "熊痴",
-        "equipment": {'weapon': {"display_name": "混混棍", 'pvp': 0, 'pve': 10}, 
+        "equipment": {'weapon': {"display_name": "混混棍", 'pvp': 0, 'pve': 10},
                         'armor': {"display_name": "混混衣", 'pvp': 0, 'pve': 50}},
         "reward": {"money": 50},
         "reward_chance": 0.5
     },
     'xiong_chi': {
         "display_name": "熊痴",
-        "equipment": {'weapon': {"display_name": "“熊痴拳套", 'pvp': 0, 'pve': 100}, 
+        "equipment": {'weapon': {"display_name": "“熊痴拳套", 'pvp': 0, 'pve': 100},
                         'armor': {"display_name": "熊痴衣", 'pvp': 0, 'pve': 500}},
         "reward": {
             "money": 200,
@@ -188,13 +188,13 @@ NPC_LIST = {
         "buff": [
             {
                 "display_name": "邓家阵法",
-                "description": "武器攻击+50%",
+                "description": "自身武器攻击+50%",
                 "weapon": 1.5,
                 "chance": 0.1,
             },
             {
                 "display_name": "邓家将",
-                "description": "武器攻击+20%",
+                "description": "自身武器攻击+20%",
                 "weapon": 1.2,
                 "chance": 0.3
             }
@@ -207,7 +207,7 @@ NPC_LIST = {
     },
     'shang_zhong_yong': {
         "display_name": "商仲永",
-        "equipment": {'weapon': {"display_name": "“商仲永扇", 'pvp': 0, 'pve': 200}, 
+        "equipment": {'weapon': {"display_name": "“商仲永扇", 'pvp': 0, 'pve': 200},
                         'armor': {"display_name": "商仲永衣", 'pvp': 0, 'pve': 3000}},
         "reward": {
             "money": 500,
@@ -216,7 +216,7 @@ NPC_LIST = {
         "buff": [
             {
                 "display_name": "木人阵攻击",
-                "description": "武器攻击+50%",
+                "description": "自身武器攻击+50%",
                 "weapon": 1.5,
                 "chance": 0.1,
             }
@@ -224,13 +224,13 @@ NPC_LIST = {
         "debuff": [
             {
                 "display_name": "八卦阵防御",
-                "description": "武器攻击-50%",
+                "description": "敌方武器攻击-50%",
                 "weapon": 0.5,
                 "chance": 0.2,
             },
             {
                 "display_name": "天雷阵防御",
-                "description": "武器攻击-20%",
+                "description": "敌方武器攻击-20%",
                 "weapon": 0.8,
                 "chance": 0.4
             }
@@ -335,7 +335,8 @@ daliy_dict = {
                 'rob': {'weiwang': 0, 'money': 0, 'last_rob_time': None},
                 'practise': {'weiwang': 0},
                 'jjc': {'score': 0, 'last_time': None, 'win': 0, 'lose': 0},
-                'dungeon': {}
+                'dungeon': {},
+                'item_usage': {}
             }
 
 def get_dungeon_id_by_display_name(display_name):
@@ -364,13 +365,13 @@ def get_wa_bao_reward():
             new_max_index = max_index + pow(item['rank'], WA_BAO_RARE_FACTOR)
             wa_bao_items[item['name']] = {'min': max_index, 'max': new_max_index}
             max_index = new_max_index
-    
+
     rand_index = random.uniform(0, max_index)
     logging.info("wa_bao items: {1} rand index: {0}".format(rand_index, wa_bao_items))
     for item_name, min_max in wa_bao_items.items():
         if rand_index >= min_max['min'] and rand_index < min_max['max']:
             return item_name
-    
+
     return ""
 
 def isItemExists(item_name):
@@ -416,7 +417,7 @@ def use_zhen_cheng_zhi_xin(fromGroup, fromQQ, toQQ):
             logging.exception(e)
 
 def isTimeSame(time_struct_1, time_struct_2):
-    return time_struct_1.tm_year == time_struct_2.tm_year and time_struct_1.tm_yday == time_struct_2.tm_yday 
+    return time_struct_1.tm_year == time_struct_2.tm_year and time_struct_1.tm_yday == time_struct_2.tm_yday
 
 def get_key_or_return_default(dictionary, key, default_value):
     if key in dictionary:
@@ -442,7 +443,7 @@ class Jx3Handler(object):
         "使用",
         "商店",
         "挖宝",
-        "查看阵营", 
+        "查看阵营",
         "查看悬赏",
         "悬赏", "抓捕",
         "pve装分排行", "pvp装分排行", "聊天排行", "奇遇排行", "土豪排行", "威望排行", "武器更名", "防具更名",
@@ -462,7 +463,6 @@ class Jx3Handler(object):
 
     is_locked = False
 
-
     def __init__(self, qq_group):
         logging.info('Jx3Handler __init__')
         self.qq_group = qq_group # int
@@ -480,76 +480,56 @@ class Jx3Handler(object):
             logging.info("path not exist. create a new one: {0}", self.json_file_folder)
             os.makedirs(self.json_file_folder)
 
+        self.load_data()
+
+        self.mutex = Lock()
+
+    def __del__(self):
+        logging.info('Jx3Handler __del__')
+
+    def load_data(self):
         if os.path.exists(self.json_file_path):
             load_old_file = False
             try:
                 with open(self.json_file_path, 'r') as f:
                     data = json.loads(f.readline(), encoding='gbk')
-                    self.jx3_users = copy.deepcopy(get_key_or_return_default(data, "jx3_users", {}))
-                    self.lover_pending = copy.deepcopy(get_key_or_return_default(data, "lover_pending", {}))
-                    self.daliy_action_count = copy.deepcopy(get_key_or_return_default(data, "daliy_action_count", {}))
-                    self.rob_protect = copy.deepcopy(get_key_or_return_default(data, "rob_protect", {}))
-                    self.equipment = copy.deepcopy(get_key_or_return_default(data, "equipment", {}))
-                    self.wanted_list = copy.deepcopy(get_key_or_return_default(data, "wanted_list", {}))
-                    self.jail_list = copy.deepcopy(get_key_or_return_default(data, "jail_list", {}))
-                    self.qiyu_status = copy.deepcopy(get_key_or_return_default(data, "qiyu_status", {}))
-                    self.group_info = []
-                    for g in get_key_or_return_default(data, "group_info", []):
-                        self.group_info.append(Group(data=g))
-                    self.dungeon_status = copy.deepcopy(get_key_or_return_default(data, "dungeon_status", {}))
+                    self.read_file(data)
                     logging.info("loading complete")
             except Exception as e:
                 load_old_file = True
                 logging.exception(e)
-            
+
             if load_old_file and os.path.exists(self.json_file_path_old):
                 try:
                     with open(self.json_file_path_old, 'r') as f:
                         data = json.loads(f.readline(), encoding='gbk')
-                        self.jx3_users = copy.deepcopy(get_key_or_return_default(data, "jx3_users", {}))
-                        self.lover_pending = copy.deepcopy(get_key_or_return_default(data, "lover_pending", {}))
-                        self.daliy_action_count = copy.deepcopy(get_key_or_return_default(data, "daliy_action_count", {}))
-                        self.rob_protect = copy.deepcopy(get_key_or_return_default(data, "rob_protect", {}))
-                        self.equipment = copy.deepcopy(get_key_or_return_default(data, "equipment", {}))
-                        self.wanted_list = copy.deepcopy(get_key_or_return_default(data, "wanted_list", {}))
-                        self.jail_list = copy.deepcopy(get_key_or_return_default(data, "jail_list", {}))
-                        self.qiyu_status = copy.deepcopy(get_key_or_return_default(data, "qiyu_status", {}))
-                        self.dungeon_status = copy.deepcopy(get_key_or_return_default(data, "dungeon_status", {}))
-                        self.group_info = []
-                        for g in get_key_or_return_default(data, "group_info", []):
-                            self.group_info.append(Group(data=g))
+                        self.read_file(data)
                         logging.info("loading old file complete")
                 except Exception as e:
                     logging.exception(e)
-            
-            try:
-                import CQSDK
-                from CQGroupMemberInfo import CQGroupMemberInfo
-                for k in list(self.jx3_users.keys()):
-                    info = CQGroupMemberInfo(CQSDK.GetGroupMemberInfoV2(int(self.qq_group), int(k)))
-                    logging.info(info)
-                    if info.GroupID == None and info.QQID == None:
-                        self.jx3_users.pop(k)
-                        logging.info("{0} popped".format(k))
-            except Exception as e:
-                logging.exception(e)
 
-        self.mutex = Lock()
-
-        self.writeToJsonFile()
-        
-    def __del__(self):
-        logging.info('Jx3Handler __del__')
+    def read_file(self, data):
+        self.jx3_users = copy.deepcopy(get_key_or_return_default(data, "jx3_users", {}))
+        self.lover_pending = copy.deepcopy(get_key_or_return_default(data, "lover_pending", {}))
+        self.daliy_action_count = copy.deepcopy(get_key_or_return_default(data, "daliy_action_count", {}))
+        self.rob_protect = copy.deepcopy(get_key_or_return_default(data, "rob_protect", {}))
+        self.equipment = copy.deepcopy(get_key_or_return_default(data, "equipment", {}))
+        self.wanted_list = copy.deepcopy(get_key_or_return_default(data, "wanted_list", {}))
+        self.jail_list = copy.deepcopy(get_key_or_return_default(data, "jail_list", {}))
+        self.qiyu_status = copy.deepcopy(get_key_or_return_default(data, "qiyu_status", {}))
+        self.group_info = []
+        for g in get_key_or_return_default(data, "group_info", []):
+            self.group_info.append(Group(data=g))
+        self.dungeon_status = copy.deepcopy(get_key_or_return_default(data, "dungeon_status", {}))
 
     def writeToJsonFile(self):
         returnMsg = ""
-        self.mutex.acquire()
         try:
             if os.path.exists(self.json_file_path_old):
                 if os.path.exists(self.json_file_path_old_2):
                     os.remove(self.json_file_path_old_2)
                 os.rename(self.json_file_path_old, self.json_file_path_old_2)
-            
+
             if os.path.exists(self.json_file_path):
                 if os.path.exists(self.json_file_path_old):
                     os.remove(self.json_file_path_old)
@@ -571,9 +551,7 @@ class Jx3Handler(object):
                 f.write(json.dumps(data, ensure_ascii=False, encoding='gbk'))
         except Exception as e:
             logging.exception(e)
-        self.mutex.release()
 
-    
     def _reset_daliy_count(self, qq_account_str=""):
         yday = time.localtime(time.time() - DALIY_REFRESH_OFFSET).tm_yday
         yday_str = str(yday)
@@ -590,14 +568,14 @@ class Jx3Handler(object):
                 yesterday_stat = self.daliy_action_count[str(yday - 1)]
             else:
                 yesterday_stat = None
-            
+
             if yesterday_stat != None:
-                
+
                 if 'faction' in yesterday_stat:
                     retval = self._get_faction_count()
-                    self.daliy_action_count[yday_str]['faction']['haoqi']['reward'] = int(yesterday_stat['faction']['haoqi']['point'] / retval[2]) if retval[2] != 0 else 0
-                    self.daliy_action_count[yday_str]['faction']['eren']['reward'] = int(yesterday_stat['faction']['eren']['point'] / retval[1]) if retval[1] != 0 else 0
-            
+                    self.daliy_action_count[yday_str]['faction']['haoqi']['reward'] = int(yesterday_stat['faction']['haoqi']['point'] / float(retval[2])) if retval[2] != 0 else 0
+                    self.daliy_action_count[yday_str]['faction']['eren']['reward'] = int(yesterday_stat['faction']['eren']['point'] / float(retval[1])) if retval[1] != 0 else 0
+
                 if 'jjc' in yesterday_stat:
                     self.daliy_action_count[yday_str]['jjc']['season'] = yesterday_stat['jjc']['season'] + (1 if yesterday_stat['jjc']['day'] >= JJC_DAYS_PER_SEASON else 0)
                     self.daliy_action_count[yday_str]['jjc']['day'] = yesterday_stat['jjc']['day'] + 1 if yesterday_stat['jjc']['day'] < JJC_DAYS_PER_SEASON else 0
@@ -609,7 +587,7 @@ class Jx3Handler(object):
             for k in list(self.daliy_action_count.keys()):
                 if int(k) < yday - DALIY_COUNT_SAVE_DAY:
                     self.daliy_action_count.pop(k)
-    
+
         if 'faction' not in self.daliy_action_count[yday_str]:
             self.daliy_action_count[yday_str]['faction'] = {"haoqi": {"point": 0, "reward": 0}, "eren": {"point":0, "reward": 0}}
 
@@ -620,24 +598,23 @@ class Jx3Handler(object):
     def _add_new_daliy_record(self, yday_str, qq_account_str):
         if qq_account_str != "" and qq_account_str not in self.daliy_action_count[yday_str]:
             self.daliy_action_count[yday_str][qq_account_str] = copy.deepcopy(daliy_dict)
-    
+
     def getCommandList(self):
         return self.commandList
 
     def register(self, qq_account):
         returnMsg = ""
+        self.mutex.acquire()
         try:
-            self.mutex.acquire()
-
             qq_account_str = str(qq_account)
             if qq_account_str in self.jx3_users.keys():
                 returnMsg = "[CQ:at,qq={0}] 注册失败！你已经注册过了。".format(qq_account)
             else:
                 self.equipment[qq_account_str] = {
-                    'weapon': {"display_name": "大侠剑", 'pvp': 10, 'pve': 10}, 
+                    'weapon': {"display_name": "大侠剑", 'pvp': 10, 'pve': 10},
                     'armor': {"display_name": "大侠衣", 'pvp': 100, 'pve': 100}
                 }
-            
+
                 gear_point = calculateGearPoint(self.equipment[qq_account_str])
 
                 self.jx3_users[qq_account_str] = {
@@ -659,30 +636,33 @@ class Jx3Handler(object):
                     "bag": {}
                 }
                 returnMsg = "注册成功！\n[CQ:at,qq={0}]\n注册时间：{1}".format(qq_account, time.strftime('%Y-%m-%d', time.localtime(self.jx3_users[qq_account_str]["register_time"])))
-        
-            self.mutex.release()
-            return returnMsg
+
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
     def isUserRegister(self, qq_account):
         try:
             return str(qq_account) in self.jx3_users.keys()
         except Exception as e:
             logging.exception(e)
-    
+
     # TODO: not thread safe
     def _update_gear_point(self, qq_account_str):
         gear_point = calculateGearPoint(self.equipment[qq_account_str])
         self.jx3_users[qq_account_str]['pve_gear_point'] = gear_point['pve']
         self.jx3_users[qq_account_str]['pvp_gear_point'] = gear_point['pvp']
-    
+
     def getInfo(self, qq_group, qq_account):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             qq_account_str = str(qq_account)
             self._update_gear_point(qq_account_str)
 
@@ -696,9 +676,7 @@ class Jx3Handler(object):
             else:
                 qiandao_status = "未签到"
 
-            self.mutex.release()
-
-            return "[CQ:at,qq={0}]\n情缘:\t\t{1}\n门派:\t\t{2}\n阵营:\t\t{3}\n威望:\t\t{4}\n帮贡:\t\t{5}\n金钱:\t\t{6}G\nPVP装分:\t{7}\nPVE装分:\t{8}\n资历:\t\t{9}\n签到状态:\t{10}\n签到次数:\t{11}\n奇遇:\t\t{12}\n注册时间:\t{13}\n今日发言:\t{14}\n体力:\t\t{15}".format(
+            returnMsg = "[CQ:at,qq={0}]\n情缘:\t\t{1}\n门派:\t\t{2}\n阵营:\t\t{3}\n威望:\t\t{4}\n帮贡:\t\t{5}\n金钱:\t\t{6}G\nPVP装分:\t{7}\nPVE装分:\t{8}\n资历:\t\t{9}\n签到状态:\t{10}\n签到次数:\t{11}\n奇遇:\t\t{12}\n注册时间:\t{13}\n今日发言:\t{14}\n体力:\t\t{15}".format(
                     qq_account,
                     "" if val['lover'] == 0 else getGroupNickName(qq_group, val['lover']),
                     CLASS_LIST[val['class_id']],
@@ -718,14 +696,21 @@ class Jx3Handler(object):
 
         except Exception as e:
             logging.exception(e)
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
 
     def qianDao(self, qq_account):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
             qq_account_str = str(qq_account)
-            self.mutex.acquire()
+
             val = self.jx3_users[qq_account_str]
-            
+
             yday = self._reset_daliy_count(qq_account_str)
             yday_str = str(yday)
 
@@ -739,7 +724,7 @@ class Jx3Handler(object):
                 self.jx3_users[qq_account_str]['qiandao_count'] += 1
                 self.jx3_users[qq_account_str]['energy'] += DALIY_ENERGY_REWARD
                 self.jx3_users[qq_account_str]['money'] += DALIY_MONEY_REWARD
-                
+
                 self.daliy_action_count[yday_str][qq_account_str]['qiandao'] = True
                 returnMsg = "[CQ:at,qq={0}] 签到成功！签到奖励: 威望+{1} 帮贡+{2} 金钱+{3} 体力+{4}".format(
                                 qq_account,
@@ -747,24 +732,27 @@ class Jx3Handler(object):
                                 banggong_reward,
                                 DALIY_MONEY_REWARD,
                                 DALIY_ENERGY_REWARD)
-                
+
                 faction_id = val['faction_id']
                 if faction_id != 0 and 'faction' in self.daliy_action_count and self.daliy_action_count['faction'][FACTION_NAME_ID[faction_id]]['reward'] != 0:
                     reward = self.daliy_action_count['faction'][FACTION_NAME_ID[faction_id]]['reward']
                     self.jx3_users[qq_account_str]['weiwang'] += reward
                     returnMsg += "\n获得昨日阵营奖励：威望+{0}".format(reward)
-            
-            self.mutex.release()
-            return returnMsg
+
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
     def addSpeechCount(self, qq_account):
+        self.mutex.acquire()
+
         try:
             qq_account_str = str(qq_account)
-            self.mutex.acquire()
 
             yday = self._reset_daliy_count(qq_account_str)
             yday_str = str(yday)
@@ -773,23 +761,24 @@ class Jx3Handler(object):
 
             if 'speech_energy_gain' not in self.daliy_action_count[yday_str][qq_account_str]:
                 self.daliy_action_count[yday_str][qq_account_str]['speech_energy_gain'] = 0
-            
+
             if self.daliy_action_count[yday_str][qq_account_str]['speech_energy_gain'] < DALIY_MAX_SPEECH_ENERGY_GAIN:
                 self.daliy_action_count[yday_str][qq_account_str]['speech_energy_gain'] += SPEECH_ENERGY_GAIN
                 self.jx3_users[qq_account_str]['energy'] += SPEECH_ENERGY_GAIN
-            
-            self.mutex.release()
 
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+
     def addLover(self, fromQQ, toQQ):
         returnMsg = ""
-        try:
-            self.mutex.acquire()
+        self.mutex.acquire()
 
+        try:
             if str(toQQ) not in self.jx3_users.keys():
                 returnMsg = "[CQ:at,qq={0}] 还没有注册哦，请先注册再绑定情缘！".format(toQQ)
             else:
@@ -814,15 +803,19 @@ class Jx3Handler(object):
                         self.lover_pending[str(toQQ)] = fromQQ
                         returnMsg = "[CQ:at,qq={1}]\n[CQ:at,qq={0}] 希望与你绑定情缘，请输入 同意 或者 拒绝。".format(fromQQ, toQQ)
 
-            self.mutex.release()
-            return returnMsg
         except Exception as e:
             logging.exception(e)
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
 
     def acceptLover(self, fromGroup, toQQ):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             toQQ_str = str(toQQ)
             if toQQ_str in self.lover_pending.keys():
                 fromQQ = self.lover_pending.pop(toQQ_str)
@@ -842,29 +835,39 @@ class Jx3Handler(object):
                         use_zhen_cheng_zhi_xin(fromGroup, fromQQ, toQQ)
 
                     returnMsg = "[CQ:at,qq={0}] 与 [CQ:at,qq={1}]，喜今日嘉礼初成，良缘遂缔。诗咏关雎，雅歌麟趾。瑞叶五世其昌，祥开二南之化。同心同德，宜室宜家。相敬如宾，永谐鱼水之欢。互助精诚，共盟鸳鸯之誓".format(fromQQ, toQQ)
-            self.mutex.release()
-            return returnMsg
+
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
 
     def rejectLover(self, toQQ):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             if str(toQQ) in self.lover_pending.keys():
                 fromQQ = self.lover_pending.pop(str(toQQ))
                 returnMsg = "落花有意，流水无情，[CQ:at,qq={1}] 婉拒了 [CQ:at,qq={0}]。".format(fromQQ, toQQ)
-            self.mutex.release()
-            return returnMsg
+
         except Exception as e:
             logging.exception(e)
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
+
     def yaBiao(self, qq_account):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             qq_account_str = str(qq_account)
             val = self.jx3_users[qq_account_str]
             if val['faction_id'] == 0 and not NO_FACTION_ALLOW_YA_BIAO:
@@ -899,17 +902,21 @@ class Jx3Handler(object):
                 else:
                     returnMsg = "[CQ:at,qq={0}] 一天最多押镖{1}次。你已经押了{1}趟啦，明天再来吧。".format(qq_account, MAX_DALIY_YA_BIAO_COUNT)
 
-            self.mutex.release()
-            return returnMsg
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
 
     def checkBag(self, qq_account):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             bag = get_key_or_return_default(self.jx3_users[str(qq_account)], 'bag', {})
             if bag == {}:
                 itemMsg = "\n空空如也"
@@ -918,15 +925,21 @@ class Jx3Handler(object):
                 for k, v in bag.items():
                     itemMsg += "\n{0} x {1}".format(get_item_display_name(k), v)
             returnMsg = "[CQ:at,qq={0}] 的背包：".format(qq_account) + itemMsg
-            self.mutex.release()
-            return returnMsg
+
         except Exception as e:
             logging.exception(e)
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
+
     def joinFaction(self, qq_account, faction_str):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             if faction_str in FACTION_DISPLAY_NAME:
                 qq_account_str = str(qq_account)
                 qq_stat = self.jx3_users[qq_account_str]
@@ -946,18 +959,22 @@ class Jx3Handler(object):
                     self.jx3_users[qq_account_str]['faction_id'] = FACTION_DISPLAY_NAME.index(faction_str)
                     self.jx3_users[qq_account_str]['faction_join_time'] = time.time()
                     returnMsg = "[CQ:at,qq={0}] 成功加入 {1}。".format(qq_account, faction_str)
-            
-            self.mutex.release()
-            return returnMsg
+
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
+
     def quitFaction(self, qq_account):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             qq_account_str = str(qq_account)
             qq_stat = self.jx3_users[qq_account_str]
             if qq_stat['faction_id'] == 0:
@@ -969,17 +986,22 @@ class Jx3Handler(object):
                 if FACTION_QUIT_EMPTY_WEIWANG:
                     self.jx3_users[qq_account_str]['weiwang'] = 0
                 returnMsg = "[CQ:at,qq={0}] 退出了江湖纷争，脱离了 {1}".format(qq_account, get_faction_display_name(pre_faction_id))
-            self.mutex.release()
-            return returnMsg
+
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
+
     def transferFaction(self, qq_account):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             qq_account_str = str(qq_account)
             qq_stat = self.jx3_users[qq_account_str]
             if qq_stat['faction_id'] == 0:
@@ -998,13 +1020,17 @@ class Jx3Handler(object):
                 self.jx3_users[qq_account_str]['faction_id'] = new_faction_id
                 self.jx3_users[qq_account_str]['faction_join_time'] = time.time()
                 returnMsg = "[CQ:at,qq={0}] 通过地下交易，花费了{1}威望，成功地脱离了 {2}，加入了 {3}。".format(qq_account, FACTION_TRANSFER_WEIWANG_COST, get_faction_display_name(pre_faction_id), get_faction_display_name(new_faction_id))
-            self.mutex.release()
-            return returnMsg
+
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
+
     def _calculate_battle(self, fromQQ_str, toQQ_str, gear_mode, fromQQ_modifier=1, toQQ_modifier=1, custom_from_qq_equipment={}, custom_to_qq_equipment={}):
 
         if custom_to_qq_equipment != {}:
@@ -1024,12 +1050,12 @@ class Jx3Handler(object):
 
         random_base = random.uniform(0.4, 0.5)
         success_chance = random_base + 0.2 * ((fromQQ_gear_point - toQQ_gear_point) / float(toQQ_gear_point)) + 0.3 * float(fromQQ_equipment['weapon'][gear_mode]) / float(toQQ_equipment['armor'][gear_mode])
-        
+
         logging.info("success_chance: {0} + 0.3 * {1} + 0.2 * {2}".format(
                         random_base,
-                        (fromQQ_gear_point - toQQ_gear_point) / float(toQQ_gear_point), 
+                        (fromQQ_gear_point - toQQ_gear_point) / float(toQQ_gear_point),
                         float(fromQQ_equipment['weapon'][gear_mode] * fromQQ_modifier)  / float(toQQ_equipment['armor'][gear_mode] * toQQ_modifier)))
-        
+
         chance = random.uniform(0, 1)
         logging.info("chance: {0}, success_chance: {1}".format(chance, success_chance))
         if chance <= success_chance:
@@ -1038,16 +1064,17 @@ class Jx3Handler(object):
         else:
             winner = toQQ_str
             loser = fromQQ_str
-        
+
         return {'winner': winner, 'loser': loser, 'success_chance': success_chance}
 
     def rob(self, fromGroup, fromQQ, toQQ):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
             if not self.isUserRegister(toQQ):
                 returnMsg = "[CQ:at,qq={0}] 对方尚未注册，无法打劫。".format(fromQQ)
             else:
-                self.mutex.acquire()
                 fromQQ_str = str(fromQQ)
                 fromQQ_stat = self.jx3_users[fromQQ_str]
                 toQQ_str = str(toQQ)
@@ -1069,7 +1096,7 @@ class Jx3Handler(object):
                 elif toQQ_str in self.rob_protect and ROB_PROTECT_COUNT != 0 and self.rob_protect[toQQ_str]['count'] >= ROB_PROTECT_COUNT and (time.time() - self.rob_protect[toQQ_str]['rob_time']) <= ROB_PROTECT_DURATION:
                     time_val = calculateRemainingTime(ROB_PROTECT_DURATION, self.rob_protect[toQQ_str]['rob_time'])
                     returnMsg = "[CQ:at,qq={0}] 对方最近被打劫太多次啦，已经受到了神之护佑。\n剩余时间：{1}小时{2}分{3}秒".format(
-                                    fromQQ, 
+                                    fromQQ,
                                     time_val['hours'],
                                     time_val['mins'],
                                     time_val['secs'])
@@ -1142,7 +1169,7 @@ class Jx3Handler(object):
                             weiwang_lost = weiwang_gain
                         else:
                             weiwang_lost = 0
-                        
+
                         if ROB_LOST_MONEY and self.rob_protect[loser]['count'] <= ROB_PROTECT_NO_LOST_COUNT:
                             money_lost = money_gain
                         else:
@@ -1150,7 +1177,7 @@ class Jx3Handler(object):
 
                         self.jx3_users[loser]['weiwang'] -= weiwang_lost
                         self.jx3_users[loser]['money'] -= money_lost
-                        
+
                         returnMsg = "打劫成功！成功率：{0}%\n[CQ:at,qq={1}] 在野外打劫了 [CQ:at,qq={2}]\n{3} 威望+{4} 金钱+{5} 体力-{6}\n{7} 威望-{8} 金钱-{9}".format(
                                         int(math.floor(success_chance * 100)),
                                         fromQQ,
@@ -1186,7 +1213,7 @@ class Jx3Handler(object):
                                         time_val['secs'],
                                         energy_cost)
                         wanted_chance = ROB_LOSE_WANTED_CHANCE if energy_cost != 0 else 0
-                    
+
                     rand = random.uniform(0, 1)
                     logging.info("wanted chance: {0} rand: {1}".format(wanted_chance, rand))
                     if rand <= wanted_chance:
@@ -1195,22 +1222,27 @@ class Jx3Handler(object):
 
                         returnMsg = self._put_wanted_internal(fromQQ_str, ROB_WANTED_REWARD)
 
-                self.mutex.release()
-            return returnMsg
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
+
+
     def buyItem(self, qq_account, item_display_name, item_amount):
         returnMsg = ""
+        self.mutex.acquire()
         try:
             item = find_item(item_display_name)
             if item != None:
                 if not isItemBuyable(item):
                     returnMsg = "[CQ:at,qq={0}] {1} 不可购买。".format(qq_account, item_display_name)
                 else:
-                    self.mutex.acquire()
+
                     qq_account_str = str(qq_account)
                     qq_stat = self.jx3_users[qq_account_str]
 
@@ -1230,23 +1262,27 @@ class Jx3Handler(object):
                                 returnMsg += "\n{0}-{1}".format(STAT_DISPLAY_NAME[k], v * item_amount)
                     else:
                         returnMsg = "[CQ:at,qq={0}] 购买失败！\n购买1个 {1} 需要:{2}".format(qq_account, item_display_name, print_cost(cost_list))
-                    self.mutex.release()
-            
-            return returnMsg
+
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
     def useItem(self, qq_account, item_display_name, item_amount):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
             item = find_item(item_display_name)
             if item != None:
                 if not isItemUsable(item):
                     returnMsg = "[CQ:at,qq={0}] {1} 不可使用。".format(qq_account, item_display_name)
                 else:
-                    self.mutex.acquire()
+
                     qq_account_str = str(qq_account)
                     qq_stat = self.jx3_users[qq_account_str]
 
@@ -1283,14 +1319,16 @@ class Jx3Handler(object):
                                 returnMsg += "\n防具pvp血量+{0}".format(v * item_amount)
                                 self._update_gear_point(qq_account_str)
 
-                    self.mutex.release()
-
-                return returnMsg
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
+
     def shopList(self, qq_account):
         try:
             returnMsg = "[CQ:at,qq={0}]\n---------杂货商---------\n--货真价实，童叟无欺--".format(qq_account)
@@ -1305,8 +1343,9 @@ class Jx3Handler(object):
 
     def waBao(self, qq_account):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             qq_account_str = str(qq_account)
             val = self.jx3_users[qq_account_str]
             if val['energy'] < WA_BAO_ENERGY_REQUIRED:
@@ -1320,7 +1359,7 @@ class Jx3Handler(object):
                                     time_val['secs'])
             else:
                 if qq_account in self.jail_list:
-                    self.jail_list.pop(qq_account)    
+                    self.jail_list.pop(qq_account)
 
                 yday = self._reset_daliy_count(qq_account_str)
                 yday_str = str(yday)
@@ -1341,8 +1380,8 @@ class Jx3Handler(object):
                         self.jx3_users[qq_account_str]['energy'] -= WA_BAO_ENERGY_REQUIRED
 
                         returnMsg = '[CQ:at,qq={0}]\n今日挖宝次数：{1}/{2}'.format(
-                                            qq_account, 
-                                            self.daliy_action_count[yday_str][qq_account_str]["wa_bao"]['count'], 
+                                            qq_account,
+                                            self.daliy_action_count[yday_str][qq_account_str]["wa_bao"]['count'],
                                             MAX_DALIY_WA_BAO_COUNT)
 
                         if reward_item_name == "":
@@ -1357,20 +1396,23 @@ class Jx3Handler(object):
                 else:
                     returnMsg = "[CQ:at,qq={0}] 一天最多挖宝{1}次。你已经挖了{1}次啦，今天休息休息吧。".format(qq_account, MAX_DALIY_WA_BAO_COUNT)
 
-            self.mutex.release()
-            return returnMsg
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
+            returnMsg = ""
+            self.load_data()
 
+        self.mutex.release()
+        return returnMsg
 
     def use_firework(self, item_display_name, fromQQ, toQQ):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
             item = find_item(item_display_name)
             if item != None:
-                self.mutex.acquire()
+
                 fromQQ_str = str(fromQQ)
                 qq_stat = self.jx3_users[fromQQ_str]
 
@@ -1383,20 +1425,23 @@ class Jx3Handler(object):
 
                     use_zhen_cheng_zhi_xin(self.qq_group, fromQQ, toQQ)
 
-                self.mutex.release()
-            return returnMsg
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
     def get_equipment_info(self, qq_account):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             val = self.equipment[str(qq_account)]
 
-            returnMsg = "[CQ:at,qq={0}]\n装备信息：\n武器：{1}\n----pve攻击：{2}----pvp攻击：{3}\n防具：{4}\n----pve血量：{5}----pvp血量：{6}".format(
+            returnMsg = "[CQ:at,qq={0}] 装备信息：\n武器：{1}\n----pve攻击：{2}----pvp攻击：{3}\n防具：{4}\n----pve血量：{5}----pvp血量：{6}".format(
                 qq_account,
                 val['weapon']['display_name'],
                 val['weapon']['pve'],
@@ -1405,41 +1450,54 @@ class Jx3Handler(object):
                 val['armor']['pve'],
                 val['armor']['pvp'])
 
-            self.mutex.release()
-            return returnMsg
         except Exception as e:
             logging.exception(e)
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
+
     def change_weapon_name(self, qq_account, name):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             self.equipment[str(qq_account)]['weapon']['display_name'] = name
             returnMsg = "[CQ:at,qq={0}] 的武器已更名为 {1}".format(qq_account, name)
-            self.mutex.release()
-            return returnMsg
+
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
 
     def change_armor_name(self, qq_account, name):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             self.equipment[str(qq_account)]['armor']['display_name'] = name
             returnMsg = "[CQ:at,qq={0}] 的防具已更名为 {1}".format(qq_account, name)
-            self.mutex.release()
-            return returnMsg
+
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
     def get_faction_info(self):
         returnMsg = "本群阵营信息\n"
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             yday = self._reset_daliy_count()
             yday_str = str(yday)
             retval = self._get_faction_count()
@@ -1451,22 +1509,27 @@ class Jx3Handler(object):
                         self.daliy_action_count[yday_str]['faction']['eren']['point'],
                         self.daliy_action_count[yday_str]['faction']['haoqi']['point'])
 
-            self.mutex.release()
-            return returnMsg
         except Exception as e:
             logging.exception(e)
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
+
     def _get_faction_count(self):
         retval = [0, 0, 0]
         for key, value in self.jx3_users.items():
             retval[value['faction_id']] += 1
         return retval
 
-    
+
     def get_pve_gear_point_rank(self):
         returnMsg = "本群pve装备排行榜"
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             rank_list = sorted(self.jx3_users.items(), lambda x, y: cmp(x[1]['pve_gear_point'], y[1]['pve_gear_point']), reverse=True)
             list_len = len(rank_list)
             for i in range(10):
@@ -1474,15 +1537,21 @@ class Jx3Handler(object):
                     returnMsg += '\n{0}. {1} {2}'.format(i + 1, getGroupNickName(self.qq_group, int(rank_list[i][0])), rank_list[i][1]['pve_gear_point'])
                 else:
                     break
-            self.mutex.release()
-            return returnMsg
+
         except Exception as e:
             logging.exception(e)
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
 
     def get_pvp_gear_point_rank(self):
         returnMsg = "本群pvp装备排行榜"
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             rank_list = sorted(self.jx3_users.items(), lambda x, y: cmp(x[1]['pvp_gear_point'], y[1]['pvp_gear_point']), reverse=True)
             list_len = len(rank_list)
             for i in range(10):
@@ -1490,15 +1559,20 @@ class Jx3Handler(object):
                     returnMsg += '\n{0}. {1} {2}'.format(i + 1, getGroupNickName(self.qq_group, int(rank_list[i][0])), rank_list[i][1]['pvp_gear_point'])
                 else:
                     break
-            self.mutex.release()
-            return returnMsg
+
         except Exception as e:
             logging.exception(e)
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
 
     def get_money_rank(self):
         returnMsg = "本群土豪排行榜"
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             rank_list = sorted(self.jx3_users.items(), lambda x, y: cmp(x[1]['money'], y[1]['money']), reverse=True)
             list_len = len(rank_list)
             for i in range(10):
@@ -1506,16 +1580,21 @@ class Jx3Handler(object):
                     returnMsg += '\n{0}. {1} {2}'.format(i + 1, getGroupNickName(self.qq_group, int(rank_list[i][0])), int(rank_list[i][1]['money']))
                 else:
                     break
-            self.mutex.release()
-            return returnMsg
+
         except Exception as e:
             logging.exception(e)
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
 
     def get_speech_rank(self, qq_account):
         returnMsg = "本群今日聊天排行榜"
-        try:
-            self.mutex.acquire()
+        self.mutex.acquire()
 
+        try:
             yday = self._reset_daliy_count(str(qq_account))
             yday_str = str(yday)
 
@@ -1525,19 +1604,26 @@ class Jx3Handler(object):
                 if i < list_len and rank_list[i][1]['speech_count'] != 0:
                     returnMsg += '\n{0}. {1} {2}'.format(
                         i + 1,
-                        getGroupNickName(self.qq_group, int(rank_list[i][0])), 
+                        getGroupNickName(self.qq_group, int(rank_list[i][0])),
                         rank_list[i][1]['speech_count'])
                 else:
                     break
-            self.mutex.release()
-            return returnMsg
+
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
 
     def get_qiyu_rank(self):
         returnMsg = "本群奇遇排行榜"
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             rank_list = sorted(self.jx3_users.items(), lambda x, y: cmp(x[1]['qiyu'], y[1]['qiyu']), reverse=True)
             list_len = len(rank_list)
             for i in range(10):
@@ -1545,15 +1631,21 @@ class Jx3Handler(object):
                     returnMsg += '\n{0}. {1} {2}'.format(i + 1, getGroupNickName(self.qq_group, int(rank_list[i][0])), rank_list[i][1]['qiyu'])
                 else:
                     break
-            self.mutex.release()
-            return returnMsg
+
         except Exception as e:
             logging.exception(e)
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
 
     def get_weiwang_rank(self):
         returnMsg = "本群威望排行榜"
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
+
             rank_list = sorted(self.jx3_users.items(), lambda x, y: cmp(x[1]['weiwang'], y[1]['weiwang']), reverse=True)
             list_len = len(rank_list)
             for i in range(10):
@@ -1561,18 +1653,23 @@ class Jx3Handler(object):
                     returnMsg += '\n{0}. {1} {2}'.format(i + 1, getGroupNickName(self.qq_group, int(rank_list[i][0])), rank_list[i][1]['weiwang'])
                 else:
                     break
-            self.mutex.release()
-            return returnMsg
+
         except Exception as e:
             logging.exception(e)
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
     def put_wanted(self, fromQQ, toQQ):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
             if not self.isUserRegister(toQQ):
                 returnMsg = "[CQ:at,qq={0}] 对方尚未注册，无法悬赏。".format(fromQQ)
             else:
-                self.mutex.acquire()
                 fromQQ_str = str(fromQQ)
                 toQQ_str = str(toQQ)
 
@@ -1591,12 +1688,15 @@ class Jx3Handler(object):
 
                     returnMsg = self._put_wanted_internal(toQQ_str, WANTED_MONEY_REWARD)
 
-                self.mutex.release()
-            return returnMsg
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
 
     def _put_wanted_internal(self, toQQ_str, money_amount):
         if toQQ_str in self.wanted_list:
@@ -1608,7 +1708,7 @@ class Jx3Handler(object):
             self.wanted_list[toQQ_str]['wanted_time'] = time.time()
         else:
             self.wanted_list[toQQ_str] = {'reward': money_amount, 'wanted_time': time.time(), 'failed_try': {}}
-        
+
         return "江湖恩怨一朝清，惟望群侠多援手。现有人愿付{0}金对 {1} 进行悬赏，总赏金已达{2}金，众侠士切勿错过。".format(
                                 money_amount,
                                 getGroupNickName(self.qq_group, int(toQQ_str)),
@@ -1617,8 +1717,9 @@ class Jx3Handler(object):
     def get_wanted_list(self):
         returnMsg = "本群悬赏榜"
         msg_list = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             rank_list = sorted(self.wanted_list.items(), lambda x, y: cmp(x[1]['reward'], y[1]['reward']), reverse=True)
             list_len = len(rank_list)
             index = 1
@@ -1634,18 +1735,24 @@ class Jx3Handler(object):
                                     time_val['secs'])
                     index += 1
 
-            self.mutex.release()
-
             if msg_list == "":
                 msg_list = "\n暂无悬赏"
-            return returnMsg + msg_list
+
+            returnMsg += msg_list
+
         except Exception as e:
             logging.exception(e)
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
 
     def catch_wanted(self, fromQQ, toQQ):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             fromQQ_str = str(fromQQ)
             toQQ_str = str(toQQ)
 
@@ -1671,7 +1778,7 @@ class Jx3Handler(object):
                                     time_val['secs'])
                 elif self.jx3_users[fromQQ_str]['energy'] < WANTED_ENERGY_COST:
                     returnMsg = "[CQ:at,qq={0}] 体力不足！需要消耗{1}体力。".format(fromQQ, WANTED_ENERGY_COST)
-                else:                
+                else:
                     battle_result = self._calculate_battle(fromQQ_str, toQQ_str, 'pvp')
                     winner = battle_result['winner']
                     loser = battle_result['loser']
@@ -1703,22 +1810,26 @@ class Jx3Handler(object):
                                         int(math.floor(success_chance * 100)),
                                         WANTED_ENERGY_COST)
 
-            self.mutex.release()
-            return returnMsg
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
+
     def get_cha_guan_quest(self, qq_account):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             qq_account_str = str(qq_account)
 
             yday = self._reset_daliy_count(qq_account_str)
             yday_str = str(yday)
-            
+
             daliy_stat = self.daliy_action_count[yday_str][qq_account_str]['cha_guan']
 
             if qq_account_str in self.jail_list and time.time() - self.jail_list[qq_account_str] < JAIL_DURATION:
@@ -1760,17 +1871,21 @@ class Jx3Handler(object):
                                 requireMsg,
                                 rewardMsg)
 
-            self.mutex.release()
-            return returnMsg
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
+
     def complete_cha_guan_quest(self, qq_account):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             qq_account_str = str(qq_account)
 
             yday = self._reset_daliy_count(qq_account_str)
@@ -1791,7 +1906,7 @@ class Jx3Handler(object):
                 if self.jx3_users[qq_account_str]['energy'] < CHA_GUAN_ENERGY_COST:
                     returnMsg = "[CQ:at,qq={0}] 体力不足！需要消耗{1}体力。".format(qq_account, CHA_GUAN_ENERGY_COST)
                 else:
-                    
+
                     has_require = True
                     for k, v in quest['require'].items():
                         has_require = has_require and k in self.jx3_users[qq_account_str]['bag'] and self.jx3_users[qq_account_str]['bag'][k] >= v
@@ -1825,17 +1940,21 @@ class Jx3Handler(object):
                     else:
                         returnMsg = "[CQ:at,qq={0}] 任务物品不足！".format(qq_account)
 
-            self.mutex.release()
-            return returnMsg
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
+
     def catch_hun_hun(self, qq_account):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             qq_account_str = str(qq_account)
 
             yday = self._reset_daliy_count(qq_account_str)
@@ -1870,7 +1989,7 @@ class Jx3Handler(object):
                                 if rand <= npc['reward_chance']:
                                     self.jx3_users[qq_account_str][k] += v
                                     rewardMsg = "\n{0}+{1}".format(STAT_DISPLAY_NAME[k], v)
-                        
+
                         if 'hun_hun_zheng_ming' not in self.jx3_users[qq_account_str]['bag']:
                             self.jx3_users[qq_account_str]['bag']['hun_hun_zheng_ming'] = 0
                         self.jx3_users[qq_account_str]['bag']['hun_hun_zheng_ming'] += 1
@@ -1885,17 +2004,21 @@ class Jx3Handler(object):
                                         qq_account,
                                         int(math.floor(success_chance * 100)))
 
-            self.mutex.release()
-            return returnMsg
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
+
     def do_qiyu(self, qiyu_type):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             logging.info(qiyu_type)
 
             for qq_account_str, qiyu_name in qiyu_type.items():
@@ -1935,123 +2058,131 @@ class Jx3Handler(object):
                                 if k in self.jx3_users[qq_account_str]:
                                     self.jx3_users[qq_account_str][k] += v
                                     rewardMsg += "\n{0}+{1}".format(STAT_DISPLAY_NAME[k], v)
-                            
+
                             self.jx3_users[qq_account_str]['qiyu'] += 1
-                            
+
                             if qiyu_name not in self.qiyu_status:
                                 self.qiyu_status[qiyu_name] = {'qq': "", "last_time": None}
                             self.qiyu_status[qiyu_name]['qq'] = qq_account_str
                             self.qiyu_status[qiyu_name]['last_time'] = time.time()
 
                             returnMsg = "{0}\n获得奖励：{1}".format(qiyu['description'].format(qq_account_str), rewardMsg)
-                            
+
                             logging.info("qiyu! qq: {0} qiyu_name: {1} success_chance: {2} < {3}".format(
                                             qq_account_str,
                                             qiyu_name,
                                             rand,
                                             qiyu['chance']))
 
-            self.mutex.release()
-            return returnMsg
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
     def practise(self, fromQQ, toQQ):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             fromQQ_str = str(fromQQ)
             toQQ_str = str(toQQ)
 
-
-            yday = self._reset_daliy_count(toQQ_str)
-            yday_str = str(yday)
-            self._add_new_daliy_record(yday_str, fromQQ_str)
-
-            fromQQ_stat = self.jx3_users[fromQQ_str]
-            toQQ_stat = self.jx3_users[toQQ_str]
-
-            if fromQQ_stat['faction_id'] == 0:
-                returnMsg = "[CQ:at,qq={0}] 中立阵营无法切磋，请先加入阵营。".format(fromQQ)
-            elif toQQ_stat['faction_id'] == 0:
-                returnMsg = "[CQ:at,qq={0}] 对方是中立阵营，无法切磋。".format(fromQQ)
-            elif fromQQ_stat['faction_id'] != toQQ_stat['faction_id'] and ROB_SAME_FACTION_PROTECTION:
-                returnMsg = "[CQ:at,qq={0}] 不同阵营无法切磋！".format(fromQQ)
-            elif fromQQ_str in self.jail_list and time.time() - self.jail_list[fromQQ_str] < JAIL_DURATION:
-                    time_val = calculateRemainingTime(JAIL_DURATION, self.jail_list[fromQQ_str])
-                    returnMsg = "[CQ:at,qq={0}] 老实点，你还要在监狱里蹲{1}小时{2}分{3}秒。".format(
-                                    fromQQ,
-                                    time_val['hours'],
-                                    time_val['mins'],
-                                    time_val['secs'])
-            elif toQQ_str in self.jail_list and time.time() - self.jail_list[toQQ_str] < JAIL_DURATION:
-                    returnMsg = "[CQ:at,qq={0}] 对方在监狱里蹲着呢，没法跟你切磋。".format(fromQQ)
-            elif self.jx3_users[fromQQ_str]['energy'] < PRACTISE_ENERGY_COST:
-                returnMsg = "[CQ:at,qq={0}] 体力不足！需要消耗{1}体力。".format(fromQQ, PRACTISE_ENERGY_COST)
+            if not self.isUserRegister(toQQ_str):
+                returnMsg = "[CQ:at,qq={0}] 对方尚未注册。".format(toQQ)
             else:
-                battle_result = self._calculate_battle(fromQQ_str, toQQ_str, 'pvp')
-                winner = battle_result['winner']
-                loser = battle_result['loser']
-                success_chance = battle_result['success_chance']
+                yday = self._reset_daliy_count(toQQ_str)
+                yday_str = str(yday)
+                self._add_new_daliy_record(yday_str, fromQQ_str)
 
-                if 'practise' not in self.daliy_action_count[yday_str][toQQ_str]:
-                    self.daliy_action_count[yday_str][fromQQ_str]['practise'] = {'weiwang': 0}
-                if 'practise' not in self.daliy_action_count[yday_str][toQQ_str]:
-                    self.daliy_action_count[yday_str][toQQ_str]['practise'] = {'weiwang': 0}
+                fromQQ_stat = self.jx3_users[fromQQ_str]
+                toQQ_stat = self.jx3_users[toQQ_str]
 
-                weiwang_amount = random.randint(PRACTISE_WEIWANG_GAIN_MIN, PRACTISE_WEIWANG_GAIN_MAX)
-
-                if self.daliy_action_count[yday_str][winner]['practise']['weiwang'] < DALIY_PRACITSE_WEIWANG_GAIN:
-                    winner_weiwang_gain = min(weiwang_amount, DALIY_PRACITSE_WEIWANG_GAIN - self.daliy_action_count[yday_str][winner]['practise']['weiwang'])
+                if fromQQ_stat['faction_id'] == 0:
+                    returnMsg = "[CQ:at,qq={0}] 中立阵营无法切磋，请先加入阵营。".format(fromQQ)
+                elif toQQ_stat['faction_id'] == 0:
+                    returnMsg = "[CQ:at,qq={0}] 对方是中立阵营，无法切磋。".format(fromQQ)
+                elif fromQQ_stat['faction_id'] != toQQ_stat['faction_id'] and ROB_SAME_FACTION_PROTECTION:
+                    returnMsg = "[CQ:at,qq={0}] 不同阵营无法切磋！".format(fromQQ)
+                elif fromQQ_str in self.jail_list and time.time() - self.jail_list[fromQQ_str] < JAIL_DURATION:
+                        time_val = calculateRemainingTime(JAIL_DURATION, self.jail_list[fromQQ_str])
+                        returnMsg = "[CQ:at,qq={0}] 老实点，你还要在监狱里蹲{1}小时{2}分{3}秒。".format(
+                                        fromQQ,
+                                        time_val['hours'],
+                                        time_val['mins'],
+                                        time_val['secs'])
+                elif toQQ_str in self.jail_list and time.time() - self.jail_list[toQQ_str] < JAIL_DURATION:
+                        returnMsg = "[CQ:at,qq={0}] 对方在监狱里蹲着呢，没法跟你切磋。".format(fromQQ)
+                elif self.jx3_users[fromQQ_str]['energy'] < PRACTISE_ENERGY_COST:
+                    returnMsg = "[CQ:at,qq={0}] 体力不足！需要消耗{1}体力。".format(fromQQ, PRACTISE_ENERGY_COST)
                 else:
-                    winner_weiwang_gain = 0
-                
-                if winner_weiwang_gain != 0 and self.daliy_action_count[yday_str][loser]['practise']['weiwang'] < DALIY_PRACITSE_WEIWANG_GAIN:
-                    loser_weiwang_gain = min(int(weiwang_amount * PRACTISE_LOSER_GAIN_PERCENTAGE), DALIY_PRACITSE_WEIWANG_GAIN - self.daliy_action_count[yday_str][loser]['practise']['weiwang'])
-                else:
-                    loser_weiwang_gain = 0
-                
-                if (winner_weiwang_gain != 0 and winner == fromQQ_str) or (loser_weiwang_gain != 0 and loser == fromQQ_str):
-                    energy_cost = PRACTISE_ENERGY_COST
-                else:
-                    energy_cost = 0
+                    battle_result = self._calculate_battle(fromQQ_str, toQQ_str, 'pvp')
+                    winner = battle_result['winner']
+                    loser = battle_result['loser']
+                    success_chance = battle_result['success_chance']
 
-                self.jx3_users[fromQQ_str]['energy'] -= energy_cost
-                
-                self.jx3_users[winner]['weiwang'] += winner_weiwang_gain
-                self.daliy_action_count[yday_str][winner]['practise']['weiwang'] += winner_weiwang_gain
-                self.jx3_users[loser]['weiwang'] += loser_weiwang_gain
-                self.daliy_action_count[yday_str][loser]['practise']['weiwang'] += loser_weiwang_gain
-            
-                if energy_cost != 0:
-                    self.daliy_action_count[yday_str]['faction'][FACTION_NAME_ID[fromQQ_stat['faction_id']]]['point'] += PRACTISE_FACTION_POINT_GAIN
+                    if 'practise' not in self.daliy_action_count[yday_str][toQQ_str]:
+                        self.daliy_action_count[yday_str][fromQQ_str]['practise'] = {'weiwang': 0}
+                    if 'practise' not in self.daliy_action_count[yday_str][toQQ_str]:
+                        self.daliy_action_count[yday_str][toQQ_str]['practise'] = {'weiwang': 0}
 
-                returnMsg = "[CQ:at,qq={0}]与[CQ:at,qq={1}]进行了切磋。{2} 战胜了 {3}，成功率{4}%。\n{5} 威望+{6} {7}\n{8} 威望+{9} {10}".format(
-                                fromQQ,
-                                toQQ,
-                                getGroupNickName(self.qq_group, int(winner)),
-                                getGroupNickName(self.qq_group, int(loser)),
-                                int(math.floor(success_chance * 100)),
-                                getGroupNickName(self.qq_group, int(winner)),
-                                winner_weiwang_gain,
-                                "体力-{0}".format(energy_cost) if winner == fromQQ_str else "",
-                                getGroupNickName(self.qq_group, int(loser)),
-                                loser_weiwang_gain,
-                                "体力-{0}".format(energy_cost) if loser == fromQQ_str else "")
+                    weiwang_amount = random.randint(PRACTISE_WEIWANG_GAIN_MIN, PRACTISE_WEIWANG_GAIN_MAX)
 
-            self.mutex.release()
-            return returnMsg
+                    if self.daliy_action_count[yday_str][winner]['practise']['weiwang'] < DALIY_PRACITSE_WEIWANG_GAIN:
+                        winner_weiwang_gain = min(weiwang_amount, DALIY_PRACITSE_WEIWANG_GAIN - self.daliy_action_count[yday_str][winner]['practise']['weiwang'])
+                    else:
+                        winner_weiwang_gain = 0
+
+                    if winner_weiwang_gain != 0 and self.daliy_action_count[yday_str][loser]['practise']['weiwang'] < DALIY_PRACITSE_WEIWANG_GAIN:
+                        loser_weiwang_gain = min(int(weiwang_amount * PRACTISE_LOSER_GAIN_PERCENTAGE), DALIY_PRACITSE_WEIWANG_GAIN - self.daliy_action_count[yday_str][loser]['practise']['weiwang'])
+                    else:
+                        loser_weiwang_gain = 0
+
+                    if (winner_weiwang_gain != 0 and winner == fromQQ_str) or (loser_weiwang_gain != 0 and loser == fromQQ_str):
+                        energy_cost = PRACTISE_ENERGY_COST
+                    else:
+                        energy_cost = 0
+
+                    self.jx3_users[fromQQ_str]['energy'] -= energy_cost
+
+                    self.jx3_users[winner]['weiwang'] += winner_weiwang_gain
+                    self.daliy_action_count[yday_str][winner]['practise']['weiwang'] += winner_weiwang_gain
+                    self.jx3_users[loser]['weiwang'] += loser_weiwang_gain
+                    self.daliy_action_count[yday_str][loser]['practise']['weiwang'] += loser_weiwang_gain
+
+                    if energy_cost != 0:
+                        self.daliy_action_count[yday_str]['faction'][FACTION_NAME_ID[fromQQ_stat['faction_id']]]['point'] += PRACTISE_FACTION_POINT_GAIN
+
+                    returnMsg = "[CQ:at,qq={0}]与[CQ:at,qq={1}]进行了切磋。{2} 战胜了 {3}，成功率{4}%。\n{5} 威望+{6} {7}\n{8} 威望+{9} {10}".format(
+                                    fromQQ,
+                                    toQQ,
+                                    getGroupNickName(self.qq_group, int(winner)),
+                                    getGroupNickName(self.qq_group, int(loser)),
+                                    int(math.floor(success_chance * 100)),
+                                    getGroupNickName(self.qq_group, int(winner)),
+                                    winner_weiwang_gain,
+                                    "体力-{0}".format(energy_cost) if winner == fromQQ_str else "",
+                                    getGroupNickName(self.qq_group, int(loser)),
+                                    loser_weiwang_gain,
+                                    "体力-{0}".format(energy_cost) if loser == fromQQ_str else "")
+
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
     def jjc(self, qq_account):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             qq_account_str = str(qq_account)
             qq_account_stat = self.jx3_users[qq_account_str]
 
@@ -2090,7 +2221,7 @@ class Jx3Handler(object):
                 if 'jjc' not in self.daliy_action_count[yday_str][random_person]:
                     self.daliy_action_count[yday_str][random_person]['jjc'] = {'score': 0, 'last_time': None, 'win': 0, 'lose': 0}
                 random_person_jjc_stat = self.daliy_action_count[yday_str][random_person]['jjc']
-                
+
                 random_person_rank = random_person_jjc_stat['score'] // 100
 
                 fromQQ_modifier = 1
@@ -2100,7 +2231,7 @@ class Jx3Handler(object):
                         toQQ_modifier = 1 + JJC_GEAR_MODIFIER * int(rank - random_person_rank)
                     elif rank < random_person_rank:
                         fromQQ_modifier = 1 + JJC_GEAR_MODIFIER * int(random_person_rank - rank)
-                
+
                 logging.info("fromqq: {0} score: {1} rank: {2} modifier: {3}; toqq: {4} score: {5} rank: {6} modifier: {7}".format(
                                 qq_account_str,
                                 jjc_stat['score'],
@@ -2129,7 +2260,7 @@ class Jx3Handler(object):
                 self.jx3_users[qq_account_str]['energy'] -= JJC_ENERGY_COST
 
                 if winner == qq_account_str:
-                    
+
                     if jjc_stat['win'] < DALIY_JJC_DOUBLE_REWARD_COUNT:
                         reward_modifier = 2
                     else:
@@ -2140,20 +2271,20 @@ class Jx3Handler(object):
                     self.jx3_users[qq_account_str]['weiwang'] += weiwang_reward
 
                     if rank < random_person_rank:
-                        score_reward = int(JJC_REWARD_RANK * (random_person_rank - rank) * reward_modifier)  
+                        score_reward = int(JJC_REWARD_RANK * (random_person_rank - rank) * reward_modifier)
                         score_lost = JJC_REWARD_RANK
                     else:
                         score_reward = JJC_REWARD_RANK * reward_modifier
                         score_lost = 0
-                    
+
                     double_msg = " (每日{1}场双倍奖励加成中：{0}/{1})".format(jjc_stat['win'] + 1, DALIY_JJC_DOUBLE_REWARD_COUNT) if reward_modifier == 2 else ""
-                    
+
                     self.daliy_action_count[yday_str][qq_account_str]['jjc']['score'] += score_reward
                     self.daliy_action_count[yday_str][qq_account_str]['jjc']['last_time'] = time.time()
 
                     if self.daliy_action_count[yday_str][random_person]['jjc']['score'] < JJC_REWARD_RANK:
                         score_lost = 0
-                    
+
                     self.daliy_action_count[yday_str][random_person]['jjc']['score'] -= score_lost
                     self.daliy_action_count[yday_str][qq_account_str]['jjc']['win'] += 1
                     self.daliy_action_count[yday_str][random_person]['jjc']['lose'] += 1
@@ -2168,7 +2299,7 @@ class Jx3Handler(object):
                                     double_msg,
                                     getGroupNickName(self.qq_group, int(random_person)),
                                     score_lost)
-                    
+
                     new_rank = self.daliy_action_count[yday_str][qq_account_str]['jjc']['score'] // 100
                     if  new_rank != rank:
                         returnMsg += "\n段位变更为：{0}".format(new_rank)
@@ -2182,7 +2313,7 @@ class Jx3Handler(object):
                     else:
                         score_reward = JJC_REWARD_RANK
                         score_lost = 0
-                    
+
                     if self.daliy_action_count[yday_str][qq_account_str]['jjc']['score'] < JJC_REWARD_RANK:
                         score_lost = 0
                     self.daliy_action_count[yday_str][qq_account_str]['jjc']['score'] -= score_lost
@@ -2201,21 +2332,25 @@ class Jx3Handler(object):
                                     JJC_ENERGY_COST,
                                     getGroupNickName(self.qq_group, int(random_person)),
                                     score_reward)
-                    
+
                     new_rank = self.daliy_action_count[yday_str][qq_account_str]['jjc']['score'] // 100
                     if  new_rank != rank:
                         returnMsg += "\n段位变更为：{0}".format(new_rank)
 
-            self.mutex.release()
-            return returnMsg
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
     def get_jjc_rank(self):
+        returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             returnMsg = "本日名剑大会排名榜"
             # returnMsg = "名剑大会排名榜 赛季：{0} 天数：{1}".format(self.daliy_action_count['jjc']['season'], self.daliy_action_count['jjc']['days'])
 
@@ -2228,28 +2363,32 @@ class Jx3Handler(object):
                 if i < list_len and 'jjc' in rank_list[i][1] and rank_list[i][1]['jjc']['score'] != 0:
                     returnMsg += '\n{0}. {1} {2}'.format(
                         i + 1,
-                        getGroupNickName(self.qq_group, int(rank_list[i][0])), 
+                        getGroupNickName(self.qq_group, int(rank_list[i][0])),
                         rank_list[i][1]['jjc']['score'])
                 else:
                     break
-            self.mutex.release()
-            return returnMsg
+
         except Exception as e:
             logging.exception(e)
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
     def get_jjc_info(self, qq_account):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             qq_account_str = str(qq_account)
             yday = self._reset_daliy_count(qq_account_str)
             yday_str = str(yday)
 
             jjc_status = self.daliy_action_count[yday_str][qq_account_str]['jjc']
 
-            self.mutex.release()
 
-            return "[CQ:at,qq={0}] 本日名剑大会分数：{1} 段位：{2} 胜负：{3}/{4} 胜率：{5}%".format(
+            returnMsg = "[CQ:at,qq={0}] 本日名剑大会分数：{1} 段位：{2} 胜负：{3}/{4} 胜率：{5}%".format(
                     qq_account,
                     jjc_status['score'],
                     jjc_status['score'] // 100,
@@ -2259,7 +2398,12 @@ class Jx3Handler(object):
 
         except Exception as e:
             logging.exception(e)
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
     def _get_daliy_list(self, yday_str):
         logging.info([(k, v) for k, v in self.daliy_action_count[yday_str].items() if k not in ['jjc', 'faction']])
         return_list = []
@@ -2270,11 +2414,12 @@ class Jx3Handler(object):
                         v[d_k] = d_v
                 return_list.append((k, v))
         return return_list
-    
+
     def join_class(self, qq_account, class_display_name):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             qq_account_str = str(qq_account)
 
             if self.jx3_users[qq_account_str]['class_id'] != 0:
@@ -2282,18 +2427,22 @@ class Jx3Handler(object):
             elif class_display_name in CLASS_LIST:
                 self.jx3_users[qq_account_str]['class_id'] = CLASS_LIST.index(class_display_name)
                 returnMsg = "[CQ:at,qq={0}] 加入门派{1}！".format(qq_account, class_display_name)
-    
-            self.mutex.release()
-            return returnMsg
+
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
+
     def remove_lover(self, qq_account):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             qq_account_str = str(qq_account)
 
             if self.jx3_users[qq_account_str]['lover'] == 0:
@@ -2306,17 +2455,21 @@ class Jx3Handler(object):
                 self.jx3_users[str(lover)]['lover_time'] = None
                 self.jx3_user[str(lover)]['lover'] = 0
                 returnMsg = "[CQ:at,qq={0}] 决定去寻找新的旅程。".format(qq_account)
-            self.mutex.release()
-            return returnMsg
+
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-        
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
+
     def create_group(self, qq_account):
         returnMsg = ""
+        self.mutex.acquire()
         try:
-            self.mutex.acquire()
             qq_account_str = str(qq_account)
 
             group = self._get_group_by_leader(qq_account_str)
@@ -2325,24 +2478,28 @@ class Jx3Handler(object):
                 returnMsg = "[CQ:at,qq={0}] 你已经创建了一个队伍了！".format(qq_account)
             else:
                 group = self._get_group_by_member(qq_account_str)
-                
+
                 if group != None:
                     returnMsg = "[CQ:at,qq={0}] 你已经加入了 {1} 的队伍！".format(qq_account, getGroupNickName(self.qq_group, int(group.get_leader())))
                 else:
                     self.group_info.append(Group(leader=qq_account_str))
                     returnMsg = "[CQ:at,qq={0}] 创建队伍成功！请让队友输入【加入队伍[CQ:at,qq={0}]】加入队伍。\n进入副本后此队伍无法被加入，请确认人数正确后再进入副本。".format(qq_account)
 
-            self.mutex.release()
-            return returnMsg
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
+
     def join_group(self, qq_account, leader):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             qq_account_str = str(qq_account)
             leader_str = str(leader)
 
@@ -2366,24 +2523,28 @@ class Jx3Handler(object):
                         group.add_member(qq_account_str)
                         returnMsg = "[CQ:at,qq={0}] 成功加入 {1} 的队伍。".format(qq_account, getGroupNickName(self.qq_group, int(leader)))
 
-            self.mutex.release()
-            return returnMsg
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
+
     def get_group_info(self, qq_account):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             qq_account_str = str(qq_account)
 
             group = self._get_group_by_leader(qq_account_str)
 
             if group == None:
                 group = self._get_group_by_member(qq_account_str)
-                
+
             if group == None:
                 returnMsg = "[CQ:at,qq={0}] 你没有加入任何队伍。".format(qq_account)
             else:
@@ -2398,15 +2559,21 @@ class Jx3Handler(object):
                             getGroupNickName(self.qq_group, int(member)),
                             self.jx3_users[member]['pve_gear_point'])
 
-            self.mutex.release()
-            return returnMsg
         except Exception as e:
             logging.exception(e)
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
+
     def quit_group(self, qq_account):
         returnMsg = ""
+        self.mutex.acquire()
+        self.is_locked = True
+
         try:
-            self.mutex.acquire()
             qq_account_str = str(qq_account)
 
             group = self._get_group_by_leader(qq_account_str)
@@ -2422,29 +2589,33 @@ class Jx3Handler(object):
                 self.group_info.remove(group)
                 returnMsg = "[CQ:at,qq={0}] 你的队伍解散了。".format(qq_account)
 
-            self.mutex.release()
-            return returnMsg
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
+
     def _get_group_by_leader(self, leader_str):
         for group in self.group_info:
             if group.is_leader(leader_str):
                 return group
         return None
-    
+
     def _get_group_by_member(self, qq_account_str):
         for group in self.group_info:
             if group.is_member_in_group(qq_account_str):
                 return group
         return None
-    
+
     def list_dungeon(self, qq_account):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             qq_account_str = str(qq_account)
 
             returnMsg = "[CQ:at,qq={0}] 副本列表：".format(qq_account)
@@ -2458,17 +2629,20 @@ class Jx3Handler(object):
                 has_cd = k in self.daliy_action_count[yday_str][qq_account_str]['dungeon'] and self.daliy_action_count[yday_str][qq_account_str]['dungeon'][k] == True
                 returnMsg += "\n{0} {1}".format(v['display_name'], "已攻略" if has_cd else "可攻略")
 
-            self.mutex.release()
-            return returnMsg
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
 
     def start_dungeon(self, qq_account, dungeon_name):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             qq_account_str = str(qq_account)
 
             dungeon_id = get_dungeon_id_by_display_name(dungeon_name)
@@ -2509,7 +2683,7 @@ class Jx3Handler(object):
                                             if self.jx3_users[str(m)]['energy'] < DUNGEON_ENERGY_REQUIRED:
                                                 energy_msg += "[CQ:at,qq={0}] ".format(m)
                                                 has_energy = False
-                                        
+
                                         if has_energy and energy_msg != "":
                                             returnMsg = "{0} 体力不足，进入副本需要耗费体力：{1}".format(energy_msg, DUNGEON_ENERGY_REQUIRED)
                                         else:
@@ -2537,17 +2711,20 @@ class Jx3Handler(object):
                                             boss = self.dungeon_status[qq_account_str]['boss_detail'][0]
                                             returnMsg = "boss战：{0} (1/{1})\n请输入每位队员输入【攻击boss】开始战斗。".format(boss['display_name'], len(self.dungeon_status[qq_account_str]['boss_detail']))
 
-            self.mutex.release()
-            return returnMsg
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
-    
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
     def attack_boss(self, qq_account):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             qq_account_str = str(qq_account)
 
             group = self._get_group_by_leader(qq_account_str)
@@ -2560,23 +2737,23 @@ class Jx3Handler(object):
 
                 if group != None:
                     leader = group.get_leader()
-                    dungeon = get_key_or_return_default(self.dungeon_status, str(leader), {})
+                    dungeon = self.dungeon_status[str(leader)]
             else:
+                dungeon = self.dungeon_status[qq_account_str]
                 leader = qq_account_str
-                dungeon = get_key_or_return_default(self.dungeon_status, str(leader), {}) 
 
             if dungeon != {} and leader != "":
                 current_boss = dungeon['boss_detail'][0]
 
                 if qq_account_str not in dungeon['attack_count']:
-                    dungeon['attack_count'][qq_account_str] = {'damage': 0, 'available_attack': DUNGEON_MAX_ATTACK_COUNT, 'last_attack_time': None}
-                
+                    dungeon['attack_count'][qq_account_str] = {'damage': 0, 'available_attack': DUNGEON_MAX_ATTACK_COUNT, 'last_attack_time': None, 'total_attack_count': 0, 'success_attack_count': 0}
+
                 if dungeon['attack_count'][qq_account_str]['last_attack_time'] != None and dungeon['attack_count'][qq_account_str]['available_attack'] < DUNGEON_MAX_ATTACK_COUNT:
                     count = int(math.floor((time.time() - dungeon['attack_count'][qq_account_str]['last_attack_time']) / float(DUNGEON_ATTACK_COOLDOWN)))
                     min_count = min(count, DUNGEON_MAX_ATTACK_COUNT - dungeon['attack_count'][qq_account_str]['available_attack'])
                     dungeon['attack_count'][qq_account_str]['available_attack'] += min_count
                     if min_count > 0:
-                        dungeon['attack_count'][qq_account_str]['last_attack_time'] += count * DUNGEON_ATTACK_COOLDOWN
+                        dungeon['attack_count'][qq_account_str]['last_attack_time'] += min_count * DUNGEON_ATTACK_COOLDOWN
 
                 if dungeon['attack_count'][qq_account_str]['available_attack'] < 1:
                     time_val = calculateRemainingTime(DUNGEON_ATTACK_COOLDOWN, dungeon['attack_count'][qq_account_str]['last_attack_time'])
@@ -2595,11 +2772,11 @@ class Jx3Handler(object):
                             rand = random.uniform(0, 1)
                             if rand < buff['chance']:
                                 modifier = copy.deepcopy(buff)
-                        
+
                         if modifier != {}:
                             boss_equipment['weapon']['pve'] = int(boss_equipment['weapon']['pve'] * modifier['weapon'])
                             buff_msg = "\n{0}使出了招数：{1}。{2}".format(current_boss['display_name'], modifier['display_name'], modifier['description'])
-                    
+
                     debuff_msg = ""
                     if 'debuff' in current_boss:
                         modifier = {}
@@ -2607,16 +2784,18 @@ class Jx3Handler(object):
                             rand = random.uniform(0, 1)
                             if rand < buff['chance']:
                                 modifier = copy.deepcopy(buff)
-                        
+
                         if modifier != {}:
                             qq_equipment['weapon']['pve'] = int(qq_equipment['weapon']['pve'] * modifier['weapon'])
                             debuff_msg = "\n{0}使出了招数：{1}。{2}".format(current_boss['display_name'], modifier['display_name'], modifier['description'])
-                    
+
                     battle_result = self._calculate_battle(qq_account_str, '', 'pve', custom_from_qq_equipment=qq_equipment, custom_to_qq_equipment=boss_equipment)
 
                     winner = battle_result['winner']
                     loser = battle_result['loser']
                     success_chance = battle_result['success_chance']
+
+                    dungeon['attack_count'][qq_account_str]['total_attack_count'] += 1
 
                     returnMsg = "[CQ:at,qq={0}] 你对{1}发起了攻击。剩余攻击次数：{2}/{3}".format(qq_account, current_boss['display_name'], dungeon['attack_count'][qq_account_str]['available_attack'] - 1, DUNGEON_MAX_ATTACK_COUNT) + buff_msg + debuff_msg
 
@@ -2625,6 +2804,7 @@ class Jx3Handler(object):
                         dungeon['attack_count'][qq_account_str]['damage'] += damage
                         dungeon['attack_count'][qq_account_str]['available_attack'] -= 1
                         current_boss['remain_hp'] -= damage
+                        dungeon['attack_count'][qq_account_str]['success_attack_count'] += 1
 
                         returnMsg += "\n攻击成功！成功率：{0}%，造成伤害：{1}。{2}血量：{3}/{4}".format(
                             int(math.floor(success_chance * 100)),
@@ -2632,21 +2812,21 @@ class Jx3Handler(object):
                             current_boss['display_name'],
                             current_boss['remain_hp'],
                             boss_equipment['armor']['pve'])
-                        
+
                         if current_boss['remain_hp'] == 0:
                             import CQSDK
                             CQSDK.SendGroupMsg(self.qq_group, returnMsg)
-                            
+
                             reward_msg = ""
                             for k, v in current_boss['reward'].items():
                                 if k in self.jx3_users[group.get_leader()]:
                                     self.jx3_users[group.get_leader()][k] += v
-                                
+
                                 for m in group.get_member_list():
                                     if k in self.jx3_users[m]:
                                         self.jx3_users[m][k] += v
                                 reward_msg += "{0} + {1} ".format(STAT_DISPLAY_NAME[k], v)
-                            
+
                             item_reward_msg = ""
                             for k, v in current_boss['reward_item'].items():
                                 rand = random.uniform(0, 1)
@@ -2664,11 +2844,13 @@ class Jx3Handler(object):
                                         item_reward_msg += "\n{0}获得额外奖励：{1} x 1 概率：{2}%".format(getGroupNickName(self.qq_group, int(m)), get_item_display_name(k), int(v * 100))
 
                             mvp = sorted(dungeon['attack_count'].items(), lambda x, y: cmp(x[1]['damage'], y[1]['damage']), reverse=True)[0]
-                            returnMsg = "{0}成功被击倒！每人获得奖励：{1}{2}\nmvp：{3} 伤害：{4}".format(
+                            returnMsg = "{0}成功被击倒！每人获得奖励：{1}{2}\nmvp：{3} 伤害：{4} 攻击次数：{5}/{6}".format(
                                 current_boss['display_name'],
                                 reward_msg,
                                 item_reward_msg,
-                                getGroupNickName(self.qq_group, int(mvp[0])), mvp[1]['damage'])
+                                getGroupNickName(self.qq_group, int(mvp[0])), mvp[1]['damage'],
+                                dungeon['attack_count'][qq_account_str]['success_attack_count'],
+                                dungeon['attack_count'][qq_account_str]['total_attack_count'])
 
                             dungeon['attack_count'] = {}
                             dungeon['boss_detail'].pop(0)
@@ -2677,7 +2859,7 @@ class Jx3Handler(object):
                             if len(dungeon['boss_detail']) > 0:
                                 next_boss =  dungeon['boss_detail'][0]
                                 returnMsg = "boss战：{0} ({1}/{2})\n请输入每位队员输入【攻击boss】开始战斗。".format(
-                                    next_boss['display_name'], 
+                                    next_boss['display_name'],
                                     len(dungeon['boss']) - len(dungeon['boss_detail']) + 1,
                                     len(dungeon['boss']))
                             else:
@@ -2686,7 +2868,7 @@ class Jx3Handler(object):
                                 for k, v in dungeon['reward'].items():
                                     if k in self.jx3_users[group.get_leader()]:
                                         self.jx3_users[group.get_leader()][k] += v
-                                    
+
                                     for m in group.get_member_list():
                                         if k in self.jx3_users[m]:
                                             self.jx3_users[m][k] += v
@@ -2705,17 +2887,21 @@ class Jx3Handler(object):
                             current_boss['remain_hp'],
                             boss_equipment['armor']['pve'])
 
-            self.mutex.release()
-            return returnMsg
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
+
 
     def get_current_boss_info(self, qq_account):
         returnMsg = ""
+        self.mutex.acquire()
+
         try:
-            self.mutex.acquire()
             qq_account_str = str(qq_account)
 
             group = self._get_group_by_leader(qq_account_str)
@@ -2739,10 +2925,12 @@ class Jx3Handler(object):
                 damage_msg = ""
                 for i in range(5):
                     if i < list_len:
-                        damage_msg += '\n{0}. {1} {2}'.format(
+                        damage_msg += '\n{0}. {1} 伤害：{2} 次数：{3}/{4}'.format(
                             i + 1,
-                            getGroupNickName(self.qq_group, int(rank_list[i][0])), 
-                            rank_list[i][1]['damage'])
+                            getGroupNickName(self.qq_group, int(rank_list[i][0])),
+                            rank_list[i][1]['damage'],
+                            dungeon['attack_count'][qq_account_str]['success_attack_count'],
+                            dungeon['attack_count'][qq_account_str]['total_attack_count'])
                     else:
                         break
                 returnMsg = "[CQ:at,qq={0}] 当前副本：{1} 当前boss：{2} {3}/{4}\n血量：{5}/{6} pve装分：{7}\n伤害排行榜：{8}".format(
@@ -2756,12 +2944,14 @@ class Jx3Handler(object):
                     calculateGearPoint(current_boss['equipment'])['pve'],
                     damage_msg)
 
-            self.mutex.release()
-            return returnMsg
+            self.writeToJsonFile()
         except Exception as e:
             logging.exception(e)
-        finally:
-            self.writeToJsonFile()
+            returnMsg = ""
+            self.load_data()
+
+        self.mutex.release()
+        return returnMsg
 
 class Group(object):
     _leader = ""
@@ -2778,28 +2968,28 @@ class Group(object):
             self._leader = data['leader']
             self._create_time = data['create_time']
             self._member_list = data['member_list']
-    
+
     def is_member_in_group(self, member):
         return member in self._member_list
-    
+
     def is_leader(self, leader):
         return self._leader == leader
-    
+
     def get_leader(self):
         return self._leader
-    
+
     def add_member(self, member):
         self._member_list.append(member)
-    
+
     def remove_member(self, member):
         self._member_list.remove(member)
-    
+
     def is_group_joinable(self):
         return len(self._member_list) < self.MAX_GROUP_MEMBER
-    
+
     def get_member_list(self):
         return self._member_list
-    
+
     def dump_data(self):
         return {
             "leader": self._leader,
