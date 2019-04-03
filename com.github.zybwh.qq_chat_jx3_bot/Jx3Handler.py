@@ -2254,7 +2254,7 @@ class Jx3Handler(object):
 
                 if winner == qq_account_str:
 
-                    if jjc_stat['win'] < DALIY_JJC_DOUBLE_REWARD_COUNT:
+                    if 'jjc' in self.daliy_action_count[yday_str][qq_account_str] and self.daliy_action_count[yday_str][qq_account_str]['jjc']['win'] < DALIY_JJC_DOUBLE_REWARD_COUNT:
                         reward_modifier = 2
                     else:
                         reward_modifier = 1
@@ -2280,6 +2280,7 @@ class Jx3Handler(object):
 
                     self.jjc_season_status[random_person]['score'] -= score_lost
                     self.jjc_season_status[qq_account_str]['win'] += 1
+                    self.daliy_action_count[yday_str][qq_account_str]['jjc']['win'] += 1
                     self.jjc_season_status[random_person]['lose'] += 1
 
                     returnMsg = "[CQ:at,qq={0}] 战斗结果：胜利！成功率：{1}%\n {2} 威望+{3} 分数+{4} 体力-{5}{6}\n{7} 分数-{8}".format(
