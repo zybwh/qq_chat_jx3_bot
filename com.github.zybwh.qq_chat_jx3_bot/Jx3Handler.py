@@ -2843,8 +2843,8 @@ class Jx3Handler(object):
                                 reward_msg,
                                 item_reward_msg,
                                 getGroupNickName(self.qq_group, int(mvp[0])), mvp[1]['damage'],
-                                dungeon['attack_count'][qq_account_str]['success_attack_count'],
-                                dungeon['attack_count'][qq_account_str]['total_attack_count'])
+                                dungeon['attack_count'][mvp[0]]['success_attack_count'],
+                                dungeon['attack_count'][mvp[0]]['total_attack_count'])
 
                             dungeon['attack_count'] = {}
                             dungeon['boss_detail'].pop(0)
@@ -2923,8 +2923,8 @@ class Jx3Handler(object):
                             i + 1,
                             getGroupNickName(self.qq_group, int(rank_list[i][0])),
                             rank_list[i][1]['damage'],
-                            dungeon['attack_count'][qq_account_str]['success_attack_count'],
-                            dungeon['attack_count'][qq_account_str]['total_attack_count'])
+                            dungeon['attack_count'][rank_list[i][0]]['success_attack_count'],
+                            dungeon['attack_count'][rank_list[i][0]]['total_attack_count'])
                     else:
                         break
                 returnMsg = "[CQ:at,qq={0}] 当前副本：{1} 当前boss：{2} {3}/{4}\n血量：{5}/{6} pve装分：{7}\n伤害排行榜：{8}".format(
