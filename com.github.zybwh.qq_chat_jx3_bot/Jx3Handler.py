@@ -563,6 +563,7 @@ class Jx3Handler(object):
         yday = time.localtime(time.time() - DALIY_REFRESH_OFFSET).tm_yday
         yday_str = str(yday)
         if yday_str not in self.daliy_action_count:
+            self.daliy_action_count[yday_str] = {"faction": {"haoqi": {"point": 0, "reward": 0}, "eren": {"point":0, "reward": 0}}}
             self.rob_protect = {}
             self.dungeon_status = {}
             self.group_info = []
