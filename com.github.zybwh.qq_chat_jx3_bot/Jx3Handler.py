@@ -522,7 +522,7 @@ class Jx3Handler(object):
         self.qiyu_status = copy.deepcopy(get_key_or_return_default(data, "qiyu_status", {}))
         self.group_info = []
         for g in get_key_or_return_default(data, "group_info", []):
-            self.group_info.append(Group(data=g))
+            self.group_info.append(Group(data=copy.deepcopy(g)))
         self.dungeon_status = copy.deepcopy(get_key_or_return_default(data, "dungeon_status", {}))
         self.jjc_status = copy.deepcopy(get_key_or_return_default(data, "jjc_status", {'season': 1, "day": 0, "last_season_jjc_status": {}}))
         self.jjc_season_status = copy.deepcopy(get_key_or_return_default(data, "jjc_season_status", {}))
@@ -563,30 +563,6 @@ class Jx3Handler(object):
         yday = time.localtime(time.time() - DALIY_REFRESH_OFFSET).tm_yday
         yday_str = str(yday)
         if yday_str not in self.daliy_action_count:
-            self.daliy_action_count[yday_str] = {"faction": {"haoqi": {"point": 0, "reward": 0}, "eren": {"point":0, "reward": 0}}}
-            if yday == 1:
-                if "365" in self.daliy_action_count and "366" not in self.daliy_action_count:
-                    yesterday_stat = self.daliy_action_count["365"]
-                elif "366" in self.daliy_action_count:
-                    yesterday_stat = self.daliy_action_count["366"]
-                else:
-                    yesterday_stat = None
-            elif str(yday - 1) in self.daliy_action_count:
-                yesterday_stat = self.daliy_action_count[str(yday - 1)]
-            else:
-                yesterday_stat = None
-
-            if yesterday_stat != None:
-
-                if 'faction' in yesterday_stat:
-                    retval = self._get_faction_count()
-                    self.daliy_action_count[yday_str]['faction']['haoqi']['reward'] = int(yesterday_stat['faction']['haoqi']['point'] / float(retval[2])) if retval[2] != 0 else 0
-                    self.daliy_action_count[yday_str]['faction']['eren']['reward'] = int(yesterday_stat['faction']['eren']['point'] / float(retval[1])) if retval[1] != 0 else 0
-
-                if 'jjc' in yesterday_stat:
-                    self.daliy_action_count[yday_str]['jjc']['season'] = yesterday_stat['jjc']['season'] + (1 if yesterday_stat['jjc']['day'] >= JJC_DAYS_PER_SEASON else 0)
-                    self.daliy_action_count[yday_str]['jjc']['day'] = yesterday_stat['jjc']['day'] + 1 if yesterday_stat['jjc']['day'] < JJC_DAYS_PER_SEASON else 0
-
             self.rob_protect = {}
             self.dungeon_status = {}
             self.group_info = []
@@ -2985,7 +2961,7 @@ class Group(object):
         else:
             self._leader = data['leader']
             self._create_time = data['create_time']
-            self._member_list = data['member_list']
+            self._member_list = copy.deepcopy(data['member_list'])
 
     def is_member_in_group(self, member):
         return member in self._member_list
