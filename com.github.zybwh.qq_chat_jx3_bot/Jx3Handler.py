@@ -2575,10 +2575,10 @@ class Jx3Handler(object):
             if group == None:
                 group = self._get_group_by_member(qq_account_str)
                 if group == None:
-                    returnMsg = "[CQ:at,qq={0}] 你不在任何队伍里。".format(qq_account, group.get_leader())
+                    returnMsg = "[CQ:at,qq={0}] 你不在任何队伍里。".format(qq_account)
                 else:
                     group.remove_member(qq_account_str)
-                    returnMsg = "[CQ:at,qq={0}] 你离开了 {1} 的队伍。".format(getGroupNickName(self.qq_group, int(group.get_leader)))
+                    returnMsg = "[CQ:at,qq={0}] 你离开了 {1} 的队伍。".format(getGroupNickName(self.qq_group, int(group.get_leader())))
             else:
                 self.group_info.remove(group)
                 returnMsg = "[CQ:at,qq={0}] 你的队伍解散了。".format(qq_account)
