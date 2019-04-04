@@ -2270,7 +2270,7 @@ class Jx3Handler(object):
                         score_reward = JJC_REWARD_RANK * reward_modifier
                         score_lost = 0
 
-                    double_msg = " (每日{1}场双倍奖励加成中：{0}/{1})".format(jjc_stat['win'] + 1, DALIY_JJC_DOUBLE_REWARD_COUNT) if reward_modifier == 2 else ""
+                    double_msg = " (每日{1}场双倍奖励加成中：{0}/{1})".format(self.daliy_action_count[yday_str][qq_account_str]['jjc']['win'], DALIY_JJC_DOUBLE_REWARD_COUNT) if reward_modifier == 2 else ""
 
                     self.jjc_season_status[qq_account_str]['score'] += score_reward
                     self.jjc_season_status[qq_account_str]['last_time'] = time.time()
