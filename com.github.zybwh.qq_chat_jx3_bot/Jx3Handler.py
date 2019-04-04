@@ -2384,8 +2384,9 @@ class Jx3Handler(object):
 
             jjc_status = self.jjc_season_status[qq_account_str]
 
-            returnMsg = "[CQ:at,qq={0}] 本日名剑大会分数：{1} 段位：{2} 胜负：{3}/{4} 胜率：{5}%".format(
+            returnMsg = "[CQ:at,qq={0}] 第{1}赛季名剑大会分数：{2} 段位：{3} 胜负：{4}/{5} 胜率：{6}%".format(
                     qq_account,
+                    self.jjc_status['season'],
                     jjc_status['score'],
                     jjc_status['score'] // 100,
                     jjc_status['win'],
