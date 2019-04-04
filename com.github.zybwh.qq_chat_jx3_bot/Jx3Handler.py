@@ -2806,7 +2806,7 @@ class Jx3Handler(object):
                                     if k not in self.jx3_users[leader]['bag']:
                                         self.jx3_users[leader]['bag'][k] = 0
                                     self.jx3_users[leader]['bag'][k] += 1
-                                    item_reward_msg += "\n{0}获得额外奖励：{1} x 1 概率：{2}%".format(getGroupNickName(self.qq_group, int(leader), get_item_display_name(k), int(v * 100))
+                                    item_reward_msg += "\n{0}获得额外奖励：{1} x 1 概率：{2}%".format(getGroupNickName(self.qq_group, int(leader)), get_item_display_name(k), int(v * 100))
                                 for m in self.group_info[leader]['member_list']:
                                     rand = random.uniform(0, 1)
                                     if rand <= v:
