@@ -3,7 +3,7 @@ import copy
 
 from .Utils import *
 
-daliy_dict = {
+daily_dict = {
     'qiandao': False,
     'speech_count': 0,
     'ya_biao': 0,
@@ -46,7 +46,7 @@ class Jx3User(object):
     _qiandao_count = 0
 
     _today = 0
-    _daliy_count = {}
+    _daily_count = {}
 
     _bag = {}
     _equipment = {}
@@ -77,7 +77,7 @@ class Jx3User(object):
         self._equipment = data.get('equipment', copy.deepcopy(default_equipment))
 
         self._today = data.get('today', 0)
-        self._daliy_count = data.get('daliy_count', copy.deepcopy(daliy_dict))
+        self._daily_count = data.get('daily_count', copy.deepcopy(daily_dict))
 
     def dump_data(self):
         return {
@@ -97,7 +97,7 @@ class Jx3User(object):
             'bag': {k: v['count'] for k, v in self._bag.items()},
             'equipment': self._equipment,
             'today': self._today,
-            'daliy_count': self._daliy_count
+            'daily_count': self._daily_count
         }
     
     def get_info(self, lover_nickname):
@@ -110,9 +110,9 @@ class Jx3User(object):
             self._banggong,
             self._money,
             self._energy,
-            '已签到' if self._daliy_count['qiandao'] else '未签到',
+            '已签到' if self._daily_count['qiandao'] else '未签到',
             0,
-            self._daliy_count['speech_count'])
+            self._daily_count['speech_count'])
     
     def qiandao(self, weiwang_reward, banggong_reward, money_reward, energy_gain):
         self.modify_weiwang(weiwang_reward)
@@ -122,7 +122,7 @@ class Jx3User(object):
         
         self._qiandao_count += 1
 
-        self._daliy_count['qiandao'] = True
+        self._daily_count['qiandao'] = True
         returnMsg = "[CQ:at,qq={0}] 签到成功！签到奖励: 威望+{1} 帮贡+{2} 金钱+{3} 体力+{4}".format(
             self._qq_account_str,
             weiwang_reward,
@@ -151,26 +151,21 @@ class Jx3User(object):
         self._energy += int(energy_reward)
 
     def has_qiandao(self):
-        return self._daliy_count['qiandao']
+        return self._daily_count['qiandao']
     
     def has_energy(self, energy_require):
         return self._energy >= energy_require
 
-    def add_speech_count(self, speech_energy_gain, max_speech_energy_gain):
-        self._daliy_count['speech_count'] += 1
 
-        if self._daliy_count['speech_energy_gain'] < max_speech_energy_gain:
-            self._daliy_count['speech_energy_gain'] += speech_energy_gain
-            self.modify_energy(speech_energy_gain)
     
-    def can_ya_biao(self, daliy_max_ya_biao_count):
-        return self._daliy_count['ya_biao'] < daliy_max_ya_biao_count
+    def can_ya_biao(self, daily_max_ya_biao_count):
+        return self._daily_count['ya_biao'] < daily_max_ya_biao_count
 
     def ya_biao(self, weiwang_reward, money_reward, energy_cost):
         self.modify_weiwang(weiwang_reward)
         self.modify_money(money_reward)
         self.modify_energy(0 - energy_cost)
-        self._daliy_count['ya_biao'] += 1
+        self._daily_count['ya_biao'] += 1
 
     def get_faction(self):
         return self._faction_ptr
@@ -221,15 +216,15 @@ class Jx3User(object):
         self.bag[item] += amount
         return returnMsg
     
-    def reset_daliy_count(self, yday, keep_jjc_data=False):
+    def reset_daily_count(self, yday, keep_jjc_data=False):
         return_dict = {}
         if yday != self._today:
-            new_daliy = copy.deepcopy(daliy_dict)
+            new_daily = copy.deepcopy(daily_dict)
             if keep_jjc_data:
-                new_daliy['jjc'] = copy.deepcopy(self._daliy_count['jjc'])
+                new_daily['jjc'] = copy.deepcopy(self._daily_count['jjc'])
             else:
-                return_dict = copy.deepcopy(self._daliy_count['jjc'])
-            self._daliy_count = new_daliy
+                return_dict = copy.deepcopy(self._daily_count['jjc'])
+            self._daily_count = new_daily
             self._today = yday
         
         return return_dict
@@ -243,6 +238,7 @@ class Jx3User(object):
         weapon = equipment['weapon']
         armor = equipment['armor']
         return weapon['pvp'] * 50 + armor['pvp'] * 10
-    
 
 
+def get_qiyu_count(user_data):
+    return sum(user_data['qiyu'].items())

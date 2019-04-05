@@ -34,17 +34,13 @@ try:
             group_file_data = json.loads(f.readline())
             for group in group_file_data:
                 active_group.append(group)
-                json_file_path = os.path.join(DATABASE_PATH, str(group), 'data.json')
-                game_data = {}
-                if os.path.exists(json_file_path):
-                    with open(json_file_path, 'r') as fg:
-                        game_data = json.loads(fg.readline())
-                group_data[str(group)] = Jx3Handler(int(group), game_data)
+                group_data[str(group)] = Jx3Handler(int(group), DATABASE_PATH)
 
             print(group_data)
-    print('load complete')
+    print('load group complete')
 except Exception as e:
     logging.exception(e)
+
 
 @bot.on_message('group')
 async def handle_group_message(ctx):
@@ -102,6 +98,7 @@ async def register(session: CommandSession):
     print(session.ctx)
     if group_id != None:
         returnMsg = group_data[str(group_id)].register(session.ctx.get('user_id'))
+
         data = group_data[str(group_id)].dump_data()
         await _write_game_data(group_id, data)
         for msg in returnMsg:
@@ -118,19 +115,9 @@ async def get_info(session: CommandSession):
     if group_id != None:
         user_id = session.ctx.get('user_id')
         if group_data[str(group_id)].is_user_register(user_id):
-            returnMsg = group_data[str(group_id)].get_info(user_id, session.state.get('lover_nickname', ""))
+            returnMsg = await group_data[str(group_id)].get_info(user_id)
             for msg in returnMsg:
                 await session.finish(msg)
-
-@get_info.args_parser
-async def _(session: CommandSession):
-    group_id = session.ctx.get('group_id')
-    if group_id != None:
-        user_id = session.ctx.get('user_id')
-        if group_data[str(group_id)].is_user_register(user_id):
-            lover_id = group_data[str(group_id)].get_lover(user_id)
-            if lover_id != "":
-                await get_group_nickname(session.state, group_id, lover_id)
 
 @on_command('签到', only_to_me=False)
 async def qiandao(session: CommandSession):

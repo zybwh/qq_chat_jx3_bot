@@ -38,17 +38,3 @@ def get_class_id(cid):
     if isinstance(cid, str) and cid in OLD_CLASS_LIST_TO_NEW_LIST:
         return cid
     return OLD_CLASS_LIST_TO_NEW_LIST[cid]
-
-class Jx3Class(object):
-    _display_name = ''
-    _name = ''
-
-    def __init__(self, name, display_name):
-        self._name = name
-        self._display_name = display_name
-    
-    def get_display_name(self):
-        return self._display_name
-    
-    def dump_data(self):
-        return self._name
