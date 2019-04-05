@@ -171,7 +171,7 @@ NPC_LIST = {
         "equipment": {'weapon': {"display_name": "“熊痴拳套", 'pvp': 0, 'pve': 100},
                         'armor': {"display_name": "熊痴衣", 'pvp': 0, 'pve': 500}},
         "reward": {
-            "money": 200,
+            "money": 50,
             "banggong": 2000,
         },
         "reward_chance": 1,
@@ -185,7 +185,7 @@ NPC_LIST = {
         "equipment": {'weapon': {"display_name": "“邓文峰枪", 'pvp': 0, 'pve': 200},
                         'armor': {"display_name": "邓文峰衣", 'pvp': 0, 'pve': 1500}},
         "reward": {
-            "money": 300,
+            "money": 100,
             "banggong": 5000,
         },
         "buff": [
@@ -213,7 +213,7 @@ NPC_LIST = {
         "equipment": {'weapon': {"display_name": "“商仲永扇", 'pvp': 0, 'pve': 200},
                         'armor': {"display_name": "商仲永衣", 'pvp': 0, 'pve': 3000}},
         "reward": {
-            "money": 500,
+            "money": 200,
             "banggong": 10000,
         },
         "buff": [
@@ -2270,7 +2270,7 @@ class Jx3Handler(object):
                         score_reward = JJC_REWARD_RANK * reward_modifier
                         score_lost = 0
 
-                    double_msg = " (每日{1}场双倍奖励加成中：{0}/{1})".format(self.daliy_action_count[yday_str][qq_account_str]['jjc']['win'], DALIY_JJC_DOUBLE_REWARD_COUNT) if reward_modifier == 2 else ""
+                    double_msg = " (每日{1}场双倍奖励加成中：{0}/{1})".format(self.daliy_action_count[yday_str][qq_account_str]['jjc']['win'] + 1, DALIY_JJC_DOUBLE_REWARD_COUNT) if reward_modifier == 2 else ""
 
                     self.jjc_season_status[qq_account_str]['score'] += score_reward
                     self.jjc_season_status[qq_account_str]['last_time'] = time.time()
