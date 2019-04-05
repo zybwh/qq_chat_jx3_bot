@@ -132,7 +132,8 @@ ITEM_LIST = [
     {"name": "cu_bu", "display_name": "粗布", "rank": 4, "cost": {"money": 10}},
     {"name": "gan_cao", "display_name": "甘草", "rank": 4, "cost": {"money": 10}},
     {"name": "hong_tong", "display_name": "红铜", "rank": 4, "cost": {"money": 10}},
-    {"name": "hun_hun_zheng_ming", "display_name": "混混抓捕证明", "rank": 0}
+    {"name": "hun_hun_zheng_ming", "display_name": "混混抓捕证明", "rank": 0},
+    {"name": "tuan_yuan_yan", "display_name": "团圆宴", "rank": 2, "effect": {'attack_count': 5}, "cost": {"money": 500}}
 ]
 
 CHA_GUAN_QUEST_INFO = {
@@ -168,7 +169,7 @@ NPC_LIST = {
     },
     'xiong_chi': {
         "display_name": "熊痴",
-        "equipment": {'weapon': {"display_name": "“熊痴拳套", 'pvp': 0, 'pve': 100},
+        "equipment": {'weapon': {"display_name": "熊痴拳套", 'pvp': 0, 'pve': 100},
                         'armor': {"display_name": "熊痴衣", 'pvp': 0, 'pve': 500}},
         "reward": {
             "money": 50,
@@ -177,7 +178,7 @@ NPC_LIST = {
         "reward_chance": 1,
         "reward_item": {
             "rong_ding": 0.2,
-            "ran": 0.4
+            "ran": 0.2
         }
     },
     'deng_wen_feng': {
@@ -245,6 +246,87 @@ NPC_LIST = {
             "jia_zhuan_shen_can": 1,
             "zhen_cheng_zhi_xin": 0.1
         }
+    },
+    'fang_ji_chang': {
+        "display_name": "方季常",
+        "equipment": {'weapon': {"display_name": "方季常剑", 'pvp': 0, 'pve': 100},
+                        'armor': {"display_name": "方季常衣", 'pvp': 0, 'pve': 1000}},
+        "reward": {
+            "money": 50,
+            "banggong": 2000,
+        },
+        "buff": [
+            {
+                "display_name": "毒气蔓延",
+                "description": "每次受到攻击时自身武器攻击+10%，现在已叠{0}层，最高{1}层",
+                "weapon": 0.1,
+                "chance": 1,
+                'increase_type': 'win',
+                'count': 0,
+                'max_count':10
+            }
+        ],
+        "reward_chance": 1,
+        "reward_item": {
+            "rong_ding": 0.2,
+            "ran": 0.2
+        }
+    },
+    'ping_san_zhi': {
+        "display_name": "平三指",
+        "equipment": {'weapon': {"display_name": "平三指剑", 'pvp': 0, 'pve': 200},
+                        'armor': {"display_name": "平三指衣", 'pvp': 0, 'pve': 3000}},
+        "reward": {
+            "money": 100,
+            "banggong": 5000,
+        },
+        "debuff": [
+            {
+                "display_name": "毒液喷射",
+                "description": "对方攻击-100%",
+                "weapon": 0,
+                "chance": 0.2,
+            },
+        ],
+        "reward_chance": 1,
+        "reward_item": {
+            "rong_ding": 0.6,
+            "ran": 1
+        }
+    },
+    'si_tu_yi_yi': {
+        "display_name": "司徒一一",
+        "equipment": {'weapon': {"display_name": "司徒一一剑", 'pvp': 0, 'pve': 300},
+                        'armor': {"display_name": "司徒一一衣", 'pvp': 0, 'pve': 5000}},
+        "reward": {
+            "money": 200,
+            "banggong": 10000,
+        },
+        "buff": [
+            {
+                "display_name": "巨龙横扫",
+                "description": "自身武器攻击+50%",
+                "weapon": 1.5,
+                "chance": 0.2,
+            }
+        ],
+        "debuff": [
+            {
+                "display_name": "巨龙吐息",
+                "description": "敌方需要消耗2次攻击次数",
+                "weapon": 1,
+                "chance": 0,
+                'attack_count': 1,
+                'hp': 0.3
+            }
+        ],
+        "reward_chance": 1,
+        "reward_item": {
+            "rong_ding": 1,
+            "ran": 2,
+            "jia_zhuan_shen_can": 1,
+            "zhen_cheng_zhi_xin": 0.2
+        }
     }
 }
 
@@ -292,8 +374,16 @@ QIYU_LIST = {
 DUNGEON_LIST = {
     'san_cai_zhen': {
         "display_name": "三才阵",
-        "recommand_pve_gear_point": 10000,
+        "max_pve_reward_gain": 12000,
         "boss": ['xiong_chi', 'deng_wen_feng', 'shang_zhong_yong'],
+        "reward": {
+            "banggong": 1000
+        }
+    },
+    'tian_gong_fang': {
+        "display_name": "天工坊",
+        "max_pve_reward_gain": 25000,
+        "boss": ['fang_ji_chang', 'ping_san_zhi', 'si_tu_yi_yi'],
         "reward": {
             "banggong": 2000
         }
@@ -1286,11 +1376,8 @@ class Jx3Handler(object):
                     elif self.jx3_users[qq_account_str]['bag'][item['name']] < item_amount:
                         returnMsg = "[CQ:at,qq={0}] 你并没有那么多 {1}。".format(qq_account, item_display_name)
                     else:
-                        self.jx3_users[qq_account_str]['bag'][item['name']] -= item_amount
-                        if self.jx3_users[qq_account_str]['bag'][item['name']] == 0:
-                            self.jx3_users[qq_account_str]['bag'].pop(item['name'])
-
-                        returnMsg = "[CQ:at,qq={0}]\n使用 {1} x {2}".format(qq_account, item_display_name, item_amount)
+                        item_used = True
+                        returnMsg = "[CQ:at,qq={0}] 使用 {1} x {2}".format(qq_account, item_display_name, item_amount)
                         for k, v in effect_list.items():
                             if k in qq_stat:
                                 self.jx3_users[qq_account_str][k] += v * item_amount
@@ -1311,6 +1398,24 @@ class Jx3Handler(object):
                                 self.equipment[qq_account_str]['armor']['pvp'] += v * item_amount
                                 returnMsg += "\n防具pvp血量+{0}".format(v * item_amount)
                                 self._update_gear_point(qq_account_str)
+                            elif k == 'attack_count':
+                                if qq_account_str in self.group_info:
+                                    leader = qq_account_str
+                                else:
+                                    leader = self._get_leader_by_member(qq_account_str)
+                                
+                                if leader != "" and leader in self.dungeon_status:
+                                    self.dungeon_status[leader]['attack_count'][qq_account_str]['available_attack'] += v * item_amount
+                                    returnMsg += "\n攻击次数+{0}".format(v * item_amount)
+                                else:
+                                    returnMsg = "[CQ:at,qq={0}] 你不在副本里，无法使用。".format(qq_account)
+                                    item_used = False
+
+                        if item_used:
+                            self.jx3_users[qq_account_str]['bag'][item['name']] -= item_amount
+                            if self.jx3_users[qq_account_str]['bag'][item['name']] == 0:
+                                self.jx3_users[qq_account_str]['bag'].pop(item['name'])
+
 
             self.writeToJsonFile()
         except Exception as e:
@@ -2607,10 +2712,13 @@ class Jx3Handler(object):
 
             if 'dungeon' not in self.daliy_action_count[yday_str][qq_account_str]:
                 self.daliy_action_count[yday_str][qq_account_str]['dungeon'] = {}
+            
+            self._update_gear_point(qq_account_str)
 
             for k, v in DUNGEON_LIST.items():
                 has_cd = k in self.daliy_action_count[yday_str][qq_account_str]['dungeon'] and self.daliy_action_count[yday_str][qq_account_str]['dungeon'][k] == True
-                returnMsg += "\n{0} {1}".format(v['display_name'], "已攻略" if has_cd else "可攻略")
+                has_reward = self.jx3_users[qq_account_str]['pve_gear_point'] < v['max_pve_reward_gain']
+                returnMsg += "\n{0} {1} {2}".format(v['display_name'], "已攻略" if has_cd else "可攻略", "有boss奖励" if has_reward else "无boss奖励")
 
             self.writeToJsonFile()
         except Exception as e:
@@ -2645,45 +2753,68 @@ class Jx3Handler(object):
                 elif qq_account_str in self.dungeon_status:
                     returnMsg = "[CQ:at,qq={0}] 你已经在副本里了。".format(qq_account)
                 elif dungeon_id in self.daliy_action_count[yday_str][qq_account_str]['dungeon'] and self.daliy_action_count[yday_str][qq_account_str]['dungeon'][dungeon_id] == True:
-                    returnMsg = "[CQ:at,qq={0}] 你有此副本cd，无法进入。".format(qq_account)  
+                    returnMsg = "[CQ:at,qq={0}] 你有此副本cd，无法进入。".format(qq_account)
                 else:
                     leader = qq_account_str
+                    self._update_gear_point(qq_account_str)
 
                     has_cd = False
+                    cd_msg = ""
+                    has_energy = True
+                    energy_msg = ""
+                    pve_gear_point_too_high = [leader] if self.jx3_users[qq_account_str]['pve_gear_point'] >= DUNGEON_LIST[dungeon_id]['max_pve_reward_gain'] else []
                     for m in self.group_info[leader]['member_list']:
                         if dungeon_id in self.daliy_action_count[yday_str][str(m)]['dungeon'] and self.daliy_action_count[yday_str][str(m)]['dungeon'][dungeon_id] == True:
+                            cd_msg += "[CQ:at,qq={0}] ".format(m)
                             has_cd = True
+                        self._update_gear_point(str(m))
+                        if self.jx3_users[str(m)]['pve_gear_point'] >= DUNGEON_LIST[dungeon_id]['max_pve_reward_gain']:
+                            pve_gear_point_too_high.append(m)
+                        elif self.jx3_users[str(m)]['energy'] < DUNGEON_ENERGY_REQUIRED:
+                            energy_msg += "[CQ:at,qq={0}] ".format(m)
+                            has_energy = False
+
                     if has_cd:
                         returnMsg = "[CQ:at,qq={0}] 你的队友有此副本cd，无法进入。".format(qq_account)
-                    elif self.jx3_users[qq_account_str]['energy'] < DUNGEON_ENERGY_REQUIRED:
+                    elif self.jx3_users[qq_account_str]['energy'] < DUNGEON_ENERGY_REQUIRED and qq_account_str not in pve_gear_point_too_high:
                         returnMsg = "[CQ:at,qq={0}] 你的体力不足，进入副本需要耗费体力：{1}".format(qq_account, DUNGEON_ENERGY_REQUIRED)
+                    elif has_energy and energy_msg != "":
+                        returnMsg = "{0} 体力不足，进入副本需要耗费体力：{1}".format(energy_msg, DUNGEON_ENERGY_REQUIRED)
                     else:
-                        has_energy = True
-                        energy_msg = ""
-                        for m in self.group_info[leader]['member_list']:
-                            if self.jx3_users[str(m)]['energy'] < DUNGEON_ENERGY_REQUIRED:
-                                energy_msg += "[CQ:at,qq={0}] ".format(m)
-                                has_energy = False
+                        force_enter = True
+                        if pve_gear_point_too_high != []:
+                            pve_msg = ""
 
-                        if has_energy and energy_msg != "":
-                            returnMsg = "{0} 体力不足，进入副本需要耗费体力：{1}".format(energy_msg, DUNGEON_ENERGY_REQUIRED)
+                            for m in pve_gear_point_too_high:
+                                force_enter = force_enter and dungeon_id in self.daliy_action_count[yday_str][str(m)]['dungeon']
+                                if dungeon_id not in self.daliy_action_count[yday_str][str(m)]['dungeon']:
+                                    pve_msg += "[CQ:at,qq={0}] ".format(m)
+                                    self.daliy_action_count[yday_str][str(m)]['dungeon'][dungeon_id] = False
+
+                        if not force_enter:
+                            returnMsg += "队伍中{0}pve装备太厉害啦，已经不能获得boss奖励了，仅可获得通关奖励且不消耗体力。如果确定还要进本的话，请再次输入 进入副本{1}".format(pve_msg, DUNGEON_LIST[dungeon_id]['display_name'])
                         else:
-
                             self.dungeon_status[leader] = copy.deepcopy(DUNGEON_LIST[dungeon_id])
                             self.dungeon_status[leader]['boss_detail'] = []
                             self.dungeon_status[leader]['attack_count'] = {}
+                            self.dungeon_status[leader]['no_reward'] = copy.deepcopy(pve_gear_point_too_high)
                             for boss_id in self.dungeon_status[leader]['boss']:
                                 boss = copy.deepcopy(NPC_LIST[boss_id])
                                 boss['remain_hp'] = boss['equipment']['armor']['pve']
                                 self.dungeon_status[leader]['boss_detail'].append(boss)
 
                             self.daliy_action_count[yday_str][leader]['dungeon'][dungeon_id] = True
-                            self.jx3_users[leader]['energy'] -= DUNGEON_ENERGY_REQUIRED
-                            energy_msg = "[CQ:at,qq={0}] ".format(leader)
+
+                            energy_msg = ""
+                            if leader not in pve_gear_point_too_high:
+                                self.jx3_users[leader]['energy'] -= DUNGEON_ENERGY_REQUIRED
+                                energy_msg = "[CQ:at,qq={0}] ".format(leader)
+                                
                             for m in self.group_info[leader]['member_list']:
                                 self.daliy_action_count[yday_str][str(m)]['dungeon'][dungeon_id] = True
-                                self.jx3_users[str(m)]['energy'] -= DUNGEON_ENERGY_REQUIRED
-                                energy_msg += "[CQ:at,qq={0}] ".format(m)
+                                if m not in pve_gear_point_too_high:
+                                    self.jx3_users[str(m)]['energy'] -= DUNGEON_ENERGY_REQUIRED
+                                    energy_msg += "[CQ:at,qq={0}] ".format(m)
                             returnMsg = "[CQ:at,qq={0}] 进入副本 {1} 成功！{2}体力-{3}".format(qq_account, dungeon_name, energy_msg, DUNGEON_ENERGY_REQUIRED)
 
                             import CQSDK
@@ -2729,7 +2860,7 @@ class Jx3Handler(object):
                         dungeon['attack_count'][qq_account_str]['last_attack_time'] += min_count * DUNGEON_ATTACK_COOLDOWN
 
                 if dungeon['attack_count'][qq_account_str]['available_attack'] < 1:
-                    time_val = calculateRemainingTime(DUNGEON_ATTACK_COOLDOWN, dungeon['attack_count'][qq_account_str]['last_attack_time'])
+                    time_val = calculateRemainingTime(DUNGEON_ATTACK_COOLDOWN * (1 - dungeon['attack_count'][qq_account_str]['available_attack']), dungeon['attack_count'][qq_account_str]['last_attack_time'])
                     returnMsg = "[CQ:at,qq={0}] 你没有攻击次数啦，还需要等{1}小时{2}分{3}秒。".format(
                                     qq_account_str,
                                     time_val['hours'],
@@ -2743,23 +2874,35 @@ class Jx3Handler(object):
                         modifier = {}
                         for buff in current_boss['buff']:
                             rand = random.uniform(0, 1)
-                            if rand < buff['chance']:
+                            if rand <= buff['chance']:
                                 modifier = copy.deepcopy(buff)
+                            logging.info(buff)
+                            logging.info(rand)
 
                         if modifier != {}:
-                            boss_equipment['weapon']['pve'] = int(boss_equipment['weapon']['pve'] * modifier['weapon'])
-                            buff_msg = "\n{0}使出了招数：{1}。{2}".format(current_boss['display_name'], modifier['display_name'], modifier['description'])
-
+                            if 'count' in modifier and 'max_count' in modifier:
+                                boss_equipment['weapon']['pve'] = int(boss_equipment['weapon']['pve'] * (1 + modifier['weapon'] * modifier['count']))
+                                description = modifier['description'].format(modifier['count'], modifier['max_count'])
+                            else:
+                                boss_equipment['weapon']['pve'] = int(boss_equipment['weapon']['pve'] * modifier['weapon'])
+                                description = modifier['description']
+                            buff_msg = "\n{0}使出了招数：{1}。{2}".format(current_boss['display_name'], modifier['display_name'], description)
+                    logging.info(buff_msg)
                     debuff_msg = ""
                     if 'debuff' in current_boss:
                         modifier = {}
                         for buff in current_boss['debuff']:
+                            fix_chance = 'hp' in buff and current_boss['remain_hp'] <= buff['hp'] * boss_equipment['armor']['pve']
+
                             rand = random.uniform(0, 1)
-                            if rand < buff['chance']:
+                            if rand <= buff['chance'] or fix_chance:
                                 modifier = copy.deepcopy(buff)
 
                         if modifier != {}:
-                            qq_equipment['weapon']['pve'] = int(qq_equipment['weapon']['pve'] * modifier['weapon'])
+                            if "attack_count" in modifier:
+                                dungeon['attack_count'][qq_account_str]['available_attack'] -= modifier['attack_count']
+                            else:
+                                qq_equipment['weapon']['pve'] = int(qq_equipment['weapon']['pve'] * modifier['weapon'])
                             debuff_msg = "\n{0}使出了招数：{1}。{2}".format(current_boss['display_name'], modifier['display_name'], modifier['description'])
 
                     battle_result = self._calculate_battle(qq_account_str, '', 'pve', custom_from_qq_equipment=qq_equipment, custom_to_qq_equipment=boss_equipment)
@@ -2779,6 +2922,11 @@ class Jx3Handler(object):
                         current_boss['remain_hp'] -= damage
                         dungeon['attack_count'][qq_account_str]['success_attack_count'] += 1
 
+                        if 'buff' in current_boss:
+                            for buff in current_boss['buff']:
+                                if 'increase_type' in buff and buff['increase_type'] == 'win' and 'count' in buff and 'max_count' in buff:
+                                    buff['count'] += 1 if buff['count'] < buff['max_count'] else 0
+
                         returnMsg += "\n攻击成功！成功率：{0}%，造成伤害：{1}。{2}血量：{3}/{4}".format(
                             int(math.floor(success_chance * 100)),
                             qq_equipment['weapon']['pve'],
@@ -2791,33 +2939,48 @@ class Jx3Handler(object):
                             CQSDK.SendGroupMsg(self.qq_group, returnMsg)
 
                             reward_msg = ""
+                            reward_member = ""
+                            
                             for k, v in current_boss['reward'].items():
-                                if k in self.jx3_users[leader]:
+                                if k in self.jx3_users[leader] and leader not in dungeon['no_reward']:
                                     self.jx3_users[leader][k] += v
 
                                 for m in self.group_info[leader]['member_list']:
-                                    if k in self.jx3_users[m]:
+                                    if k in self.jx3_users[m] and m not in dungeon['no_reward']:
                                         self.jx3_users[m][k] += v
-                                reward_msg += "{0} + {1} ".format(STAT_DISPLAY_NAME[k], v)
+                                reward_msg += "{0}+{1} ".format(STAT_DISPLAY_NAME[k], v)
 
                             item_reward_msg = ""
                             for k, v in current_boss['reward_item'].items():
-                                rand = random.uniform(0, 1)
-                                if rand <= v:
-                                    if k not in self.jx3_users[leader]['bag']:
-                                        self.jx3_users[leader]['bag'][k] = 0
-                                    self.jx3_users[leader]['bag'][k] += 1
-                                    item_reward_msg += "\n{0}获得额外奖励：{1} x 1 概率：{2}%".format(getGroupNickName(self.qq_group, int(leader)), get_item_display_name(k), int(v * 100))
-                                for m in self.group_info[leader]['member_list']:
+                                if leader not in dungeon['no_reward']:
                                     rand = random.uniform(0, 1)
                                     if rand <= v:
-                                        if k not in self.jx3_users[m]['bag']:
-                                            self.jx3_users[m]['bag'][k] = 0
-                                        self.jx3_users[m]['bag'][k] += 1
-                                        item_reward_msg += "\n{0}获得额外奖励：{1} x 1 概率：{2}%".format(getGroupNickName(self.qq_group, int(m)), get_item_display_name(k), int(v * 100))
+                                        if k not in self.jx3_users[leader]['bag']:
+                                            self.jx3_users[leader]['bag'][k] = 0
+                                        self.jx3_users[leader]['bag'][k] += 1
+                                        item_reward_msg += "\n{0}获得额外奖励：{1} x 1 概率：{2}%".format(getGroupNickName(self.qq_group, int(leader)), get_item_display_name(k), int(v * 100))
+
+                                for m in self.group_info[leader]['member_list']:
+                                    if m not in dungeon['no_reward']:
+                                        rand = random.uniform(0, 1)
+                                        if rand <= v:
+                                            if k not in self.jx3_users[m]['bag']:
+                                                self.jx3_users[m]['bag'][k] = 0
+                                            self.jx3_users[m]['bag'][k] += 1
+                                            item_reward_msg += "\n{0}获得额外奖励：{1} x 1 概率：{2}%".format(getGroupNickName(self.qq_group, int(m)), get_item_display_name(k), int(v * 100))
+
+                            member_list = copy.deepcopy(self.group_info[leader]['member_list'])
+                            member_list.append(leader)
+                            for m in list(set(member_list) - set(dungeon['no_reward'])):
+                                reward_member += "[CQ:at,qq={0}]".format(m)
+
+                            if reward_member != "":
+                                reward_msg = "{0}获得奖励{1}".format(reward_member, reward_msg)
+                            else:
+                                reward_msg = ""
 
                             mvp = sorted(dungeon['attack_count'].items(), lambda x, y: cmp(x[1]['damage'], y[1]['damage']), reverse=True)[0]
-                            returnMsg = "{0}成功被击倒！每人获得奖励：{1}{2}\nmvp：{3} 伤害：{4} 攻击次数：{5}/{6}".format(
+                            returnMsg = "{0}成功被击倒！{1}{2}\nmvp：{3} 伤害：{4} 攻击次数：{5}/{6}".format(
                                 current_boss['display_name'],
                                 reward_msg,
                                 item_reward_msg,
@@ -2825,7 +2988,9 @@ class Jx3Handler(object):
                                 dungeon['attack_count'][mvp[0]]['success_attack_count'],
                                 dungeon['attack_count'][mvp[0]]['total_attack_count'])
 
-                            dungeon['attack_count'] = {}
+                            for k, v in dungeon['attack_count'].items():
+                                dungeon['attack_count'][k] = {'damage': 0, 'available_attack': max(DUNGEON_MAX_ATTACK_COUNT, v['available_attack']), 'last_attack_time': None, 'total_attack_count': 0, 'success_attack_count': 0}
+
                             dungeon['boss_detail'].pop(0)
 
                             CQSDK.SendGroupMsg(self.qq_group, returnMsg)
@@ -2853,7 +3018,6 @@ class Jx3Handler(object):
                                 self.dungeon_status.pop(leader)
                     else:
                         dungeon['attack_count'][qq_account_str]['available_attack'] -= 1
-                        dungeon['attack_count'][qq_account_str]['last_attack_time'] = time.time()
                         returnMsg += "\n攻击失败！成功率：{0}%。{1}血量：{2}/{3}".format(
                             int(math.floor(success_chance * 100)),
                             current_boss['display_name'],
