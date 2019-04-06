@@ -285,7 +285,7 @@ NPC_LIST = {
                 "display_name": "毒液喷射",
                 "description": "对方攻击-100%",
                 "weapon": 0,
-                "chance": 0.2,
+                "chance": 0.25,
             },
         ],
         "reward_chance": 1,
@@ -2682,6 +2682,8 @@ class Jx3Handler(object):
                     returnMsg = "[CQ:at,qq={0}] 你离开了 {1} 的队伍。".format(qq_account, getGroupNickName(self.qq_group, int(leader)))
             else:
                 self.group_info.pop(qq_account_str)
+                if qq_account_str in self.dungeon_status:
+                    self.dungeon_status.pop(qq_account_str)
                 returnMsg = "[CQ:at,qq={0}] 你的队伍解散了。".format(qq_account)
 
             self.writeToJsonFile()
@@ -2852,7 +2854,10 @@ class Jx3Handler(object):
                 if qq_account_str not in dungeon['attack_count']:
                     dungeon['attack_count'][qq_account_str] = {'damage': 0, 'available_attack': DUNGEON_MAX_ATTACK_COUNT, 'last_attack_time': None, 'total_attack_count': 0, 'success_attack_count': 0}
 
-                if dungeon['attack_count'][qq_account_str]['last_attack_time'] != None and dungeon['attack_count'][qq_account_str]['available_attack'] < DUNGEON_MAX_ATTACK_COUNT:
+                if dungeon['attack_count'][qq_account_str]['last_attack_time'] == None:
+                        dungeon['attack_count'][qq_account_str]['last_attack_time'] = time.time()
+
+                if dungeon['attack_count'][qq_account_str]['available_attack'] < DUNGEON_MAX_ATTACK_COUNT:
                     count = int(math.floor((time.time() - dungeon['attack_count'][qq_account_str]['last_attack_time']) / float(DUNGEON_ATTACK_COOLDOWN)))
                     min_count = min(count, DUNGEON_MAX_ATTACK_COUNT - dungeon['attack_count'][qq_account_str]['available_attack'])
                     dungeon['attack_count'][qq_account_str]['available_attack'] += min_count
@@ -2880,7 +2885,7 @@ class Jx3Handler(object):
                             logging.info(rand)
 
                         if modifier != {}:
-                            if 'count' in modifier and 'max_count' in modifier:
+                            if 'count' in modifier and 'max_count' in modifier and modifier['count'] != 0:
                                 boss_equipment['weapon']['pve'] = int(boss_equipment['weapon']['pve'] * (1 + modifier['weapon'] * modifier['count']))
                                 description = modifier['description'].format(modifier['count'], modifier['max_count'])
                             else:
@@ -2912,6 +2917,7 @@ class Jx3Handler(object):
                     success_chance = battle_result['success_chance']
 
                     dungeon['attack_count'][qq_account_str]['total_attack_count'] += 1
+                    
 
                     returnMsg = "[CQ:at,qq={0}] 你对{1}发起了攻击。剩余攻击次数：{2}/{3}".format(qq_account, current_boss['display_name'], dungeon['attack_count'][qq_account_str]['available_attack'] - 1, DUNGEON_MAX_ATTACK_COUNT) + buff_msg + debuff_msg
 
