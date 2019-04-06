@@ -2855,7 +2855,7 @@ class Jx3Handler(object):
                     dungeon['attack_count'][qq_account_str] = {'damage': 0, 'available_attack': DUNGEON_MAX_ATTACK_COUNT, 'last_attack_time': None, 'total_attack_count': 0, 'success_attack_count': 0}
 
                 if dungeon['attack_count'][qq_account_str]['last_attack_time'] == None:
-                        dungeon['attack_count'][qq_account_str]['last_attack_time'] = time.time()
+                    dungeon['attack_count'][qq_account_str]['last_attack_time'] = time.time()
 
                 if dungeon['attack_count'][qq_account_str]['available_attack'] < DUNGEON_MAX_ATTACK_COUNT:
                     count = int(math.floor((time.time() - dungeon['attack_count'][qq_account_str]['last_attack_time']) / float(DUNGEON_ATTACK_COOLDOWN)))
@@ -2863,6 +2863,9 @@ class Jx3Handler(object):
                     dungeon['attack_count'][qq_account_str]['available_attack'] += min_count
                     if min_count > 0:
                         dungeon['attack_count'][qq_account_str]['last_attack_time'] += min_count * DUNGEON_ATTACK_COOLDOWN
+                
+                if dungeon['attack_count'][qq_account_str]['available_attack'] >= DUNGEON_MAX_ATTACK_COUNT:
+                    dungeon['attack_count'][qq_account_str]['last_attack_time'] = time.time()
 
                 if dungeon['attack_count'][qq_account_str]['available_attack'] < 1:
                     time_val = calculateRemainingTime(DUNGEON_ATTACK_COOLDOWN * (1 - dungeon['attack_count'][qq_account_str]['available_attack']), dungeon['attack_count'][qq_account_str]['last_attack_time'])
