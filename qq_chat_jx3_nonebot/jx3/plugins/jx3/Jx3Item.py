@@ -32,8 +32,18 @@ USER_STAT_DISPLAY = {
     'energy': ''
 }
 
-def load_item_data(data, item_list):
-    return {k: {'object': item_list[k], 'count': v} for k, v in data.items()}
-
 def get_item_display_name(item_name):
     return ITEM_LIST[item_name]['display_name'] if item_name in ITEM_LIST else ""
+
+def get_item_id_by_display_name(item_display_name):
+    for k, v in ITEM_LIST.items():
+        if v['display_name'] == item_display_name:
+            return k
+    return ""
+
+def print_item_cost(item_name):
+    returnMsg = ""
+    for k, v in ITEM_LIST[item_name]['cost'].items():
+        if k in STAT_DISPLAY_NAME:
+            returnMsg += " {0}：{1}".format(STAT_DISPLAY_NAME[k], v)
+    return returnMsg

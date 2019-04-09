@@ -10,6 +10,21 @@ OLD_FACTION_LIST = [
     'hao_qi'
 ]
 
+faction_daily_dict = {
+    'zhong_li': {
+        'faction_point': 0,
+        'yesterday_reward': 0
+    },
+    'hao_qi': {
+        'faction_point': 0,
+        'yesterday_reward': 0
+    },
+    'e_ren': {
+        'faction_point': 0,
+        'yesterday_reward': 0
+    }
+}
+
 def get_faction_id(fid):
     if isinstance(fid, str) and fid in OLD_FACTION_LIST:
         return fid
