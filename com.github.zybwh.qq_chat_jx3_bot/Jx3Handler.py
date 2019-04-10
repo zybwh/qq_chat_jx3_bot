@@ -108,6 +108,8 @@ JJC_REWARD_RANK_MODIFIER = 0.1
 DALIY_JJC_DOUBLE_REWARD_COUNT = 5
 JJC_DAYS_PER_SEASON = 7
 MAX_JJC_RANK = 14
+JJC_SEASON_PER_RANK_WEIWANG_REWARD = 1000
+JJC_SEASON_PER_RANK_MONEY_REWARD = 100
 
 DUNGEON_MAX_ATTACK_COUNT = 5
 DUNGEON_ATTACK_COOLDOWN = 10 * 60
@@ -821,6 +823,35 @@ class Jx3Handler(object):
                     reward = self.daliy_action_count['faction'][FACTION_NAME_ID[faction_id]]['reward']
                     self.jx3_users[qq_account_str]['weiwang'] += reward
                     returnMsg += "\n获得昨日阵营奖励：威望+{0}".format(reward)
+                
+                if qq_account_str not in self.jjc_season_status and qq_account_str in get_key_or_return_default(self.jjc_status['last_season_jjc_status'], str(self.jjc_status['season'] - 1), {}):
+                    jjc_status = self.jjc_status['last_season_jjc_status'][str(self.jjc_status['season'] - 1)][qq_account_str]
+                    if 'reward_gain' not in jjc_status:
+                        rank = jjc_status['score'] // 100 
+                        jjc_weiwang_reward = rank * JJC_SEASON_PER_RANK_WEIWANG_REWARD
+                        jjc_money_reward = rank * JJC_SEASON_PER_RANK_MONEY_REWARD
+
+                        rank_list = sorted(self.jjc_status['last_season_jjc_status'][str(self.jjc_status['season'] - 1)].items(), lambda x, y: cmp(x[1]['score'], y[1]['score']), reverse=True)
+                        
+                        rank_msg = ""
+                        i = 0
+                        modifier = 1
+                        for k, v in rank_list:
+                            i += 1
+                            if qq_account_str == k:
+                                rank_msg = "\n上赛季名剑大会成绩： 分数：{0}，段位：{1}，排名：{2}。".format(v['score'], rank, i)
+                                if i == 1:
+                                    modifier = 2
+                                    rank_msg += "由于上赛季排名为第1，获得2倍奖励。"
+                                elif i >= 2 and i <= 3:
+                                    modifier = 1.5
+                                    rank_msg += "由于上赛季排名为第{0}，获得{1}倍奖励。".format(i, modifier)
+                        
+
+                        self.jx3_users[qq_account_str]['weiwang'] += int(jjc_weiwang_reward * modifier)
+                        self.jx3_users[qq_account_str]['money'] += int(jjc_money_reward * modifier)
+                        self.jjc_status['last_season_jjc_status'][str(self.jjc_status['season'] - 1)][qq_account_str]['reward_gain'] = True
+                        returnMsg += "\n获得上赛季名剑大会排行奖励：威望+{0} 金钱+{1}".format(jjc_weiwang_reward, jjc_money_reward)
 
             self.writeToJsonFile()
         except Exception as e:
