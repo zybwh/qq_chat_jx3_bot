@@ -667,6 +667,7 @@ class Jx3Handler(object):
             if self.jjc_status['day'] > JJC_DAYS_PER_SEASON:
                 self.jjc_status['last_season_jjc_status'][str(self.jjc_status['season'])] = copy.deepcopy(self.jjc_season_status)
                 self.jjc_status['season'] += 1
+                self.jjc_status['day'] = 1
                 self.jjc_season_status = {}
 
             for k in list(self.daliy_action_count.keys()):
