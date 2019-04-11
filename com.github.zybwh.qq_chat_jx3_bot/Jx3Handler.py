@@ -342,7 +342,7 @@ NPC_LIST = {
             {
                 "display_name": "跪地求饶",
                 "description": "自身回血50，奖励金钱+10",
-                "hp_recover": 50
+                "hp_recover": 50,
                 "money": 10,
                 "chance": 0.2,
                 "hp": 0.25
