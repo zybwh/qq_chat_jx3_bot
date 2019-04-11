@@ -315,11 +315,94 @@ NPC_LIST = {
         "debuff": [
             {
                 "display_name": "巨龙吐息",
-                "description": "敌方需要消耗2次攻击次数",
+                "description": "敌方需要消耗额外1次攻击次数",
                 "weapon": 1,
-                "chance": 0,
+                "chance": 1,
                 'attack_count': 1,
                 'hp': 0.3
+            }
+        ],
+        "reward_chance": 1,
+        "reward_item": {
+            "rong_ding": 1,
+            "ran": 2,
+            "jia_zhuan_shen_can": 1,
+            "zhen_cheng_zhi_xin": 0.2
+        }
+    },
+    'feng_du': {
+        "display_name": "冯度",
+        "equipment": {'weapon': {"display_name": "冯度剑", 'pvp': 0, 'pve': 200},
+                        'armor': {"display_name": "冯度衣", 'pvp': 0, 'pve': 2000}},
+        "reward": {
+            "money": 50,
+            "banggong": 2000,
+        },
+        "buff": [
+            {
+                "display_name": "跪地求饶",
+                "description": "自身回血50，奖励金钱+10",
+                "hp_recover": 50
+                "money": 10,
+                "chance": 0.2,
+                "hp": 0.25
+            }
+        ],
+        "reward_chance": 1,
+        "reward_item": {
+            "rong_ding": 0.2,
+            "ran": 0.2
+        }
+    },
+    'wang_yan_zhi': {
+        "display_name": "王彦直",
+        "equipment": {'weapon': {"display_name": "王彦直剑", 'pvp': 0, 'pve': 300},
+                        'armor': {"display_name": "王彦直衣", 'pvp': 0, 'pve': 5000}},
+        "reward": {
+            "money": 100,
+            "banggong": 5000,
+        },
+        "buff": [
+            {
+                "display_name": "碎星辰",
+                "description": "每次受到攻击时自身武器攻击+20%，现在已叠{0}层，最高{1}层",
+                "weapon": 0.2,
+                "chance": 1,
+                'increase_type': 'win',
+                'count': 0,
+                'max_count':10
+            }
+        ],
+        "reward_chance": 1,
+        "reward_item": {
+            "rong_ding": 0.6,
+            "ran": 1,
+            "tuan_yuan_yan": 0.4
+        }
+    },
+    'gui_ying_xiao_ci_lang': {
+        "display_name": "鬼影小次郎",
+        "equipment": {'weapon': {"display_name": "鬼影小次郎剑", 'pvp': 0, 'pve': 400},
+                        'armor': {"display_name": "鬼影小次郎衣", 'pvp': 0, 'pve': 8000}},
+        "reward": {
+            "money": 200,
+            "banggong": 10000,
+        },
+        "buff": [
+            {
+                "display_name": "一闪",
+                "description": "自身武器攻击+20%",
+                "weapon": 1.2,
+                "chance": 0.4,
+            }
+        ],
+        "debuff": [
+            {
+                "display_name": "真·天珠·一闪",
+                "description": "敌方需要消耗额外1次攻击次数",
+                "chance": 0.5,
+                'attack_count': 1,
+                'hp': 0.5
             }
         ],
         "reward_chance": 1,
@@ -388,6 +471,14 @@ DUNGEON_LIST = {
         "boss": ['fang_ji_chang', 'ping_san_zhi', 'si_tu_yi_yi'],
         "reward": {
             "banggong": 2000
+        }
+    },
+    'kong_wu_feng': {
+        "display_name": "空雾峰",
+        "max_pve_reward_gain": 40000,
+        "boss": ['feng_du', 'wang_yan_zhi', 'gui_ying_xiao_ci_lang'],
+        "reward": {
+            "banggong": 3000
         }
     }
 }
@@ -2913,8 +3004,9 @@ class Jx3Handler(object):
                     if 'buff' in current_boss:
                         modifier = {}
                         for buff in current_boss['buff']:
+                            fix_chance = 'hp' in buff and current_boss['remain_hp'] <= buff['hp'] * boss_equipment['armor']['pve']
                             rand = random.uniform(0, 1)
-                            if rand <= buff['chance']:
+                            if rand <= buff['chance'] and fix_chance:
                                 modifier = copy.deepcopy(buff)
                             logging.info(buff)
                             logging.info(rand)
@@ -2923,6 +3015,10 @@ class Jx3Handler(object):
                             if 'count' in modifier and 'max_count' in modifier and modifier['count'] != 0:
                                 boss_equipment['weapon']['pve'] = int(boss_equipment['weapon']['pve'] * (1 + modifier['weapon'] * modifier['count']))
                                 description = modifier['description'].format(modifier['count'], modifier['max_count'])
+                            elif 'money' in modifier:
+                                current_boss['reward']['money'] += modifier['money']
+                                current_boss['remain_hp'] += modifier['hp_recover']
+                                description = modifier['description']
                             else:
                                 boss_equipment['weapon']['pve'] = int(boss_equipment['weapon']['pve'] * modifier['weapon'])
                                 description = modifier['description']
@@ -2935,10 +3031,11 @@ class Jx3Handler(object):
                             fix_chance = 'hp' in buff and current_boss['remain_hp'] <= buff['hp'] * boss_equipment['armor']['pve']
 
                             rand = random.uniform(0, 1)
-                            if rand <= buff['chance'] or fix_chance:
+                            if rand <= buff['chance'] and fix_chance:
                                 modifier = copy.deepcopy(buff)
 
                         if modifier != {}:
+
                             if "attack_count" in modifier:
                                 dungeon['attack_count'][qq_account_str]['available_attack'] -= modifier['attack_count']
                             else:
