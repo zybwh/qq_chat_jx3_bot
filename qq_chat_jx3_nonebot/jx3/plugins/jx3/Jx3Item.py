@@ -25,13 +25,6 @@ ITEM_LIST = {
     "hun_hun_zheng_ming": {"display_name": "混混抓捕证明", "rank": 0}
 }
 
-USER_STAT_DISPLAY = {
-    'banggong': '',
-    'weiwang': '',
-    'money': '',
-    'energy': ''
-}
-
 def get_item_display_name(item_name):
     return ITEM_LIST[item_name]['display_name'] if item_name in ITEM_LIST else ""
 

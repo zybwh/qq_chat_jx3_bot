@@ -38,3 +38,9 @@ def get_class_id(cid):
     if isinstance(cid, str) and cid in OLD_CLASS_LIST_TO_NEW_LIST:
         return cid
     return OLD_CLASS_LIST_TO_NEW_LIST[cid]
+
+def get_class_id_by_display_name(display_name):
+    for k, v in CLASS_LIST.items():
+        if v == item_display_name:
+            return k
+    return ""

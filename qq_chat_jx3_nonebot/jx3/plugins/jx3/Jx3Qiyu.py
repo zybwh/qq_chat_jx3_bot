@@ -69,7 +69,7 @@ QIYU_LIST = {
 }
 
 def convert_old_qiyu_to_new_list(old_qiyu):
-    return {'unknown': {'object': None, 'count': old_qiyu}}
+    return {'unknown': old_qiyu}
 
 class Jx3Qiyu(object):
     _name = ''
