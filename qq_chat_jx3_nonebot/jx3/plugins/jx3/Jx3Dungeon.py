@@ -130,7 +130,7 @@ NPC_LIST = {
                 "description": "每次受到攻击时自身武器攻击+10%，现在已叠{0}层，最高{1}层",
                 "weapon": 0.1,
                 "chance": 1,
-                'increase_type': 'win',
+                'increase_type': 'lose',
                 'count': 0,
                 'max_count':10
             }
@@ -235,7 +235,7 @@ NPC_LIST = {
                 "description": "每次受到攻击时自身武器攻击+20%，现在已叠{0}层，最高{1}层",
                 "weapon": 0.2,
                 "chance": 1,
-                'increase_type': 'win',
+                'increase_type': 'lose',
                 'count': 0,
                 'max_count':10
             }

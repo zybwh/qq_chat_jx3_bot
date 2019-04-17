@@ -9,4 +9,4 @@ if __name__ == '__main__':
         path.join(path.dirname(__file__), 'jx3', 'plugins'),
         'jx3.plugins'
     )
-    nonebot.run(host='127.0.0.1', port=8080)
+    nonebot.run(host='0.0.0.0', port=8080)

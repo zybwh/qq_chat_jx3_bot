@@ -99,10 +99,9 @@ async def register(session: CommandSession):
     if group_id != None:
         returnMsg = group_data[str(group_id)].register(session.ctx.get('user_id'))
 
-        data = group_data[str(group_id)].dump_data()
-        await _write_game_data(group_id, data)
-        for msg in returnMsg:
-            await session.finish(msg)
+        #data = group_data[str(group_id)].dump_data()
+        #await _write_game_data(group_id, data)
+        await session.finish(returnMsg)
 
 @on_command('指令', aliases=['帮助', '使用手册'], only_to_me=False)
 async def help(session: CommandSession):
@@ -111,23 +110,18 @@ async def help(session: CommandSession):
 
 @on_command('查看', only_to_me=False)
 async def get_info(session: CommandSession):
-    group_id = session.ctx.get('group_id')
-    if group_id != None:
-        user_id = session.ctx.get('user_id')
-        if group_data[str(group_id)].is_user_register(user_id):
-            returnMsg = await group_data[str(group_id)].get_info(user_id)
-            for msg in returnMsg:
-                await session.finish(msg)
+    group_id = session.ctx.get('group_id', '')
+    user_id = session.ctx.get('user_id', '')
+
+    if group_id != "" and group_data[str(group_id)].is_user_register(user_id):
+        returnMsg = await group_data[str(group_id)].get_info(user_id)
+        await session.finish(returnMsg)
 
 @on_command('签到', only_to_me=False)
 async def qiandao(session: CommandSession):
-    group_id = session.ctx.get('group_id')
-    if group_id != None:
-        user_id = session.ctx.get('user_id')
-        if group_data[str(group_id)].is_user_register(user_id):
-            returnMsg = group_data[str(group_id)].qiandao(user_id)
-            
-            data = group_data[str(group_id)].dump_data()
-            await _write_game_data(group_id, data)
-            for msg in returnMsg:
-                await session.finish(msg)
+    group_id = session.ctx.get('group_id', '')
+    user_id = session.ctx.get('user_id', '')
+    
+    if group_id != "" and group_data[str(group_id)].is_user_register(user_id):
+        returnMsg = group_data[str(group_id)].qiandao(user_id)
+        await session.finish(returnMsg)
