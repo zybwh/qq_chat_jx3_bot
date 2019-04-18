@@ -6,6 +6,8 @@ import copy
 import time
 import math
 
+import aiofiles
+
 from .Jx3Class import *
 from .Jx3User import *
 from .Jx3Faction import *
@@ -16,6 +18,24 @@ from .GameConfig import *
 from .Utils import *
 
 class Jx3Handler(object):
+
+    class data_handler(object):
+        def __init__(self, save_file: bool=True, return_list: bool=False):
+            self.save_file = save_file
+            self.return_list = return_list
+        def __call__(self, func):
+            def wrapper(jx3Handler, *args, **kwargs):
+                try:
+                    return_val = func(jx3Handler, *args, **kwargs)
+
+                    return return_val
+                    if self.save_file:
+                        jx3Handler._save_data()
+                except Exception as e:
+                    logging.exception(e)
+                    jx3Handler.read_data()
+                    return [] if self.return_list else ""
+            return wrapper
 
     json_file_path = ""
 
@@ -36,15 +56,58 @@ class Jx3Handler(object):
     def __init__(self, qq_group, DATABASE_PATH):
         self._qq_group = qq_group
 
-        self.json_file_path = os.path.join(DATABASE_PATH, str(qq_group), 'data.json')
+        self.json_dir_path = os.path.join(DATABASE_PATH, str(qq_group))
+        self.json_file_path = os.path.join(self.json_dir_path, 'data.json')
 
-        self.read_data(self.json_file_path)
+        self._read_data()
 
-    def read_data(self, json_file_path):
+    async def _save_data(self):
+        try:
+            if not os.path.exists(self.json_dir_path):
+                os.makedirs(self.json_dir_path)
+
+            json_file_path = os.path.join(self.json_dir_path, 'data.json')
+            json_file_path_old = os.path.join(self.json_dir_path, 'data.json.old')
+            json_file_path_old_2 = os.path.join(self.json_dir_path, 'data.json.old2')
+
+            if os.path.exists(json_file_path_old):
+                if os.path.exists(json_file_path_old_2):
+                    os.remove(json_file_path_old_2)
+                os.rename(json_file_path_old, json_file_path_old_2)
+                    
+            if os.path.exists(json_file_path):
+                if os.path.exists(json_file_path_old):
+                    os.remove(json_file_path_old)
+                os.rename(json_file_path, json_file_path_old)
+
+            async with aiofiles.open(json_file_path, 'w', encoding='utf-8') as f:
+                data = self._dump_data()
+                await f.write(json.dumps(data))
+        except Exception as e:
+            logging.exception(e)
+
+    
+    def function_wrapper(self, save_file: bool=True, return_list=False):
+        def wrap(f):
+            def wrap_args(*args):
+                try:
+                    return_val = f(*args)
+
+                    if save_file:
+                        self._save_data()
+                    return return_val
+                except Exception as e:
+                    logging.exception(e)
+                    self._read_data()
+                    return [] if return_list else ""
+            return wrap_args
+        return wrap
+
+    def _read_data(self):
         try:
             game_data = {}
-            if os.path.exists(json_file_path):
-                with open(json_file_path, 'r') as f:
+            if os.path.exists(self.json_file_path):
+                with open(self.json_file_path, 'r', encoding='utf-8') as f:
                     game_data = json.loads(f.readline())
 
             self._load_user_data(game_data.get('jx3_users', {}))
@@ -88,7 +151,7 @@ class Jx3Handler(object):
                 self._jx3_users[k]['day'] = day
                 self._jx3_users[k]['daily_count'] = copy.deepcopy(v)
 
-    def dump_data(self):
+    def _dump_data(self):
         try:
             data = {
                 "jx3_users": self._jx3_users,
@@ -109,45 +172,37 @@ class Jx3Handler(object):
                 self._jx3_users[qq_account]['energy'] += SPEECH_ENERGY_GAIN
         except Exception as e:
             logging.exception(e)
-            self.read_data(self.json_file_path)
+            self._read_data()
 
+    @data_handler()
     def register(self, qq_account: str):
-        returnMsg = ""
-
-        try:
-            if qq_account in self._jx3_users:
-                returnMsg = f"[CQ:at,qq={qq_account}] 注册失败！你已经注册过了。"
-            else:
-                self._jx3_users[qq_account] = {
-                    'class_id': 'da_xia',
-                    'faction_id': 'zhong_li',
-                    'faction_join_time': None,
-                    'weiwang': 0,
-                    'banggong': 0,
-                    'money': 0,
-                    'energy': 0,
-                    'achievement': {},
-                    'lover': '',
-                    'lover_time': None,
-                    'qiyu': {},
-                    'register_time': time.time(),
-                    'bag': {},
-                    'equipment': copy.deepcopy(default_equipment),
-                    'today': self._today,
-                    'daily_count': copy.deepcopy(daily_dict),
-                    'qiandao_count': 0
-                }
-                returnMsg = (
-                    f"注册成功！\n"
-                    f"[CQ:at,qq={qq_account}]\n"
-                    f"注册时间：{time.strftime('%Y-%m-%d', time.localtime(self._jx3_users[qq_account]['register_time']))}"
-                )
-        except Exception as e:
-            logging.exception(e)
-            returnMsg = ""
-            self.read_data(self.json_file_path)
-
-        return returnMsg
+        if qq_account in self._jx3_users:
+            return f"[CQ:at,qq={qq_account}] 注册失败！你已经注册过了。"
+        else:
+            self._jx3_users[qq_account] = {
+                'class_id': 'da_xia',
+                'faction_id': 'zhong_li',
+                'faction_join_time': None,
+                'weiwang': 0,
+                'banggong': 0,
+                'money': 0,
+                'energy': 0,
+                'achievement': {},
+                'lover': '',
+                'lover_time': None,
+                'qiyu': {},
+                'register_time': time.time(),
+                'bag': {},
+                'equipment': copy.deepcopy(default_equipment),
+                'today': self._today,
+                'daily_count': copy.deepcopy(daily_dict),
+                'qiandao_count': 0
+            }
+            return (
+                f"注册成功！\n"
+                f"[CQ:at,qq={qq_account}]\n"
+                f"注册时间：{time.strftime('%Y-%m-%d', time.localtime(self._jx3_users[qq_account]['register_time']))}"
+            )
 
     def is_user_register(self, qq_account: str):
         return qq_account in self._jx3_users
@@ -211,7 +266,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = ""
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -242,7 +297,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = ""
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -279,7 +334,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = []
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -294,7 +349,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = ""
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -338,7 +393,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = ""
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -357,7 +412,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = ""
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -385,7 +440,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = ""
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -407,7 +462,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = ""
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -438,7 +493,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = ""
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -583,7 +638,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = []
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -672,7 +727,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = ""
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -832,7 +887,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = []
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -887,7 +942,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = ""
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -936,7 +991,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = ""
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -1008,7 +1063,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = []
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -1091,7 +1146,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = ""
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -1131,7 +1186,7 @@ class Jx3Handler(object):
             except Exception as e:
                 logging.exception(e)
                 returnMsg = ""
-                self.read_data(self.json_file_path)
+                self._read_data()
 
             return returnMsg
 
@@ -1145,7 +1200,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = ""
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -1380,7 +1435,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = []
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -1429,7 +1484,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = ""
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -1486,7 +1541,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = ""
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -1542,7 +1597,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = ""
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -1583,7 +1638,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = ""
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -1605,7 +1660,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = ""
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -1639,7 +1694,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = ""
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -1671,7 +1726,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = ""
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -1701,7 +1756,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = ""
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -1726,7 +1781,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = ""
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -1746,7 +1801,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = ""
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -1874,7 +1929,7 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = []
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
 
@@ -2240,6 +2295,6 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
             returnMsg = []
-            self.read_data(self.json_file_path)
+            self._read_data()
 
         return returnMsg
