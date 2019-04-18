@@ -21,7 +21,7 @@ class Jx3Handler(object):
 
     _jx3_users = {}
     _today = 0
-    _jx3_faction = {}
+    _jx3_faction = copy.deepcopy(faction_daily_dict)
     _lover_pending = {}
     _jail_list = {}
     _group_info = {}
@@ -31,6 +31,7 @@ class Jx3Handler(object):
         'last_season_data': {},
         'current_season_data': {}
     }
+    _wanted_list = {}
 
     def __init__(self, qq_group, DATABASE_PATH):
         self._qq_group = qq_group
@@ -78,6 +79,8 @@ class Jx3Handler(object):
                     self._jx3_users[k]['equipment'] = copy.deepcopy(v)
 
     def _load_daily_count(self, daily_count_data):
+        if daily_count_data == {}:
+            return
         sorted_list = sorted(daily_count_data['daily_action_count'].items, key=lambda x: int(x[0]), reverse=True)
         day, count_list = sorted_list.items()[0]
         for k, v in count_list.items():
@@ -131,7 +134,8 @@ class Jx3Handler(object):
                     'bag': {},
                     'equipment': copy.deepcopy(default_equipment),
                     'today': self._today,
-                    'daily_count': copy.deepcopy(daily_dict)
+                    'daily_count': copy.deepcopy(daily_dict),
+                    'qiandao_count': 0
                 }
                 returnMsg = (
                     f"注册成功！\n"
@@ -156,13 +160,13 @@ class Jx3Handler(object):
             returnMsg = (
                 f"[CQ:at,qq={qq_account}]\n"
                 f"情缘:\t\t{lover_name}\n"
-                f"门派:\t\t{CLASS_LIST[self._jx3_users[qq_account]]}\n"
-                f"阵营:\t\t{FACTION_LIST[self._jx3_users[qq_account]]}\n"
+                f"门派:\t\t{CLASS_LIST[self._jx3_users[qq_account]['class_id']]}\n"
+                f"阵营:\t\t{FACTION_LIST[self._jx3_users[qq_account]['faction_id']]}\n"
                 f"威望:\t\t{self._jx3_users[qq_account]['weiwang']}\n"
                 f"帮贡:\t\t{self._jx3_users[qq_account]['banggong']}\n"
                 f"金钱:\t\t{self._jx3_users[qq_account]['money']}G\n"
                 f"体力:\t\t{self._jx3_users[qq_account]['energy']}\n"
-                f"签到状态:\t{'已签到' if self._jx3_users[qq_account]['daily_count']['qiandao'] else '未签到',}\n"
+                f"签到状态:\t{'已签到' if self._jx3_users[qq_account]['daily_count']['qiandao'] else '未签到'}\n"
                 f"奇遇:\t\t{get_qiyu_count(self._jx3_users[qq_account])}\n"
                 f"今日发言:\t{self._jx3_users[qq_account]['daily_count']['speech_count']}"
             )
@@ -176,8 +180,7 @@ class Jx3Handler(object):
     def qiandao(self, qq_account: str):
         returnMsg = ""
         try:
-            qq_account_str = str(qq_account)
-            val = self._jx3_users[qq_account_str]
+            val = self._jx3_users[qq_account]
 
             if self._jx3_users[qq_account]['daily_count']['qiandao']:
                 returnMsg = f"[CQ:at,qq={qq_account}]今天已经签到过了!"
@@ -186,16 +189,16 @@ class Jx3Handler(object):
                 weiwang_reward = random.randint(DALIY_REWARD_MIN, DALIY_REWARD_MAX)
 
                 self._jx3_users[qq_account]['weiwang'] += weiwang_reward
-                self._jx3_users[qq_account]['weiwang'] += banggong_reward
-                self._jx3_users[qq_account]['weiwang'] += DALIY_MONEY_REWARD
-                self._jx3_users[qq_account]['weiwang'] += DALIY_ENERGY_REWARD
+                self._jx3_users[qq_account]['banggong'] += banggong_reward
+                self._jx3_users[qq_account]['money'] += DALIY_MONEY_REWARD
+                self._jx3_users[qq_account]['energy'] += DALIY_ENERGY_REWARD
 
                 self._jx3_users[qq_account]['qiandao_count'] += 1
 
                 self._jx3_users[qq_account]['daily_count']['qiandao'] = True
 
                 returnMsg = (
-                    f"[CQ:at,qq={qq_account}] 签到成功！"
+                    f"[CQ:at,qq={qq_account}] 签到成功！累积签到次数：{self._jx3_users[qq_account]['qiandao_count']} "
                     f"签到奖励: 威望+{weiwang_reward} 帮贡+{banggong_reward} 金钱+{DALIY_MONEY_REWARD} 体力+{DALIY_ENERGY_REWARD}"
                 )
 
@@ -1106,10 +1109,10 @@ class Jx3Handler(object):
             returnMsg = (
                 f"[CQ:at,qq={qq_account}] 装备信息：\n"
                 f"pve评分：{gear_point['pve']} pvp评分：{gear_point['pvp']}\n"
-                f"武器：{val['weapon']['display_name']}\n"
-                f"pve攻击：{val['weapon']['pve']}\tpvp攻击：{val['weapon']['pvp']}\n"
-                f"防具：{val['armor']['display_name']}\n"
-                f"pve血量：{val['armor']['pve']}\tpvp血量：{val['armor']['pvp']}"
+                f"武器：{val['weapon']['display_name']} 伤害：\n"
+                f"pve：{val['weapon']['pve']} pvp：{val['weapon']['pvp']}\n"
+                f"防具：{val['armor']['display_name']} 血量：\n"
+                f"pve：{val['armor']['pve']} pvp：{val['armor']['pvp']}"
             )
 
         except Exception as e:
@@ -1160,8 +1163,6 @@ class Jx3Handler(object):
         returnMsg = ""
 
         try:
-            yday = self._reset_daliy_count()
-            yday_str = str(yday)
             retval = self._get_faction_count()
             strong_faction = "浩气强势" if retval['hao_qi'] > retval['e_ren'] else "恶人强势" if retval['e_ren'] > retval['hao_qi'] else "势均力敌"
             returnMsg = (
@@ -1183,12 +1184,12 @@ class Jx3Handler(object):
 
         try:
             pve_gear_point_list = {k: self._calculate_gear_point(v['equipment'])['pve'] for k, v in self._jx3_users.items()}
-            rank_list = sorted(pve_gear_point_list.items(), lambda x, y: cmp(x[1], y[1]), reverse=True)
+            rank_list = sorted(pve_gear_point_list, key=pve_gear_point_list.get, reverse=True)
             list_len = len(rank_list)
             for i in range(10):
                 if i < list_len:
-                    qq_nickname = await get_group_nickname(self._qq_group, rank_list[i][0])
-                    returnMsg += f"\n{i + 1}. {qq_nickname} {rank_list[i][1]}"
+                    qq_nickname = await get_group_nickname(self._qq_group, rank_list[i])
+                    returnMsg += f"\n{i + 1}. {qq_nickname} {pve_gear_point_list.get(rank_list[i])}"
                 else:
                     break
 
@@ -1204,12 +1205,12 @@ class Jx3Handler(object):
 
         try:
             pvp_gear_point_list = {k: self._calculate_gear_point(v['equipment'])['pvp'] for k, v in self._jx3_users.items()}
-            rank_list = sorted(pvp_gear_point_list.items(), lambda x, y: cmp(x[1], y[1]), reverse=True)
+            rank_list = rank_list = sorted(pvp_gear_point_list, key=pvp_gear_point_list.get, reverse=True)
             list_len = len(rank_list)
             for i in range(10):
                 if i < list_len:
-                    qq_nickname = await get_group_nickname(self._qq_group, rank_list[i][0])
-                    returnMsg += f"\n{i + 1}. {qq_nickname} {rank_list[i][1]}"
+                    qq_nickname = await get_group_nickname(self._qq_group, rank_list[i])
+                    returnMsg += f"\n{i + 1}. {qq_nickname} {pvp_gear_point_list.get(rank_list[i])}"
                 else:
                     break
 
@@ -1223,12 +1224,12 @@ class Jx3Handler(object):
         returnMsg = "本群土豪排行榜"
 
         try:
-            rank_list = sorted(self._jx3_users.items(), lambda x, y: cmp(x[1]['money'], y[1]['money']), reverse=True)
+            rank_list = sorted(self._jx3_users, key=lambda x: self._jx3_users[x]['money'], reverse=True)
             list_len = len(rank_list)
             for i in range(10):
-                if i < list_len and rank_list[i][1]['money'] != 0:
-                    qq_nickname = await get_group_nickname(self._qq_group, rank_list[i][0])
-                    returnMsg += f"\n{i + 1}. {qq_nickname} {rank_list[i][1]['money']}"
+                if i < list_len and self._jx3_users[rank_list[i]]['money'] != 0:
+                    qq_nickname = await get_group_nickname(self._qq_group, rank_list[i])
+                    returnMsg += f"\n{i + 1}. {qq_nickname} {self._jx3_users[rank_list[i]]['money']}"
                 else:
                     break
 
@@ -1239,16 +1240,16 @@ class Jx3Handler(object):
         return returnMsg
 
 
-    async def get_speech_rank(self, qq_account):
+    async def get_speech_rank(self):
         returnMsg = "本群今日聊天排行榜"
 
         try:
-            rank_list = sorted(self._jx3_users.items(), lambda x, y: cmp(x[1]['daily_count']['speech_count'], y[1]['daily_count']['speech_count']), reverse=True)
+            rank_list = sorted(self._jx3_users, key=lambda x: self._jx3_users[x]['daily_count']['speech_count'], reverse=True)
             list_len = len(rank_list)
             for i in range(10):
-                if i < list_len and rank_list[i][1]['speech_count'] != 0:
-                    qq_nickname = await get_group_nickname(self._qq_group, rank_list[i][0])
-                    returnMsg += f"\n{i + 1}. {qq_nickname} {rank_list[i][1]['daily_count']['speech_count']}"
+                if i < list_len and self._jx3_users[rank_list[i]]['daily_count']['speech_count'] != 0:
+                    qq_nickname = await get_group_nickname(self._qq_group, rank_list[i])
+                    returnMsg += f"\n{i + 1}. {qq_nickname} {self._jx3_users[rank_list[i]]['daily_count']['speech_count']}"
                 else:
                     break
 
@@ -1262,12 +1263,12 @@ class Jx3Handler(object):
         returnMsg = "本群奇遇排行榜"
 
         try:
-            rank_list = sorted(self._jx3_users.items(), lambda x, y: cmp(get_qiyu_count(x[1]), get_qiyu_count(y[1])), reverse=True)
+            rank_list = sorted(self._jx3_users, key=lambda x: get_qiyu_count(self._jx3_users[x]), reverse=True)
             list_len = len(rank_list)
             for i in range(10):
-                if i < list_len and get_qiyu_count(rank_list[i][1]) != 0:
-                    qq_nickname = await get_group_nickname(self._qq_group, rank_list[i][0])
-                    returnMsg += f"\n{i + 1}. {qq_nickname} {get_qiyu_count(rank_list[i][1])}"
+                if i < list_len and get_qiyu_count(self._jx3_users[rank_list[i]]) != 0:
+                    qq_nickname = await get_group_nickname(self._qq_group, rank_list[i])
+                    returnMsg += f"\n{i + 1}. {qq_nickname} {get_qiyu_count(self._jx3_users[rank_list[i]])}"
                 else:
                     break
 
@@ -1281,12 +1282,12 @@ class Jx3Handler(object):
         returnMsg = "本群威望排行榜"
 
         try:
-            rank_list = sorted(self._jx3_users.items(), lambda x, y: cmp(x[1]['weiwang'], y[1]['weiwang']), reverse=True)
+            rank_list = sorted(self._jx3_users, key=lambda x: self._jx3_users[x]['weiwang'], reverse=True)
             list_len = len(rank_list)
             for i in range(10):
-                if i < list_len and rank_list[i][1]['weiwang'] != 0:
-                    qq_nickname = await get_group_nickname(self._qq_group, rank_list[i][0])
-                    returnMsg += f"\n{i + 1}. {qq_nickname} {rank_list[i][1]['weiwang']}"
+                if i < list_len and self._jx3_users[rank_list[i]]['weiwang'] != 0:
+                    qq_nickname = await get_group_nickname(self._qq_group, rank_list[i])
+                    returnMsg += f"\n{i + 1}. {qq_nickname} {self._jx3_users[rank_list[i]]['weiwang']}"
                 else:
                     break
 
@@ -1302,14 +1303,15 @@ class Jx3Handler(object):
         try:
             returnMsg = f"名剑大会排名榜 赛季：{self._jjc_data['season']} 天数：{self._jjc_data['day']}"
 
-            rank_list = sorted(self._jjc_data['current_season_data'].items(), lambda x, y: cmp(x[1]['score'], y[1]['score']), reverse=True)
+            rank_list = sorted(self._jjc_data['current_season_data'], key=lambda x: self._jjc_data['current_season_data'][x]['score'], reverse=True)
             list_len = len(rank_list)
             for i in range(10):
-                if i < list_len and rank_list[i][1]['score'] != 0:
-                    qq_nickname = await get_group_nickname(self._qq_group, rank_list[i][0])
+                if i < list_len and self._jjc_data['current_season_data'][rank_list[i]]['score'] != 0:
+                    qq_nickname = await get_group_nickname(self._qq_group, rank_list[i])
+                    score = self._jjc_data['current_season_data'][rank_list[i]]['score']
                     returnMsg += (
                         f"\n{i + 1}. {qq_nickname} "
-                        f"分数：{rank_list[i][1]['score']} 段位：{min(rank_list[i][1]['score'] // 100, MAX_JJC_RANK)}"
+                        f"分数：{score} 段位：{min(score // 100, MAX_JJC_RANK)}"
                     )
                 else:
                     break
@@ -1325,13 +1327,13 @@ class Jx3Handler(object):
 
         try:
             msg_list = ""
-            rank_list = sorted(self.wanted_list.items(), lambda x, y: cmp(x[1]['reward'], y[1]['reward']), reverse=True)
+            rank_list = sorted(self._wanted_list, key=lambda x: self._wanted_list[x]['reward'], reverse=True)
             index = 1
-            for k, v in rank_list:
-                if time.time() - self.wanted_list[k]['wanted_time'] < WANTED_DURATION:
-                    remain_time_msg = get_remaining_time_string(WANTED_DURATION, self.wanted_list[k]['wanted_time'])
+            for k in rank_list:
+                if time.time() - self._wanted_list[k]['wanted_time'] < WANTED_DURATION:
+                    remain_time_msg = get_remaining_time_string(WANTED_DURATION, self._wanted_list[k]['wanted_time'])
                     qq_nickname = await get_group_nickname(self._qq_group, k)
-                    msg_list += f"\n{index}. {qq_nickname} {v['reward']}金 {remain_time_msg}"
+                    msg_list += f"\n{index}. {qq_nickname} {self._wanted_list[k]['reward']}金 {remain_time_msg}"
                     index += 1
 
             if msg_list == "":
@@ -1346,19 +1348,19 @@ class Jx3Handler(object):
         return returnMsg
 
     def _put_wanted_internal(self, toQQ_str, money_amount):
-        if toQQ_str in self.wanted_list:
-            if time.time() - self.wanted_list[toQQ_str]['wanted_time'] > WANTED_DURATION:
-                self.wanted_list[toQQ_str]['reward'] = money_amount
+        if toQQ_str in self._wanted_list:
+            if time.time() - self._wanted_list[toQQ_str]['wanted_time'] > WANTED_DURATION:
+                self._wanted_list[toQQ_str]['reward'] = money_amount
             else:
-                self.wanted_list[toQQ_str]['reward'] += money_amount
+                self._wanted_list[toQQ_str]['reward'] += money_amount
 
-            self.wanted_list[toQQ_str]['wanted_time'] = time.time()
+            self._wanted_list[toQQ_str]['wanted_time'] = time.time()
         else:
-            self.wanted_list[toQQ_str] = {'reward': money_amount, 'wanted_time': time.time(), 'failed_try': {}}
+            self._wanted_list[toQQ_str] = {'reward': money_amount, 'wanted_time': time.time(), 'failed_try': {}}
 
         return (
             f"江湖恩怨一朝清，惟望群侠多援手。现有人愿付{money_amount}金对[CQ:at,qq={toQQ_str}]进行悬赏，"
-            f"总赏金已达{self.wanted_list[toQQ_str]['reward']}金，众侠士切勿错过。"
+            f"总赏金已达{self._wanted_list[toQQ_str]['reward']}金，众侠士切勿错过。"
         )
 
     def put_wanted(self, fromQQ: str, toQQ: str):
