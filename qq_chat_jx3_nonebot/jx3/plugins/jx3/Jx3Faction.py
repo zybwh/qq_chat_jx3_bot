@@ -31,6 +31,7 @@ def get_faction_id(fid):
     return OLD_FACTION_LIST[fid]
 
 def convert_display_name_to_faction_id(display_name):
-    if display_name in FACTION_LIST.values():
-        return FACTION_LIST.keys()[FACTION_LIST.values().index(display_name)]
+    for k, v in FACTION_LIST.items():
+        if v == display_name:
+            return k
     return ""
