@@ -4,17 +4,21 @@ import logging
 import datetime
 import pytz
 
+DATABASE_PATH = os.path.join(os.path.dirname(__file__), 'data')
+GROUP_DATA_JSON_FILE = os.path.join(DATABASE_PATH, 'jx3_group.json')
+LOG_FILE_NAME = os.path.join(DATABASE_PATH, 'bot.log')
+
 logging.basicConfig(
     level       = logging.INFO,
     format      = '%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
     datefmt     = '%Y-%m-%d %H:%M:%S',
-    filename    = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'bot.log'),
+    filename    = LOG_FILE_NAME,
     filemode    = 'w+'
 )
 
 import aiofiles
 
-from nonebot import on_command, CommandSession, get_bot, scheduler, on_natural_language, NLPSession, IntentCommand, Message
+from nonebot import on_command, CommandSession, get_bot, scheduler, on_natural_language, NLPSession, IntentCommand, Message, permission
 
 from .jx3.GameConfig import *
 from .jx3.Jx3Handler import *
@@ -22,56 +26,67 @@ from .jx3.Jx3Handler import *
 group_data = {}
 active_group = []
 
+BOT_START = False
+
 bot = get_bot()
 
-DATABASE_PATH = os.path.join(os.path.dirname(__file__), 'data')
-GROUP_DATA_JSON_FILE = os.path.join(DATABASE_PATH, 'jx3_group.json')
+@bot.server_app.before_serving
+async def start():
+    try:
+        if not os.path.exists(DATABASE_PATH):
+            os.makedirs(DATABASE_PATH)
 
-try:
-    if not os.path.exists(DATABASE_PATH):
-        os.makedirs(DATABASE_PATH)
+        if os.path.exists(GROUP_DATA_JSON_FILE):
+            with open(GROUP_DATA_JSON_FILE, 'r') as f:
+                group_file_data = json.loads(f.readline())
+                for group in group_file_data:
+                    active_group.append(group)
+                    group_data[str(group)] = Jx3Handler(int(group), DATABASE_PATH)
 
-    if os.path.exists(GROUP_DATA_JSON_FILE):
-        with open(GROUP_DATA_JSON_FILE, 'r') as f:
-            group_file_data = json.loads(f.readline())
-            for group in group_file_data:
-                active_group.append(group)
-                group_data[str(group)] = Jx3Handler(int(group), DATABASE_PATH)
+                print(group_data)
+        print('load group complete')
 
-            print(group_data)
-    print('load group complete')
-except Exception as e:
-    logging.exception(e)
+        @scheduler.scheduled_job('cron', hour='0')
+        async def _():
+            try:
+                os.rename(LOG_FILE_NAME, os.path.join(DATABASE_PATH, f"{datetime.date.today().strftime('%Y-%m-%d')}.log"))
+            except Exception as e:
+                logging.exception(e)
+
+    except Exception as e:
+        logging.exception(e)
 
 class check_user_register(object):
     def __init__(self, need_register: bool=True):
         self.need_register = need_register
-    
+
     def __call__(self, func):
         async def wrapper(session: CommandSession):
+            if not BOT_START:
+                return
             return_val = False
             try:
                 group_id = str(session.ctx.get('group_id', ''))
                 user_id = str(session.ctx.get('user_id', ''))
-                print(session.cmd.name)
+
                 if group_id != '':
                     if group_id not in active_group:
                         active_group.append(group_id)
                         group_data[group_id] = Jx3Handler(int(group_id), DATABASE_PATH)
                         async with aiofiles.open(GROUP_DATA_JSON_FILE, 'w') as f:
                             await f.write(json.dumps(active_group))
-                    
+
                     if group_data[group_id].is_user_register(user_id):
                         group_data[group_id].add_speech_count(user_id)
-                    
+
                     if not self.need_register or group_data[group_id].is_user_register(user_id):
                         return_val = True
 
             except Exception as e:
                 logging.exception(e)
-            finally:
-                if return_val:
-                    await func(session, group_id, user_id)
+
+            if return_val:
+                await func(session, group_id, user_id)
 
         return wrapper
 
@@ -84,6 +99,35 @@ def check_to_qq_is_self_or_not_register(group_id, user_id, toQQ, self_msg='该�
         return f"[CQ:at,qq={user_id}] 对方尚未注册。"
     return ""
 
+@on_command('test', permission=permission.SUPERUSER)
+async def test(session: CommandSession):
+    async with aiohttp.ClientSession().get('http://www.jx3tong.com/?m=api&c=daily&a=daily_list') as response:
+        big_war_detail = json.loads(await response.text())
+        print(big_war_detail)
+
+@on_command('开启', permission=permission.SUPERUSER)
+async def start_bot(session: CommandSession):
+    for group in active_group:
+        await bot.send_group_msg(group_id=int(group), message=f'神小隐上线啦！更新日志请查看帮助手册：{HELP_URL}')
+        await group_data[str(group)].reset_daily_count_and_start_scheduler()
+    BOT_START = True
+    await session.finish()
+
+@on_command('关闭', permission=permission.SUPERUSER)
+async def stop_bot(session: CommandSession):
+    for group in active_group:
+        await bot.send_group_msg(group_id=group, message='神小隐[离线，有事请留言]')
+    BOT_START = False
+    for v in group_data.values():
+        await v._save_data()
+    await session.finish()
+
+@on_command('剑三日常', only_to_me=False)
+@check_user_register(need_register=False)
+async def get_jx3_daily_info(session: CommandSession, group_id: str="", user_id: str=""):
+    returnMsg = group_data[group_id].get_jx3_daily_info(user_id)
+    await session.finish(returnMsg)
+
 @on_command('注册', only_to_me=False)
 @check_user_register(need_register=False)
 async def register(session: CommandSession, group_id: str="", user_id: str=""):
@@ -93,7 +137,7 @@ async def register(session: CommandSession, group_id: str="", user_id: str=""):
 @on_command('指令', aliases=['帮助', '使用手册'], only_to_me=False)
 @check_user_register(need_register=False)
 async def help(session: CommandSession, group_id: str="", user_id: str=""):
-    await session.finish("神小隐说明：{0}".format(HELP_URL))
+    await session.finish(f"神小隐说明：{HELP_URL}")
 
 @on_command('查看阵营', aliases=['阵营信息'], only_to_me=False)
 @check_user_register(need_register=False)
@@ -250,7 +294,7 @@ async def _(session: NLPSession):
         toQQ = toQQ[0]
         return IntentCommand(100, '///jx3_handler_rob///', current_arg=toQQ)
     return None
-    
+
 @on_command('///jx3_handler_rob///')
 @check_user_register()
 async def rob(session: CommandSession, group_id: str="", user_id: str=""):
@@ -267,7 +311,7 @@ async def _(session: NLPSession):
         toQQ = toQQ[0]
         return IntentCommand(100, '///jx3_handler_practise///', current_arg=toQQ)
     return None
-    
+
 @on_command('///jx3_handler_practise///')
 @check_user_register()
 async def practise(session: CommandSession, group_id: str="", user_id: str=""):
@@ -315,7 +359,7 @@ async def _(session: NLPSession):
 @check_user_register()
 async def use_item(session: CommandSession, group_id: str="", user_id: str=""):
     returnMsg = await group_data[group_id].use_item(user_id,
-        session.args.get('item', ''), 
+        session.args.get('item', ''),
         session.args.get('item_amount', 1),
         session.args.get('toQQ', ''))
     for msg in returnMsg:
@@ -367,7 +411,7 @@ async def _(session: NLPSession):
         toQQ = toQQ[0]
         return IntentCommand(100, '///jx3_handler_put_wanted///', current_arg=toQQ)
     return None
-    
+
 @on_command('///jx3_handler_put_wanted///')
 @check_user_register()
 async def put_wanted(session: CommandSession, group_id: str="", user_id: str=""):
@@ -384,7 +428,7 @@ async def _(session: NLPSession):
         toQQ = toQQ[0]
         return IntentCommand(100, '///jx3_handler_catch_wanted///', current_arg=toQQ)
     return None
-    
+
 @on_command('///jx3_handler_catch_wanted///')
 @check_user_register()
 async def catch_wanted(session: CommandSession, group_id: str="", user_id: str=""):
@@ -452,7 +496,7 @@ async def _(session: NLPSession):
         toQQ = toQQ[0]
         return IntentCommand(100, '///jx3_handler_join_group///', current_arg=toQQ)
     return None
-    
+
 @on_command('///jx3_handler_join_group///')
 @check_user_register()
 async def join_group(session: CommandSession, group_id: str="", user_id: str=""):
@@ -467,6 +511,13 @@ async def join_group(session: CommandSession, group_id: str="", user_id: str="")
 async def get_group_info(session: CommandSession, group_id: str="", user_id: str=""):
     returnMsg = await group_data[group_id].get_group_info(user_id)
     await session.finish(returnMsg)
+
+@on_command('队伍列表', only_to_me=False)
+@check_user_register()
+async def get_group_list(session: CommandSession, group_id: str="", user_id: str=""):
+    returnMsg = await group_data[group_id].get_group_list(user_id)
+    await session.finish(returnMsg)
+
 
 @on_command('退出队伍', only_to_me=False)
 @check_user_register()
@@ -505,10 +556,11 @@ async def _(session: NLPSession):
 @on_command('///jx3_handler_start_dungeon///')
 @check_user_register()
 async def start_dungeon(session: CommandSession, group_id: str="", user_id: str=""):
-    returnMsg = await group_data[group_id].start_dungeon(user_id, session.current_arg_text)
-    for msg in returnMsg:
-        await session.send(msg)
-    await session.finish()
+    if session.current_arg_text == "":
+        returnMsg = await group_data[group_id].start_dungeon(user_id, session.current_arg_text)
+        for msg in returnMsg:
+            await session.send(msg)
+        await session.finish()
 
 @on_command('攻击boss', only_to_me=False)
 @check_user_register()
@@ -529,13 +581,9 @@ async def add_scheduler(session: CommandSession):
     group_id = str(session.ctx.get('group_id', ''))
     user_id = str(session.ctx.get('user_id', ''))
 
-    print(session.current_arg_text)
     raw_message = session.ctx.get('raw_message')
-    time = int(raw_message.split("设置闹钟 ")[1])
+    time = int(session.current_arg)
 
-    time = 10
-    print(time)
-    print(datetime.datetime.now() + datetime.timedelta(seconds=time))
     await bot.send_group_msg(group_id=int(group_id),
         message=f'[CQ:at,qq={user_id}] 设置闹钟成功！倒计时{time}秒')
 
@@ -556,10 +604,9 @@ async def _(session: NLPSession):
         print(stripped_msg)
         try:
             time = int(stripped_msg[1])
-            session.state
         except ValueError:
             pass
         else:
             return IntentCommand(100, '设置闹钟', current_arg=time)
-    
+
     return None

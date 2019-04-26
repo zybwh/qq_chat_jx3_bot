@@ -4,9 +4,13 @@ import os
 import json
 import copy
 import time
+import datetime
 import math
 
 import aiofiles
+import aiohttp
+
+from nonebot import get_bot, scheduler
 
 from .Jx3Class import *
 from .Jx3User import *
@@ -31,7 +35,7 @@ class Jx3Handler(object):
                     if self.async_func:
                         return_val = await func(jx3Handler, *args, **kwargs)
                     else:
-                        return_val = func(jx3Handler, *args, **kwargs) 
+                        return_val = func(jx3Handler, *args, **kwargs)
 
                     if not self.read_only:
                         await jx3Handler._save_data()
@@ -56,9 +60,12 @@ class Jx3Handler(object):
         'season': 1,
         'day': 1,
         'last_season_data': {},
-        'current_season_data': {}
+        'current_season_data': {},
+        'get_last_season_reward': []
     }
     _wanted_list = {}
+
+    _jx3_daily_info = []
 
     def __init__(self, qq_group, DATABASE_PATH):
         self._qq_group = qq_group
@@ -67,6 +74,67 @@ class Jx3Handler(object):
         self.json_file_path = os.path.join(self.json_dir_path, 'data.json')
 
         self._read_data()
+
+    async def reset_daily_count_and_start_scheduler(self):
+        await self._reset_daily_count()
+        @scheduler.scheduled_job('cron', hour='7')
+        async def _():
+            try:
+                self._reset_daily_count()
+            except Exception as e:
+                logging.exception(e)
+
+    @data_handler(async_func=True)
+    async def _reset_daily_count(self):
+        yday = time.localtime(time.time() - DALIY_REFRESH_OFFSET).tm_yday
+        if yday != self._today:
+            self._today = yday
+
+            for v in self._jx3_users.values():
+                v['daily_count'] = {}
+
+            async with aiohttp.ClientSession().get('http://www.jx3tong.com/?m=api&c=daily&a=daily_list') as response:
+                jx3_daily_details = json.loads(await response.text())
+                self._jx3_daily_info = jx3_daily_details['activity_data']
+
+            big_war = ""
+            battle_field = ""
+            for activity in self._jx3_daily_info:
+                for act in activity['activity_list']:
+                    if '大战·' in act['title']:
+                        big_war = act['title'].split('大战·')[1]
+                    if '战场-' in act['title']:
+                        battle_field = act['title'].split('战场-')[1]
+
+            msg = (
+                f"日常刷新啦\n"
+                f"本日剑三大战本：{big_war}, 战场：{battle_field}"
+            )
+            await get_bot().send_group_msg(group_id=int(self._qq_group), message=msg)
+
+            self._jjc_data['day'] += 1
+            if self._jjc_data['day'] > JJC_DAYS_PER_SEASON:
+                self._jjc_data['day'] = 1
+                self._jjc_data['season'] += 1
+                self._jjc_data['last_seasion_data'] = copy.deepcopy(self._jjc_data['current_season_data'])
+                self._jjc_data['current_season_data'] = {}
+                self._jjc_data['get_last_season_reward'] = []
+
+                returnMsg = f"名剑大会赛季{self._jjc_data['season']-1}已结束！赛季排行榜："
+
+                rank_list = sorted(self._jjc_data['last_seasion_data'], key=lambda x: self._jjc_data['last_seasion_data'][x]['score'], reverse=True)
+                list_len = len(rank_list)
+                for i in range(5):
+                    if i < list_len and self._jjc_data['current_season_data'][rank_list[i]]['score'] != 0:
+                        qq_nickname = await get_group_nickname(self._qq_group, rank_list[i])
+                        score = self._jjc_data['current_season_data'][rank_list[i]]['score']
+                        returnMsg += (
+                            f"\n{i + 1}. {qq_nickname} "
+                            f"分数：{score} 段位：{min(score // 100, MAX_JJC_RANK)}"
+                        )
+                    else:
+                        break
+                await get_bot().send_group_msg(group_id=int(self._qq_group), message=returnMsg)
 
     async def _save_data(self):
         try:
@@ -81,7 +149,7 @@ class Jx3Handler(object):
                 if os.path.exists(json_file_path_old_2):
                     os.remove(json_file_path_old_2)
                 os.rename(json_file_path_old, json_file_path_old_2)
-                    
+
             if os.path.exists(json_file_path):
                 if os.path.exists(json_file_path_old):
                     os.remove(json_file_path_old)
@@ -104,9 +172,14 @@ class Jx3Handler(object):
             self._load_equipment(game_data.get('equipment', {}))
             self._load_daily_count(game_data.get('daily_action_count', {}))
 
-            self._jx3_faction = game_data.get('jx3_faction', copy.deepcopy(faction_daily_dict))
+            self._jx3_faction = game_data.get('jx3_faction', self._jx3_faction)
             self._lover_pending = game_data.get('lover_pending', {})
             self._jail_list = game_data.get('jail_list', {})
+            self._today = game_data.get('today', 0)
+            self._group_info = game_data.get('', {})
+            self._jjc_data = game_data.get('jjc_data', self._jjc_data)
+            self._wanted_list = game_data.get('wanted_list', {})
+            self._jx3_daily_info = game_data.get('jx3_daily_info', [])
         except Exception as e:
             logging.exception(e)
 
@@ -147,7 +220,12 @@ class Jx3Handler(object):
                 "jx3_users": self._jx3_users,
                 "jx3_faction": self._jx3_faction,
                 "lover_pending": self._lover_pending,
-                "jail_list": self._jail_list
+                "jail_list": self._jail_list,
+                "today": self._today,
+                "group_info": self._group_info,
+                "jjc_data": self._jjc_data,
+                "wanted_list": self._wanted_list,
+                "jx3_daily_info": self._jx3_daily_info
             }
             return data
         except Exception as e:
@@ -244,6 +322,33 @@ class Jx3Handler(object):
             if faction_reward != 0:
                 self._weiwang += faction_reward
                 returnMsg += f"\n获得昨日阵营奖励：威望+{faction_reward}"
+
+            if qq_account not in self._jjc_data['get_last_season_reward']:
+                self._jjc_data['get_last_season_reward'].append(qq_account)
+
+                rank_list = sorted(self._jjc_data['last_seasion_data'], key=lambda x: self._jjc_data['last_seasion_data'][x]['score'], reverse=True)
+                rank_msg = ""
+                i = 0
+                modifier = 1
+                for k, v in rank_list.items():
+                    i += 1
+                    if qq_account == k:
+                        rank_msg = f"\n上赛季名剑大会成绩： 分数：{v['score']}，段位：{rank}，排名：{i}。"
+                        if i == 1:
+                            modifier = 2
+                            rank_msg += "由于上赛季排名为第1，获得2倍奖励。"
+                        elif i >= 2 and i <= 3:
+                            modifier = 1.5
+                            rank_msg += f"由于上赛季排名前3，获得{modifier}倍奖励。"
+
+                rank = jjc_status['score'] // 100
+                jjc_weiwang_reward = rank * JJC_SEASON_PER_RANK_WEIWANG_REWARD
+                jjc_money_reward = rank * JJC_SEASON_PER_RANK_MONEY_REWARD
+
+                self.jx3_users[qq_account]['weiwang'] += int(jjc_weiwang_reward * modifier)
+                self.jx3_users[qq_account]['money'] += int(jjc_money_reward * modifier)
+
+                returnMsg += f"{rank_msg}\n获得上赛季名剑大会排行奖励：威望+{jjc_weiwang_reward} 金钱+{jjc_money_reward}"
 
         return returnMsg
 
@@ -1246,7 +1351,7 @@ class Jx3Handler(object):
             returnMsg += self._put_wanted_internal(toQQ, WANTED_MONEY_REWARD)
 
         return returnMsg
-    
+
     @data_handler(async_func=True)
     async def catch_wanted(self, fromQQ: str, toQQ: str) -> str:
         returnMsg = ""
@@ -1258,7 +1363,7 @@ class Jx3Handler(object):
         elif toQQ in self.jail_list and time.time() - self.jail_list[toQQ] < JAIL_DURATION:
                 returnMsg = f"[CQ:at,qq={fromQQ}] 对方在监狱里蹲着呢，你这是要劫狱吗？"
         elif toQQ in self.wanted_list and time.time() - self.wanted_list[toQQ]['wanted_time'] < WANTED_DURATION:
-            
+
             if 'failed_try' in self.wanted_list[toQQ] and fromQQ_str in self.wanted_list[toQQ]['failed_try'] and time.time() - self.wanted_list[toQQ]['failed_try'][fromQQ] < WANTED_COOLDOWN:
                 remain_time_msg = get_remaining_time_string(WANTED_DURATION, self.wanted_list[toQQ_str]['failed_try'][fromQQ_str])
                 returnMsg = f"[CQ:at,qq={fromQQ}] 你已经尝试过抓捕了，奈何技艺不佳。请锻炼{remain_time_msg}后再来挑战！"
@@ -1556,7 +1661,7 @@ class Jx3Handler(object):
         return returnMsg
 
     @data_handler(read_only=True, async_func=True)
-    async def get_group_info(self, qq_account: str):
+    async def get_group_info(self, qq_account: str) -> str:
         if qq_account in self._group_info:
             leader = qq_account
         else:
@@ -1566,14 +1671,25 @@ class Jx3Handler(object):
             returnMsg = f"[CQ:at,qq={qq_account}] 你没有加入任何队伍。"
         else:
 
-            returnMsg = f"[CQ:at,qq={qq_account}] 当前队伍信息：\n"
+            returnMsg = f"[CQ:at,qq={qq_account}] 当前队伍信息："
             if self._group_info[leader]['member_list'] != []:
                 for member in self._group_info[leader]['member_list']:
-                    member_nickname = await get_group_nickname(self._qq_group, leader)
+                    member_nickname = await get_group_nickname(self._qq_group, member)
                     returnMsg += (
-                        f"\n{'(队长) ' if member == leader else ''}{member_nickname} "
-                        f"pve装分：{self._jx3_users[member]['pve_gear_point']}"
+                        f"\n{member_nickname} "
+                        f"pve装分：{self._jx3_users[member]['pve_gear_point']} {'(队长) ' if member == leader else ''}"
                     )
+
+        return returnMsg
+
+    @data_handler(async_func=True)
+    async def get_group_list(self, qq_account: str) -> str:
+        returnMsg = f"[CQ:at,qq={qq_account}] 当前存在的队伍有："
+        index = 0
+        for k, v in self._group_info.items():
+            index += 1
+            nickname = await get_group_nickname(self._qq_group, k)
+            returnMsg += f"\n{index}. 队长：{nickname} 人数：{len(v['member_list'])}"
 
         return returnMsg
 
@@ -2069,5 +2185,24 @@ class Jx3Handler(object):
                             returnMsg.append("队伍已解散。")
                             self._group_info.pop(leader)
                             self.dungeon_status.pop(leader)
+
+        return returnMsg
+
+    @data_handler(read_only=True)
+    def get_jx3_daily_info(self, qq_account: str) -> str:
+        big_war = ""
+        battle_field = ""
+        for activity in self._jx3_daily_info:
+            for act in activity['activity_list']:
+                if '大战·' in act['title']:
+                    big_war = act['title'].split('大战·')[1]
+                if '战场-' in act['title']:
+                    battle_field = act['title'].split('战场-')[1]
+
+        returnMsg = f"[CQ:at,qq={qq_account}]本日剑三大战本：{big_war}, 战场：{battle_field}。"
+
+        weekday = datetime.datetime.today().weekday()
+        if weekday == 1 or weekday == 3:
+            returnMsg += "本日有阵营小攻防。"
 
         return returnMsg
