@@ -174,7 +174,7 @@ class Jx3Handler(object):
                 with open(self.json_file_path, 'r', encoding='utf-8') as f:
                     game_data = json.loads(f.readline())
 
-            self._qiyu_status = game_data.get('qiyu_status', {})
+            self._qiyu_status = game_data.get('qiyu', {})
 
             self._load_user_data(game_data.get('jx3_users', {}))
             self._load_equipment(game_data.get('equipment', {}))
@@ -240,7 +240,7 @@ class Jx3Handler(object):
                 "rob_protect": self._rob_protect,
                 "dungeon_status": self._dungeon_status,
                 "jx3_daily_info": self._jx3_daily_info,
-                "qiyu_status":self._qiyu_status
+                "qiyu":self._qiyu_status
             }
             return data
         except Exception as e:
