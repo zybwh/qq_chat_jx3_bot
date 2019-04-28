@@ -679,7 +679,7 @@ class Jx3Handler(object):
                     wanted_chance = ROB_WIN_WANTED_CHANCE if energy_cost != 0 else 0
 
                     if energy_cost != 0:
-                        self._jx3_faction[fromQQ_stat['faction_id']]['point'] += ROB_FACTION_POINT_GAIN
+                        self._jx3_faction[fromQQ_stat['faction_id']]['faction_point'] += ROB_FACTION_POINT_GAIN
                         self._qiyu_status[fromQQ]['pending_qiyu'] = 'hu_xiao_shan_lin'
                         self._qiyu_status[toQQ]['pending_qiyu'] = 'yin_yang_liang_jie'
 
@@ -778,7 +778,7 @@ class Jx3Handler(object):
                 self._jx3_users[loser]['daily_count']['practise']['weiwang'] += loser_weiwang_gain
 
                 if energy_cost != 0:
-                    self._jx3_faction[fromQQ_stat['faction_id']]['point'] += PRACTISE_FACTION_POINT_GAIN
+                    self._jx3_faction[fromQQ_stat['faction_id']]['faction_point'] += PRACTISE_FACTION_POINT_GAIN
 
                 winner_nickname = await get_group_nickname(self._qq_group, winner)
                 loser_nickname = await get_group_nickname(self._qq_group, loser)
