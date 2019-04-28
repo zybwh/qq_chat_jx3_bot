@@ -3,7 +3,7 @@ from .GameConfig import *
 QIYU_LIST = {
     'hong_fu_qi_tian': {
         "display_name": '鸿运当头',
-        "description": "江湖快马飞报！[CQ:at,qq={0}]侠士签到时洪福降临，不经意间出发奇遇【鸿运当头】！签到时获得额外奖励。",
+        "description": "江湖快马飞报！[CQ:at,qq={0}]侠士签到时洪福降临，不经意间触发奇遇【鸿运当头】！签到时获得额外奖励。",
         "chance": 0.1,
         "cooldown": 0,
         "reward": {"money": DALIY_MONEY_REWARD, "weiwang": DALIY_REWARD_MAX, "banggong": DALIY_REWARD_MAX}
@@ -31,7 +31,7 @@ QIYU_LIST = {
     },
     'fu_yao_jiu_tian': {
         "display_name": '扶摇九天',
-        "description": "江湖快马飞报！[CQ:at,qq={0}]侠士轻功盖世，触发奇遇【扶摇九天】！正是御风行千里，扶摇红尘巅",
+        "description": "江湖快马飞报！[CQ:at,qq={0}]侠士轻功盖世，不经意间触发奇遇【扶摇九天】！正是御风行千里，扶摇红尘巅",
         "chance": 0.01,
         "cooldown": 1 * 60 * 60,
         "reward": {"money": 200, "energy": 100}

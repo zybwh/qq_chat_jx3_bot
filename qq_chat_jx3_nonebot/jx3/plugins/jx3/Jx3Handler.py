@@ -1554,6 +1554,7 @@ class Jx3Handler(object):
             if self._qiyu_status[qq_account].get('has_qiyu_in_same_command', False):
                 logging.info("this qq has qiyu already in same command, ignoring")
                 self._qiyu_status[qq_account]['has_qiyu_in_same_command'] = False
+                self._qiyu_status[qq_account]['pending_qiyu'] = ""
                 continue
 
             if time.time() - self._qiyu_status[qq_account]['cd'].get(qiyu_name, 0) < qiyu['cooldown']:
@@ -1589,7 +1590,6 @@ class Jx3Handler(object):
 
                     self._qiyu_status[qq_account]['cd'][qiyu_name] = time.time()
                     self._qiyu_status[qq_account]['has_qiyu_in_same_command'] = True
-                    self._qiyu_status[qq_account]['pending_qiyu'] = ""
 
                     returnMsg = (
                         f"{qiyu['description'].format(qq_account)}\n"
@@ -1600,6 +1600,8 @@ class Jx3Handler(object):
                     has_qiyu = True
 
                     logging.info(f"qiyu! qq: {qq_account} qiyu_name: {qiyu_name} success_chance: {rand} < {qiyu['chance']}")
+                
+                self._qiyu_status[qq_account]['pending_qiyu'] = ""
 
         return has_qiyu
 
