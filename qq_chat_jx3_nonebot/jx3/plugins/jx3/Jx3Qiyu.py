@@ -6,7 +6,7 @@ QIYU_LIST = {
         "description": "江湖快马飞报！[CQ:at,qq={0}]侠士签到时洪福降临，不经意间出发奇遇【鸿运当头】！签到时获得额外奖励。",
         "chance": 0.1,
         "cooldown": 0,
-        "reward": {"money": DALIY_MONEY_REWARD, "weiwang": DALIY_REWARD_MIN, "banggong": DALIY_REWARD_MIN}
+        "reward": {"money": DALIY_MONEY_REWARD, "weiwang": DALIY_REWARD_MAX, "banggong": DALIY_REWARD_MAX}
     },
     'luan_shi_wu_ji': {
         "display_name": '乱世舞姬',

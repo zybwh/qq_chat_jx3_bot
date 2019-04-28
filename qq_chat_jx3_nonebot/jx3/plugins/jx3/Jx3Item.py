@@ -1,3 +1,4 @@
+from .Jx3User import USER_STAT_DISPLAY
 ITEM_LIST = {
     "zhen_cheng_zhi_xin": {
         "display_name": "真橙之心",
@@ -15,14 +16,15 @@ ITEM_LIST = {
     "jia_zhuan_shen_can": {"display_name": "佳·转神餐", "rank": 3, "effect": {"energy": 30}, "cost": {"money": 500}},
     "rong_ding": {"display_name": "熔锭", "rank": 3, "effect": {'pve_weapon': 5}, "cost": {"banggong": 5000}},
     "mo_shi": {"display_name": "磨石", "rank": 3, "effect": {'pvp_weapon': 5}, "cost": {"weiwang": 5000}},
-    "ran": {"display_name": "绣", "rank": 0, "effect": {'pve_armor': 10}},
     "xiu": {"display_name": "绣", "rank": 4, "effect": {'pve_armor': 10}, "cost": {"banggong": 2000}},
+    "ran": {"display_name": "绣", "rank": 0, "effect": {'pve_armor': 10}},
     "yin": {"display_name": "印", "rank": 4, "effect": {'pvp_armor': 10}, "cost": {"weiwang": 2000}},
     "sui_rou": {"display_name": "碎肉", "rank": 4, "cost": {"money": 10}},
     "cu_bu": {"display_name": "粗布", "rank": 4, "cost": {"money": 10}},
     "gan_cao": {"display_name": "甘草", "rank": 4, "cost": {"money": 10}},
     "hong_tong": {"display_name": "红铜", "rank": 4, "cost": {"money": 10}},
-    "hun_hun_zheng_ming": {"display_name": "混混抓捕证明", "rank": 0}
+    "hun_hun_zheng_ming": {"display_name": "混混抓捕证明", "rank": 0},
+    "tuan_yuan_yan": {"display_name": "团圆宴", "rank": 2, "effect": {'attack_count': 5}, "cost": {"money": 500}}
 }
 
 def get_item_display_name(item_name):
@@ -37,6 +39,6 @@ def get_item_id_by_display_name(item_display_name):
 def print_item_cost(item_name):
     returnMsg = ""
     for k, v in ITEM_LIST[item_name]['cost'].items():
-        if k in STAT_DISPLAY_NAME:
-            returnMsg += " {0}：{1}".format(STAT_DISPLAY_NAME[k], v)
+        if k in USER_STAT_DISPLAY:
+            returnMsg += " {0}：{1}".format(USER_STAT_DISPLAY[k], v)
     return returnMsg

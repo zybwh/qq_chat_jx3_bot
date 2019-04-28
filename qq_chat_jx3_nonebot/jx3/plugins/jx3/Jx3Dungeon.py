@@ -6,6 +6,9 @@ DUNGEON_LIST = {
         "boss": ['xiong_chi', 'deng_wen_feng', 'shang_zhong_yong'],
         "reward": {
             "banggong": 1000
+        },
+        "mvp_reward": {
+            "bamggong": 500
         }
     },
     'tian_gong_fang': {
@@ -15,6 +18,9 @@ DUNGEON_LIST = {
         "boss": ['fang_ji_chang', 'ping_san_zhi', 'si_tu_yi_yi'],
         "reward": {
             "banggong": 2000
+        },
+        "mvp_reward": {
+            "bamggong": 1000
         }
     },
     'kong_wu_feng': {
@@ -23,7 +29,10 @@ DUNGEON_LIST = {
         "max_pve_reward_gain": 40000,
         "boss": ['feng_du', 'wang_yan_zhi', 'gui_ying_xiao_ci_lang'],
         "reward": {
-            "banggong": 3000
+            "banggong": 2000
+        },
+        "mvp_reward": {
+            "bamggong": 1000
         }
     }
 }
@@ -186,7 +195,7 @@ NPC_LIST = {
                 "weapon": 1,
                 "chance": 1,
                 'attack_count': 1,
-                'hp': 0.3
+                'max_hp': 0.3
             }
         ],
         "reward_chance": 1,
@@ -212,7 +221,7 @@ NPC_LIST = {
                 "hp_recover": 50,
                 "money": 10,
                 "chance": 0.2,
-                "hp": 0.25
+                "max_hp": 0.25
             }
         ],
         "reward_chance": 1,
@@ -269,7 +278,7 @@ NPC_LIST = {
                 "description": "敌方需要消耗额外1次攻击次数",
                 "chance": 0.5,
                 'attack_count': 1,
-                'hp': 0.5
+                'max_hp': 0.5
             }
         ],
         "reward_chance": 1,

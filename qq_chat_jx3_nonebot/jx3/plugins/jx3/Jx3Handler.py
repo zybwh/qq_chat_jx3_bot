@@ -37,7 +37,9 @@ class Jx3Handler(object):
                     else:
                         return_val = func(jx3Handler, *args, **kwargs)
 
-                    if not self.read_only:
+                    is_qiyu = await jx3Handler.do_qiyu()
+
+                    if is_qiyu or not self.read_only:
                         await jx3Handler._save_data()
 
                     return return_val
@@ -64,6 +66,9 @@ class Jx3Handler(object):
         'get_last_season_reward': []
     }
     _wanted_list = {}
+    _rob_protect = {}
+    _dungeon_status = {}
+    _qiyu_status = {}
 
     _jx3_daily_info = []
 
@@ -91,7 +96,8 @@ class Jx3Handler(object):
             self._today = yday
 
             for v in self._jx3_users.values():
-                v['daily_count'] = {}
+                v['daily_count'] = copy.deepcopy(daily_dict)
+                v['today'] = self._today
 
             async with aiohttp.ClientSession().get('http://www.jx3tong.com/?m=api&c=daily&a=daily_list') as response:
                 jx3_daily_details = json.loads(await response.text())
@@ -108,7 +114,7 @@ class Jx3Handler(object):
 
             msg = (
                 f"日常刷新啦\n"
-                f"本日剑三大战本：{big_war}, 战场：{battle_field}"
+                f"今日剑三大战本：{big_war}, 战场：{battle_field}"
             )
             await get_bot().send_group_msg(group_id=int(self._qq_group), message=msg)
 
@@ -116,18 +122,18 @@ class Jx3Handler(object):
             if self._jjc_data['day'] > JJC_DAYS_PER_SEASON:
                 self._jjc_data['day'] = 1
                 self._jjc_data['season'] += 1
-                self._jjc_data['last_seasion_data'] = copy.deepcopy(self._jjc_data['current_season_data'])
+                self._jjc_data['last_season_data'] = copy.deepcopy(self._jjc_data['current_season_data'])
                 self._jjc_data['current_season_data'] = {}
                 self._jjc_data['get_last_season_reward'] = []
 
                 returnMsg = f"名剑大会赛季{self._jjc_data['season']-1}已结束！赛季排行榜："
 
-                rank_list = sorted(self._jjc_data['last_seasion_data'], key=lambda x: self._jjc_data['last_seasion_data'][x]['score'], reverse=True)
+                rank_list = sorted(self._jjc_data['last_season_data'], key=lambda x: self._jjc_data['last_season_data'][x]['score'], reverse=True)
                 list_len = len(rank_list)
                 for i in range(5):
-                    if i < list_len and self._jjc_data['current_season_data'][rank_list[i]]['score'] != 0:
+                    if i < list_len and self._jjc_data['last_season_data'][rank_list[i]]['score'] != 0:
                         qq_nickname = await get_group_nickname(self._qq_group, rank_list[i])
-                        score = self._jjc_data['current_season_data'][rank_list[i]]['score']
+                        score = self._jjc_data['last_season_data'][rank_list[i]]['score']
                         returnMsg += (
                             f"\n{i + 1}. {qq_nickname} "
                             f"分数：{score} 段位：{min(score // 100, MAX_JJC_RANK)}"
@@ -168,6 +174,8 @@ class Jx3Handler(object):
                 with open(self.json_file_path, 'r', encoding='utf-8') as f:
                     game_data = json.loads(f.readline())
 
+            self._qiyu_status = game_data.get('qiyu_status', {})
+
             self._load_user_data(game_data.get('jx3_users', {}))
             self._load_equipment(game_data.get('equipment', {}))
             self._load_daily_count(game_data.get('daily_action_count', {}))
@@ -176,10 +184,12 @@ class Jx3Handler(object):
             self._lover_pending = game_data.get('lover_pending', {})
             self._jail_list = game_data.get('jail_list', {})
             self._today = game_data.get('today', 0)
-            self._group_info = game_data.get('', {})
+            self._group_info = game_data.get('group_info', {})
             self._jjc_data = game_data.get('jjc_data', self._jjc_data)
             self._wanted_list = game_data.get('wanted_list', {})
+            self._rob_protect = game_data.get('rob_protect', {})
             self._jx3_daily_info = game_data.get('jx3_daily_info', [])
+            self._dungeon_status = game_data.get('dungeon_status', {})
         except Exception as e:
             logging.exception(e)
 
@@ -195,6 +205,8 @@ class Jx3Handler(object):
                     val['qiyu'] = {'unknown': val['qiyu']}
 
                 self._jx3_users[str(k)] = val
+                if str(k) not in self._qiyu_status:
+                    self._qiyu_status[str(k)] = {'pending_qiyu': "", 'cd': {}, 'has_qiyu_in_same_command': False}
         except Exception as e:
             logging.exception(e)
 
@@ -225,22 +237,28 @@ class Jx3Handler(object):
                 "group_info": self._group_info,
                 "jjc_data": self._jjc_data,
                 "wanted_list": self._wanted_list,
-                "jx3_daily_info": self._jx3_daily_info
+                "rob_protect": self._rob_protect,
+                "dungeon_status": self._dungeon_status,
+                "jx3_daily_info": self._jx3_daily_info,
+                "qiyu_status":self._qiyu_status
             }
             return data
         except Exception as e:
             logging.exception(e)
 
-    def add_speech_count(self, qq_account: str):
-        try:
-            self._jx3_users[qq_account]['daily_count']['speech_count'] += 1
+            
+    @data_handler()
+    def add_speech_count(self, qq_account: str, msg: str):
+        self._jx3_users[qq_account]['daily_count']['speech_count'] += 1
 
-            if self._jx3_users[qq_account]['daily_count']['speech_energy_gain'] < DALIY_MAX_SPEECH_ENERGY_GAIN:
-                self._jx3_users[qq_account]['daily_count']['speech_energy_gain'] += SPEECH_ENERGY_GAIN
-                self._jx3_users[qq_account]['energy'] += SPEECH_ENERGY_GAIN
-        except Exception as e:
-            logging.exception(e)
-            self._read_data()
+        if self._jx3_users[qq_account]['daily_count']['speech_energy_gain'] < DALIY_MAX_SPEECH_ENERGY_GAIN:
+            self._jx3_users[qq_account]['daily_count']['speech_energy_gain'] += SPEECH_ENERGY_GAIN
+            self._jx3_users[qq_account]['energy'] += SPEECH_ENERGY_GAIN
+        
+        if qq_account not in self._qiyu_status:
+            self._qiyu_status[qq_account] = {'pending_qiyu': '', 'cd': {}}
+        
+        self._qiyu_status[qq_account]['pending_qiyu'] = 'luan_shi_wu_ji' if '[CQ:image,file=' in msg else 'fu_yao_jiu_tian' 
 
     @data_handler()
     def register(self, qq_account: str):
@@ -323,17 +341,18 @@ class Jx3Handler(object):
                 self._weiwang += faction_reward
                 returnMsg += f"\n获得昨日阵营奖励：威望+{faction_reward}"
 
-            if qq_account not in self._jjc_data['get_last_season_reward']:
+            if self._jjc_data['last_season_data'] != {} and qq_account not in self._jjc_data['get_last_season_reward']:
                 self._jjc_data['get_last_season_reward'].append(qq_account)
+                rank = self._jjc_data['last_season_data'][qq_account]['score'] // 100
 
-                rank_list = sorted(self._jjc_data['last_seasion_data'], key=lambda x: self._jjc_data['last_seasion_data'][x]['score'], reverse=True)
+                rank_list = sorted(self._jjc_data['last_season_data'], key=lambda x: self._jjc_data['last_season_data'][x]['score'], reverse=True)
                 rank_msg = ""
                 i = 0
                 modifier = 1
-                for k, v in rank_list.items():
+                for k in rank_list:
                     i += 1
                     if qq_account == k:
-                        rank_msg = f"\n上赛季名剑大会成绩： 分数：{v['score']}，段位：{rank}，排名：{i}。"
+                        rank_msg = f"\n上赛季名剑大会成绩： 分数：{self._jjc_data['last_season_data'][k]['score']}，段位：{rank}，排名：{i}。"
                         if i == 1:
                             modifier = 2
                             rank_msg += "由于上赛季排名为第1，获得2倍奖励。"
@@ -341,14 +360,16 @@ class Jx3Handler(object):
                             modifier = 1.5
                             rank_msg += f"由于上赛季排名前3，获得{modifier}倍奖励。"
 
-                rank = jjc_status['score'] // 100
+
                 jjc_weiwang_reward = rank * JJC_SEASON_PER_RANK_WEIWANG_REWARD
                 jjc_money_reward = rank * JJC_SEASON_PER_RANK_MONEY_REWARD
 
-                self.jx3_users[qq_account]['weiwang'] += int(jjc_weiwang_reward * modifier)
-                self.jx3_users[qq_account]['money'] += int(jjc_money_reward * modifier)
+                self._jx3_users[qq_account]['weiwang'] += int(jjc_weiwang_reward * modifier)
+                self._jx3_users[qq_account]['money'] += int(jjc_money_reward * modifier)
 
                 returnMsg += f"{rank_msg}\n获得上赛季名剑大会排行奖励：威望+{jjc_weiwang_reward} 金钱+{jjc_money_reward}"
+                
+                self._qiyu_status[qq_account]['pending_qiyu'] = 'hong_fu_qi_tian'
 
         return returnMsg
 
@@ -364,9 +385,9 @@ class Jx3Handler(object):
         else:
             if fromQQ_stat['lover'] == toQQ:
                 return f"[CQ:at,qq={fromQQ}] 你们已经绑定过啦！还想乱撒狗粮？".format()
-            elif fromQQ_stat['lover'] != 0:
+            elif fromQQ_stat['lover'] != "":
                 return f"[CQ:at,qq={fromQQ}]  想什么呢？你就不怕[CQ:at,qq={fromQQ_stat['lover']}]打你吗？"
-            elif toQQ_stat['lover'] != 0:
+            elif toQQ_stat['lover'] != "":
                 return f"[CQ:at,qq={fromQQ}] 人家已经有情缘啦，你是想上818吗？"
             elif toQQ in self._lover_pending and self._lover_pending[toQQ] != fromQQ:
                 return f"[CQ:at,qq={fromQQ}] 已经有人向[CQ:at,qq={toQQ}]求情缘啦，你是不是再考虑一下？"
@@ -375,14 +396,14 @@ class Jx3Handler(object):
                 for p in pendingList:
                     self._lover_pending.pop(p)
                 self._lover_pending[toQQ] = fromQQ
-                return f"[CQ:at,qq={fromQQ}]\n[CQ:at,qq={toQQ}] 希望与你绑定情缘，请输入 同意 或者 拒绝。"
+                return f"[CQ:at,qq={fromQQ}] [CQ:at,qq={toQQ}] 希望与你绑定情缘，请输入 同意 或者 拒绝。"
 
     @data_handler(return_list=True, async_func=True)
     async def accept_lover(self, toQQ: str):
         returnMsg = []
 
-        if toQQ in self.lover_pending.keys():
-            fromQQ = self.lover_pending.pop(toQQ)
+        if toQQ in self._lover_pending.keys():
+            fromQQ = self._lover_pending.pop(toQQ)
 
             if LOVE_ITEM_REQUIRED != "" and LOVE_ITEM_REQUIRED not in self._jx3_users[fromQQ]['bag'].keys():
                 returnMsg.append(f"[CQ:at,qq={fromQQ}] 虽然人家同意了但是你并没有1个{get_item_display_name(LOVE_ITEM_REQUIRED)}。")
@@ -412,9 +433,9 @@ class Jx3Handler(object):
     @data_handler()
     def reject_lover(self, toQQ: str):
         returnMsg = ""
-        if toQQ in self.lover_pending:
-            fromQQ = self.lover_pending.pop(toQQ)
-            returnMsg = f"落花有意，流水无情，[CQ:at,qq={fromQQ}] 婉拒了 [CQ:at,qq={toQQ}]。"
+        if toQQ in self._lover_pending:
+            fromQQ = self._lover_pending.pop(toQQ)
+            returnMsg = f"[CQ:at,qq={fromQQ}] 落花有意，流水无情， [CQ:at,qq={toQQ}]婉拒了你的请求。"
 
         return returnMsg
 
@@ -449,12 +470,14 @@ class Jx3Handler(object):
 
                     self._jx3_faction[self._jx3_users[qq_account]['faction_id']]['faction_point'] += YA_BIAO_FACTION_POINT_GAIN
 
+                    self._qiyu_status[qq_account]['pending_qiyu'] = 'hu_you_cang_sheng'
+
                     return (
                         f"[CQ:at,qq={qq_account}] 押镖成功！"
                         f"体力-{YA_BIAO_ENERGY_REQUIRED} 威望+{reward} 金钱+{DALIY_YA_BIAO_MONEY_REWARD}"
                     )
                 else:
-                    return f"[CQ:at,qq={0}] 一天最多押镖{1}次。你已经押了{1}趟啦，明天再来吧。".format(qq_account, MAX_DALIY_YA_BIAO_COUNT)
+                    return f"[CQ:at,qq={qq_account}] 一天最多押镖{MAX_DALIY_YA_BIAO_COUNT}次。你已经押了{MAX_DALIY_YA_BIAO_COUNT}趟啦，明天再来吧。"
 
     @data_handler(read_only=True)
     def check_bag(self, qq_account):
@@ -537,8 +560,8 @@ class Jx3Handler(object):
             returnMsg.append(f"[CQ:at,qq={fromQQ}] 对方是中立阵营，无法打劫。")
         elif fromQQ_stat['faction_id'] == toQQ_stat['faction_id'] and ROB_SAME_FACTION_PROTECTION:
             returnMsg.append(f"[CQ:at,qq={fromQQ}] 同阵营无法打劫！")
-        elif toQQ in self.rob_protect and ROB_PROTECT_COUNT != 0 and self.rob_protect[toQQ]['count'] >= ROB_PROTECT_COUNT and (time.time() - self.rob_protect[toQQ]['rob_time']) <= ROB_PROTECT_DURATION:
-            remain_msg = get_remaining_time_string(ROB_PROTECT_DURATION, self.rob_protect[toQQ]['rob_time'])
+        elif toQQ in self._rob_protect and ROB_PROTECT_COUNT != 0 and self._rob_protect[toQQ]['count'] >= ROB_PROTECT_COUNT and (time.time() - self._rob_protect[toQQ]['rob_time']) <= ROB_PROTECT_DURATION:
+            remain_msg = get_remaining_time_string(ROB_PROTECT_DURATION, self._rob_protect[toQQ]['rob_time'])
             returnMsg.append(f"[CQ:at,qq={fromQQ}] 对方最近被打劫太多次啦，已经受到了神之护佑。剩余时间：{remain_msg}")
         else:
             jail_status = self._is_in_jailed(fromQQ)
@@ -581,10 +604,10 @@ class Jx3Handler(object):
                     else:
                         weiwang_gain = 0
 
-                    if loser not in self.rob_protect:
-                        self.rob_protect[loser] = {"count": 0, "rob_time": None}
+                    if loser not in self._rob_protect:
+                        self._rob_protect[loser] = {"count": 0, "rob_time": None}
 
-                    if fromQQ_stat['daily_count']['rob']['money'] < ROB_DALIY_MAX_MONEY_GAIN and self.rob_protect[loser]['count'] <= ROB_PROTECT_NO_LOST_COUNT:
+                    if fromQQ_stat['daily_count']['rob']['money'] < ROB_DALIY_MAX_MONEY_GAIN and self._rob_protect[loser]['count'] <= ROB_PROTECT_NO_LOST_COUNT:
                         money_gain = min(money_amount, ROB_DALIY_MAX_MONEY_GAIN - fromQQ_stat['daily_count']['rob']['money'])
                     else:
                         money_gain = 0
@@ -601,19 +624,19 @@ class Jx3Handler(object):
                     self._jx3_users[winner]['money'] += money_gain
                     fromQQ_stat['daily_count']['rob']['money'] += money_gain
 
-                    if loser not in self.rob_protect:
-                        self.rob_protect[loser] = {'count': 0, 'rob_time': None}
+                    if loser not in self._rob_protect:
+                        self._rob_protect[loser] = {'count': 0, 'rob_time': None}
 
                     if money_gain != 0:
-                        self.rob_protect[loser]['count'] += 1
-                        self.rob_protect[loser]['rob_time'] = time.time()
+                        self._rob_protect[loser]['count'] += 1
+                        self._rob_protect[loser]['rob_time'] = time.time()
 
-                    if ROB_LOST_WEIWANG and self.rob_protect[loser]['count'] <= ROB_PROTECT_NO_LOST_COUNT:
+                    if ROB_LOST_WEIWANG and self._rob_protect[loser]['count'] <= ROB_PROTECT_NO_LOST_COUNT:
                         weiwang_lost = weiwang_gain
                     else:
                         weiwang_lost = 0
 
-                    if ROB_LOST_MONEY and self.rob_protect[loser]['count'] <= ROB_PROTECT_NO_LOST_COUNT:
+                    if ROB_LOST_MONEY and self._rob_protect[loser]['count'] <= ROB_PROTECT_NO_LOST_COUNT:
                         money_lost = money_gain
                     else:
                         money_lost = 0
@@ -635,6 +658,8 @@ class Jx3Handler(object):
 
                     if energy_cost != 0:
                         self._jx3_faction[fromQQ_stat['faction_id']]['point'] += ROB_FACTION_POINT_GAIN
+                        self._qiyu_status[fromQQ]['pending_qiyu'] = 'hu_xiao_shan_lin'
+                        self._qiyu_status[toQQ]['pending_qiyu'] = 'yin_yang_liang_jie'
 
                 else:
                     fromQQ_stat['daily_count']['rob']['last_rob_time'] = time.time()
@@ -646,7 +671,7 @@ class Jx3Handler(object):
                     else:
                         energy_cost = 0
 
-                    returnMsg.apeend(
+                    returnMsg.append(
                         (
                             f"打劫失败！成功率：{success_chance}%\n"
                             f"[CQ:at,qq={fromQQ}] 在野外打劫 [CQ:at,qq={toQQ}] 时被反杀，需要休息{remain_msg}。体力-{energy_cost}"
@@ -751,8 +776,8 @@ class Jx3Handler(object):
 
         qq_account_stat = self._jx3_users[qq_account]
 
-        if qq_account not in self.jjc_season_status:
-            self.jjc_season_status[qq_account] = {'score': 0, 'last_time': None, 'win': 0, 'lose': 0}
+        if qq_account not in self._jjc_data['current_season_data']:
+            self._jjc_data['current_season_data'][qq_account] = {'score': 0, 'last_time': None, 'win': 0, 'lose': 0}
 
         jail_status = self._is_in_jailed(qq_account)
         if jail_status != "":
@@ -760,11 +785,11 @@ class Jx3Handler(object):
         elif self._jx3_users[qq_account]['energy'] < JJC_ENERGY_COST:
             returnMsg.append(f"[CQ:at,qq={qq_account}] 体力不足！需要消耗{1}体力。")
         else:
-            remain_time = get_remaining_time_string(JJC_COOLDOWN, self.jjc_season_status[qq_account]['last_time'])
+            remain_time = get_remaining_time_string(JJC_COOLDOWN, self._jjc_data['current_season_data'][qq_account]['last_time'])
             if remain_time != "":
                 returnMsg.append(f"[CQ:at,qq={qq_account}] 你刚排过名剑大会了，请过{remain_time}之后再来吧。")
             else:
-                jjc_stat = self.jjc_season_status[qq_account]
+                jjc_stat = self._jjc_data['current_season_data'][qq_account]
 
                 rank = min(MAX_JJC_RANK, jjc_stat['score'] // 100)
 
@@ -772,9 +797,9 @@ class Jx3Handler(object):
                 random_person = available_list[random.randint(0, len(available_list) - 1)]
                 random_person_stat = self._jx3_users[random_person]
 
-                if random_person not in self.jjc_season_status:
-                    self.jjc_season_status[random_person] = {'score': 0, 'last_time': None, 'win': 0, 'lose': 0}
-                random_person_jjc_stat = self.jjc_season_status[random_person]
+                if random_person not in self._jjc_data['current_season_data']:
+                    self._jjc_data['current_season_data'][random_person] = {'score': 0, 'last_time': None, 'win': 0, 'lose': 0}
+                random_person_jjc_stat = self._jjc_data['current_season_data'][random_person]
 
                 random_person_rank = random_person_jjc_stat['score'] // 100
 
@@ -796,7 +821,7 @@ class Jx3Handler(object):
                 random_person_nickname = await get_group_nickname(self._qq_group, random_person)
                 returnMsg.append(
                     (
-                        f"CQ:at,qq={qq_account}] 加入名剑大会排位。\n"
+                        f"[CQ:at,qq={qq_account}] 加入名剑大会排位。\n"
                         f"你的名剑大会分数：{jjc_stat['score']} 段位：{rank}段。"
                         f"匹配到的对手是 {random_person_nickname}，名剑大会分数：{random_person_jjc_stat['score']} 段位：{random_person_rank}段"
                     )
@@ -843,18 +868,18 @@ class Jx3Handler(object):
 
                     double_msg = " (每日{1}场双倍奖励加成中：{0}/{1})".format(qq_account_stat['daily_count']['jjc']['win'] + 1, DALIY_JJC_DOUBLE_REWARD_COUNT) if reward_modifier == 2 else ""
 
-                    self.jjc_season_status[qq_account]['score'] += score_reward
-                    self.jjc_season_status[qq_account]['last_time'] = time.time()
+                    self._jjc_data['current_season_data'][qq_account]['score'] += score_reward
+                    self._jjc_data['current_season_data'][qq_account]['last_time'] = time.time()
 
-                    if self.jjc_season_status[random_person]['score'] < JJC_REWARD_RANK:
+                    if self._jjc_data['current_season_data'][random_person]['score'] < JJC_REWARD_RANK:
                         score_lost = 0
 
-                    self.jjc_season_status[random_person]['score'] -= score_lost
-                    self.jjc_season_status[qq_account]['win'] += 1
+                    self._jjc_data['current_season_data'][random_person]['score'] -= score_lost
+                    self._jjc_data['current_season_data'][qq_account]['win'] += 1
                     qq_account_stat['daily_count']['jjc']['win'] += 1
-                    self.jjc_season_status[random_person]['lose'] += 1
+                    self._jjc_data['current_season_data'][random_person]['lose'] += 1
 
-                    new_rank = self.jjc_season_status[qq_account]['score'] // 100
+                    new_rank = self._jjc_data['current_season_data'][qq_account]['score'] // 100
                     rank_msg = "\n段位变更为：{0}".format(new_rank) if new_rank != rank else ""
 
                     returnMsg.append(
@@ -876,17 +901,17 @@ class Jx3Handler(object):
                         score_reward = JJC_REWARD_RANK
                         score_lost = 0
 
-                    if self.jjc_season_status[qq_account]['score'] < JJC_REWARD_RANK:
+                    if self._jjc_data['current_season_data'][qq_account]['score'] < JJC_REWARD_RANK:
                         score_lost = 0
-                    self.jjc_season_status[qq_account]['score'] -= score_lost
+                    self._jjc_data['current_season_data'][qq_account]['score'] -= score_lost
 
-                    self.jjc_season_status[qq_account]['last_time'] = time.time()
-                    self.jjc_season_status[random_person]['score'] += score_reward
+                    self._jjc_data['current_season_data'][qq_account]['last_time'] = time.time()
+                    self._jjc_data['current_season_data'][random_person]['score'] += score_reward
 
-                    self.jjc_season_status[random_person]['win'] += 1
-                    self.jjc_season_status[qq_account]['lose'] += 1
+                    self._jjc_data['current_season_data'][random_person]['win'] += 1
+                    self._jjc_data['current_season_data'][qq_account]['lose'] += 1
 
-                    new_rank = self.jjc_season_status[random_person]['score'] // 100
+                    new_rank = self._jjc_data['current_season_data'][random_person]['score'] // 100
                     rank_msg = "\n段位变更为：{0}".format(new_rank) if new_rank != random_person_rank else ""
 
                     returnMsg.append(
@@ -1034,24 +1059,24 @@ class Jx3Handler(object):
                                 else:
                                     leader = self._get_leader_by_member(qq_account)
 
-                                if leader != "" and leader in self.dungeon_status:
-                                    self.dungeon_status[leader]['attack_count'][qq_account]['available_attack'] += v * item_amount
+                                if leader != "" and leader in self._dungeon_status:
+                                    self._dungeon_status[leader]['attack_count'][qq_account]['available_attack'] += v * item_amount
                                     msg += f"\n攻击次数+{v * item_amount}"
                                 else:
                                     msg = f"[CQ:at,qq={qq_account}] 你不在副本里，无法使用。"
                                     item_used = False
                             else:
                                 if k == 'pve_weapon':
-                                    self.equipment[qq_account]['weapon']['pve'] += v * item_amount
+                                    self._jx3_users[qq_account]['equipment']['weapon']['pve'] += v * item_amount
                                     msg += f"\n武器pve伤害+{v * item_amount}"
                                 elif k == 'pvp_weapon':
-                                    self.equipment[qq_account]['weapon']['pvp'] += v * item_amount
+                                    self._jx3_users[qq_account]['equipment']['weapon']['pvp'] += v * item_amount
                                     msg += f"\n武器pvp伤害+{v * item_amount}"
                                 elif k == 'pve_armor':
-                                    self.equipment[qq_account]['armor']['pve'] += v * item_amount
+                                    self._jx3_users[qq_account]['equipment']['armor']['pve'] += v * item_amount
                                     msg += f"\n防具pve血量+{v * item_amount}"
                                 elif k == 'pvp_armor':
-                                    self.equipment[qq_account]['armor']['pvp'] += v * item_amount
+                                    self._jx3_users[qq_account]['equipment']['armor']['pvp'] += v * item_amount
                                     msg += f"\n防具pvp血量+{v * item_amount}"
 
                         returnMsg.append(msg)
@@ -1128,6 +1153,7 @@ class Jx3Handler(object):
                         else:
                             self._modify_item_in_bag(qq_account, reward_item_name, 1)
                             returnMsg += f"\n你一铲子下去，挖到了一个神秘的东西: {get_item_display_name(reward_item_name)}+1 体力-{WA_BAO_ENERGY_REQUIRED}"
+                            self._qiyu_status[qq_account]['pending_qiyu'] = 'san_shan_si_hai'
                 else:
                     returnMsg = f"[CQ:at,qq={0}] 一天最多挖宝{MAX_DALIY_WA_BAO_COUNT}次。你已经挖了{MAX_DALIY_WA_BAO_COUNT}次啦，今天休息休息吧。"
 
@@ -1341,14 +1367,14 @@ class Jx3Handler(object):
         returnMsg = []
 
         if self._jx3_users[fromQQ]['money'] < WANTED_MONEY_REWARD:
-            returnMsg = f"[CQ:at,qq={fromQQ}] 金钱不足，无法悬赏。".format()
+            returnMsg.append(f"[CQ:at,qq={fromQQ}] 金钱不足，无法悬赏。")
         elif self._jx3_users[toQQ]['daily_count']['jailed'] >= JAIL_TIMES_PROTECTION:
-            returnMsg = f"[CQ:at,qq={fromQQ}] 对方今天已经被抓进去{JAIL_TIMES_PROTECTION}次了，无法悬赏。"
+            returnMsg.append(f"[CQ:at,qq={fromQQ}] 对方今天已经被抓进去{JAIL_TIMES_PROTECTION}次了，无法悬赏。")
         else:
             self._jx3_users[fromQQ]['money'] -= WANTED_MONEY_REWARD
 
-            returnMsg += f"[CQ:at,qq={fromQQ}] 悬赏成功！\n金钱-{WANTED_MONEY_REWARD}"
-            returnMsg += self._put_wanted_internal(toQQ, WANTED_MONEY_REWARD)
+            returnMsg.append(f"[CQ:at,qq={fromQQ}] 悬赏成功！\n金钱-{WANTED_MONEY_REWARD}")
+            returnMsg.append(self._put_wanted_internal(toQQ, WANTED_MONEY_REWARD))
 
         return returnMsg
 
@@ -1360,38 +1386,38 @@ class Jx3Handler(object):
 
         if jail_status != "":
             returnMsg = jail_status
-        elif toQQ in self.jail_list and time.time() - self.jail_list[toQQ] < JAIL_DURATION:
+        elif toQQ in self._jail_list and time.time() - self._jail_list[toQQ] < JAIL_DURATION:
                 returnMsg = f"[CQ:at,qq={fromQQ}] 对方在监狱里蹲着呢，你这是要劫狱吗？"
-        elif toQQ in self.wanted_list and time.time() - self.wanted_list[toQQ]['wanted_time'] < WANTED_DURATION:
+        elif toQQ in self._wanted_list and time.time() - self._wanted_list[toQQ]['wanted_time'] < WANTED_DURATION:
 
-            if 'failed_try' in self.wanted_list[toQQ] and fromQQ_str in self.wanted_list[toQQ]['failed_try'] and time.time() - self.wanted_list[toQQ]['failed_try'][fromQQ] < WANTED_COOLDOWN:
-                remain_time_msg = get_remaining_time_string(WANTED_DURATION, self.wanted_list[toQQ_str]['failed_try'][fromQQ_str])
+            if 'failed_try' in self._wanted_list[toQQ] and fromQQ in self._wanted_list[toQQ]['failed_try'] and time.time() - self._wanted_list[toQQ]['failed_try'][fromQQ] < WANTED_COOLDOWN:
+                remain_time_msg = get_remaining_time_string(WANTED_DURATION, self._wanted_list[toQQ_str]['failed_try'][fromQQ])
                 returnMsg = f"[CQ:at,qq={fromQQ}] 你已经尝试过抓捕了，奈何技艺不佳。请锻炼{remain_time_msg}后再来挑战！"
-            elif self.jx3_users[fromQQ]['energy'] < WANTED_ENERGY_COST:
+            elif self._jx3_users[fromQQ]['energy'] < WANTED_ENERGY_COST:
                 returnMsg = f"[CQ:at,qq={fromQQ}] 体力不足！需要消耗{WANTED_ENERGY_COST}体力。"
             else:
                 fromQQ_battle_stat = {
                     'qq_account': fromQQ,
-                    'equipment': copy.deepcopy(fromQQ_stat['equipment'])
+                    'equipment': copy.deepcopy(self._jx3_users[fromQQ]['equipment'])
                 }
                 toQQ_battle_stat = {
                     'qq_account': toQQ,
-                    'equipment': copy.deepcopy(toQQ_stat['equipment'])
+                    'equipment': copy.deepcopy(self._jx3_users[toQQ]['equipment'])
                 }
                 battle_result = self._calculate_battle(fromQQ_battle_stat, toQQ_battle_stat, 'pvp')
                 winner = battle_result['winner']
                 loser = battle_result['loser']
                 success_chance = battle_result['success_chance']
 
-                self.jx3_users[fromQQ_str]['energy'] -= WANTED_ENERGY_COST
+                self._jx3_users[fromQQ]['energy'] -= WANTED_ENERGY_COST
 
                 if winner == fromQQ:
-                    reward = int(0.9 * self.wanted_list[toQQ]['reward'])
-                    self.jx3_users[fromQQ]['money'] += reward
-                    self.wanted_list.pop(toQQ)
-                    self.jail_list[toQQ] = time.time()
+                    reward = int(0.9 * self._wanted_list[toQQ]['reward'])
+                    self._jx3_users[fromQQ]['money'] += reward
+                    self._wanted_list.pop(toQQ)
+                    self._jail_list[toQQ] = time.time()
 
-                    self.daliy_action_count[yday_str][toQQ]['jailed'] += 1
+                    self._jx3_users[toQQ]['daily_count']['jailed'] += 1
 
                     fromQQ_nickname = await get_group_nickname(self._qq_group, fromQQ)
                     toQQ_nickname = await get_group_nickname(self._qq_group, toQQ)
@@ -1400,10 +1426,13 @@ class Jx3Handler(object):
                         f"{toQQ_nickname}在时限内被{fromQQ_nickname}成功抓捕，悬赏解除。成功率：{success_chance}%\n"
                         f"[CQ:at,qq={fromQQ}] 获得：金钱+{reward}金 体力-{WANTED_ENERGY_COST}"
                     )
+
+                    self._qiyu_status[fromQQ]['pending_qiyu'] = 'qing_feng_bu_wang'
+                    self._qiyu_status[toQQ]['pending_qiyu'] = 'yin_yang_liang_jie'
                 else:
-                    if 'failed_try' not in self.wanted_list[toQQ]:
-                        self.wanted_list[toQQ]['failed_try'] = {}
-                    self.wanted_list[toQQ]['failed_try'][fromQQ] = time.time()
+                    if 'failed_try' not in self._wanted_list[toQQ]:
+                        self._wanted_list[toQQ]['failed_try'] = {}
+                    self._wanted_list[toQQ]['failed_try'][fromQQ] = time.time()
                     returnMsg = f"[CQ:at,qq={fromQQ}] 抓捕失败，成功率：{success_chance}% 体力-{WANTED_ENERGY_COST}"
 
         return returnMsg
@@ -1498,6 +1527,8 @@ class Jx3Handler(object):
                             )
                         )
 
+                        self._qiyu_status[qq_account]['pending_qiyu'] = 'cha_guan_qi_yuan'
+
                         if len(self._jx3_users[qq_account]['daily_count']['cha_guan']['complete_quest']) == len(CHA_GUAN_QUEST_INFO):
                             banggong_reward = random.randint(CHA_GUAN_FINAL_REWARD_BANGGONG_MIN, CHA_GUAN_FINAL_REWARD_BANGGONG_MAX)
                             self._jx3_users[qq_account]['banggong'] += banggong_reward
@@ -1511,61 +1542,66 @@ class Jx3Handler(object):
 
         return returnMsg
 
-    def do_qiyu(self, qiyu_type):
-        returnMsg = ""
+    async def do_qiyu(self):
+        has_qiyu = False
+        print(self._qiyu_status)
+        pending_qiyu_list = [k for k, v in self._qiyu_status.items() if v['pending_qiyu'] != ""]
 
-        try:
-            logging.info(qiyu_type)
+        for qq_account in pending_qiyu_list:
+            qiyu_name = self._qiyu_status[qq_account]['pending_qiyu']
+            qiyu = QIYU_LIST[qiyu_name]
 
-            for qq_account_str, qiyu_name in qiyu_type.items():
-                qiyu = QIYU_LIST[qiyu_name]
+            if self._qiyu_status[qq_account].get('has_qiyu_in_same_command', False):
+                logging.info("this qq has qiyu already in same command, ignoring")
+                self._qiyu_status[qq_account]['has_qiyu_in_same_command'] = False
+                continue
 
-                if qiyu_name in self.qiyu_status and self.qiyu_status[qiyu_name]['qq'] == qq_account_str and time.time() - self.qiyu_status[qiyu_name]['last_time'] < qiyu['cooldown']:
-                    remaining_time_msg = get_remaining_time_string(qiyu['cooldown'], self.qiyu_status[qiyu_name]['last_time'])
-                    logging.info(f"qiyu in cd! qq: {qq_account_str} remain_time: {remaining_time_msg}")
+            if time.time() - self._qiyu_status[qq_account]['cd'].get(qiyu_name, 0) < qiyu['cooldown']:
+                logging.info('qi yu in cd!')
+                self._qiyu_status[qq_account]['pending_qiyu'] = ""
+                continue
+
+            require_meet = True
+            if 'require' in qiyu:
+                for key, val in qiyu['require'].items():
+                    if key in self._jx3_users[qq_account]:
+                        require_meet = require_meet and (self._jx3_users[qq_account][key] >= val)
+                        requireMsg += f"{key}: {self._jx3_users[qq_account][key]} > {val}; "
+
+            if not require_meet:
+                logging.info(f"qiyu require not met! qq: {qq_account} require: {requireMsg}")
+            else:
+                rand = random.uniform(0, 1)
+
+                if rand > qiyu['chance']:
+                    logging.info(f"No qiyu qq: {qq_account} chance: {rand} > {qiyu['chance']}")
                 else:
-                    requireMsg = ""
-                    require_meet = True
-                    if 'require' in qiyu:
-                        for k, v in qiyu['require'].items():
-                            if k in self._jx3_users[qq_account_str]:
-                                require_meet = require_meet and (self._jx3_users[qq_account_str][k] >= v)
-                                requireMsg += f"{k}:{self._jx3_users[qq_account_str][k]} > {v}; "
+                    rewardMsg = ""
+                    for k, v in qiyu['reward'].items():
+                        if k in self._jx3_users[qq_account]:
+                            self._jx3_users[qq_account][k] += v
+                            rewardMsg += f"\n{USER_STAT_DISPLAY[k]}+{v}"
 
-                    if not require_meet:
-                        logging.info(f"qiyu require not met! qq: {qq_account_str} require: {requireMsg}")
-                    else:
-                        rand = random.uniform(0, 1)
+                    if qiyu_name not in self._jx3_users[qq_account]['qiyu']:
+                        self._jx3_users[qq_account]['qiyu'][qiyu_name] = 0
 
-                        if rand > qiyu['chance']:
-                            logging.info(f"No qiyu qq: {qq_account_str} chance: {rand} > {qiyu['chance']}")
-                        else:
-                            rewardMsg = ""
-                            for k, v in qiyu['reward'].items():
-                                if k in self._jx3_users[qq_account_str]:
-                                    self._jx3_users[qq_account_str][k] += v
-                                    rewardMsg += f"\n{USER_STAT_DISPLAY[k]}+{v}"
+                    self._jx3_users[qq_account]['qiyu'][qiyu_name] += 1
 
-                            self._jx3_users[qq_account_str]['qiyu'][qiyu_name] += 1
+                    self._qiyu_status[qq_account]['cd'][qiyu_name] = time.time()
+                    self._qiyu_status[qq_account]['has_qiyu_in_same_command'] = True
+                    self._qiyu_status[qq_account]['pending_qiyu'] = ""
 
-                            if qiyu_name not in self.qiyu_status:
-                                self.qiyu_status[qiyu_name] = {'qq': "", 'last_time': None}
-                            self.qiyu_status[qiyu_name]['qq'] = qq_account_str
-                            self.qiyu_status[qiyu_name]['last_time'] = time.time()
+                    returnMsg = (
+                        f"{qiyu['description'].format(qq_account)}\n"
+                        f"获得奖励：{rewardMsg}"
+                    )
 
-                            returnMsg = (
-                                f"{qiyu['description'].format(qq_account_str)}\n"
-                                f"获得奖励：{rewardMsg}"
-                            )
+                    await get_bot().send_group_msg(group_id=int(self._qq_group), message=returnMsg)
+                    has_qiyu = True
 
-                            logging.info(f"qiyu! qq: {qq_account_str} qiyu_name: {qiyu_name} success_chance: {rand} < {qiyu['chance']}")
+                    logging.info(f"qiyu! qq: {qq_account} qiyu_name: {qiyu_name} success_chance: {rand} < {qiyu['chance']}")
 
-        except Exception as e:
-            logging.exception(e)
-            returnMsg = ""
-            self._read_data()
-
-        return returnMsg
+        return has_qiyu
 
     @data_handler(read_only=True)
     def get_jjc_info(self, qq_account: str):
@@ -1597,7 +1633,7 @@ class Jx3Handler(object):
 
     @data_handler()
     def remove_lover(self, qq_account):
-        if self._jx3_users[qq_account]['lover'] == 0:
+        if self._jx3_users[qq_account]['lover'] == "":
             returnMsg = f"[CQ:at,qq={qq_account}] 你没有情缘，别乱用。"
         else:
             lover = self._jx3_users[qq_account]['lover']
@@ -1605,7 +1641,7 @@ class Jx3Handler(object):
             self._jx3_users[qq_account]['lover_time'] = None
             self._jx3_users[qq_account]['lover'] = ""
             self._jx3_users[lover]['lover_time'] = None
-            self.jx3_user[lover]['lover'] = ""
+            self._jx3_users[lover]['lover'] = ""
             returnMsg = f"[CQ:at,qq={qq_account}] 决定去寻找新的旅程。"
 
         return returnMsg
@@ -1643,7 +1679,7 @@ class Jx3Handler(object):
             returnMsg = f"[CQ:at,qq={qq_account}] 你已经创建了一个队伍，不能加入其他人的队伍，输入【退出队伍】退出当前队伍。"
         elif leader not in self._group_info:
             returnMsg = f"[CQ:at,qq={qq_account}] 队伍不存在。"
-        elif leader in self.dungeon_status:
+        elif leader in self._dungeon_status:
             leader_nickname = await get_group_nickname(self._qq_group, leader)
             returnMsg = f"[CQ:at,qq={qq_account}] {leader_nickname} 的队伍正在副本里，无法加入。"
         elif len(self._group_info[leader]['member_list']) >= MAX_GROUP_MEMBER:
@@ -1675,9 +1711,10 @@ class Jx3Handler(object):
             if self._group_info[leader]['member_list'] != []:
                 for member in self._group_info[leader]['member_list']:
                     member_nickname = await get_group_nickname(self._qq_group, member)
+                    pve_gear_point = self._calculate_gear_point(self._jx3_users[member]['equipment'])['pve']
                     returnMsg += (
                         f"\n{member_nickname} "
-                        f"pve装分：{self._jx3_users[member]['pve_gear_point']} {'(队长) ' if member == leader else ''}"
+                        f"pve装分：{pve_gear_point} {'(队长) ' if member == leader else ''}"
                     )
 
         return returnMsg
@@ -1705,8 +1742,8 @@ class Jx3Handler(object):
                 returnMsg = f"[CQ:at,qq={qq_account}] 你离开了 {leader_nickname} 的队伍。"
         else:
             self._group_info.pop(qq_account)
-            if qq_account in self.dungeon_status:
-                self.dungeon_status.pop(qq_account)
+            if qq_account in self._dungeon_status:
+                self._dungeon_status.pop(qq_account)
             returnMsg = f"[CQ:at,qq={qq_account}] 你的队伍解散了。"
 
         return returnMsg
@@ -1734,13 +1771,15 @@ class Jx3Handler(object):
 
         gear_point = self._calculate_gear_point(val['equipment'])
         dungeon_list = sorted(DUNGEON_LIST, key=lambda x: DUNGEON_LIST[x]['max_pve_reward_gain'])
+        index = 0
         for k in dungeon_list:
+            index += 1
             has_cd = k in val['daily_count']['dungeon'] and val['daily_count']['dungeon'][k] == True
             has_reward = gear_point['pve'] <= DUNGEON_LIST[k]['max_pve_reward_gain']
             can_enter = gear_point['pve'] >= DUNGEON_LIST[k].get('min_pve_reward_enter', 0)
             can_enter_msg = "有cd" if has_cd else "可进入" if can_enter else "不可进入"
             has_reward_msg = "无boss奖励" if not has_reward else "有boss奖励" if can_enter else "装分不足"
-            returnMsg += f"\n{DUNGEON_LIST[k]['display_name']} {can_enter_msg} {has_reward_msg}"
+            returnMsg += f"\n{index}. {DUNGEON_LIST[k]['display_name']} {can_enter_msg} {has_reward_msg}"
 
         return returnMsg
 
@@ -1762,7 +1801,7 @@ class Jx3Handler(object):
                     returnMsg.append(f"[CQ:at,qq={qq_account}] 必须创建队伍才能进入副本。")
                 else:
                     returnMsg.append(f"[CQ:at,qq={qq_account}] 你不是队长！无法使用此命令。")
-            elif qq_account in self.dungeon_status:
+            elif qq_account in self._dungeon_status:
                 returnMsg.append(f"[CQ:at,qq={qq_account}] 你已经在副本里了。")
             else:
                 leader = qq_account
@@ -1794,33 +1833,33 @@ class Jx3Handler(object):
                             no_energy.append(m)
 
                 if len(has_cd) > 0:
-                    returnMsg.append(f"队伍中{' '.join(['[CQ:at,qq={}}]'.format(m) for m in has_cd])}有此副本cd，无法进入。")
+                    returnMsg.append(f"队伍中{' '.join(['[CQ:at,qq={}]'.format(m) for m in has_cd])}有此副本cd，无法进入。")
                 elif len(pve_gear_point_too_high) > 0:
                     returnMsg.append(
                         (
-                            f"队伍中{' '.join(['[CQ:at,qq={}}]'.format(m) for m in pve_gear_point_too_high])}pve装备太厉害啦，"
+                            f"队伍中{' '.join(['[CQ:at,qq={}]'.format(m) for m in pve_gear_point_too_high])}pve装备太厉害啦，"
                             f"已经不能获得boss奖励了，仅可获得通关奖励且不消耗体力。如果确定还要进本的话，请再次输入 进入副本{DUNGEON_LIST[dungeon_id]['display_name']}"
                         )
                     )
                 elif len(pve_gear_point_too_low) > 0:
                     returnMsg.append(
                         (
-                            f"队伍中{' '.join(['[CQ:at,qq={}}]'.format(m) for m in pve_gear_point_too_low])}"
-                            f"装分未满副本要求({DUNGEON_LIST[dungeon_id].getget('min_pve_reward_enter', 0)})，无法进入。"
+                            f"队伍中{' '.join(['[CQ:at,qq={}]'.format(m) for m in pve_gear_point_too_low])}"
+                            f"装分未满副本要求({DUNGEON_LIST[dungeon_id].get('min_pve_reward_enter', 0)})，无法进入。"
                         )
                     )
                 elif len(no_energy) > 0:
-                    returnMsg.append(f"队伍中{' '.join(['[CQ:at,qq={}}]'.format(m) for m in no_energy])}体力不足({DUNGEON_ENERGY_REQUIRED})，无法进入。")
+                    returnMsg.append(f"队伍中{' '.join(['[CQ:at,qq={}]'.format(m) for m in no_energy])}体力不足({DUNGEON_ENERGY_REQUIRED})，无法进入。")
                 else:
-                    self.dungeon_status[leader] = copy.deepcopy(DUNGEON_LIST[dungeon_id])
-                    self.dungeon_status[leader]['boss_detail'] = []
-                    self.dungeon_status[leader]['attack_count'] = {}
-                    self.dungeon_status[leader]['no_reward'] = copy.deepcopy(pve_gear_point_too_high)
+                    self._dungeon_status[leader] = copy.deepcopy(DUNGEON_LIST[dungeon_id])
+                    self._dungeon_status[leader]['boss_detail'] = []
+                    self._dungeon_status[leader]['attack_count'] = {}
+                    self._dungeon_status[leader]['no_reward'] = copy.deepcopy(pve_gear_point_too_high)
 
-                    for boss_id in self.dungeon_status[leader]['boss']:
+                    for boss_id in self._dungeon_status[leader]['boss']:
                         boss = copy.deepcopy(NPC_LIST[boss_id])
                         boss['remain_hp'] = boss['equipment']['armor']['pve']
-                        self.dungeon_status[leader]['boss_detail'].append(boss)
+                        self._dungeon_status[leader]['boss_detail'].append(boss)
 
                     energy_msg = ""
 
@@ -1831,10 +1870,10 @@ class Jx3Handler(object):
                             energy_msg += "[CQ:at,qq={0}] ".format(m)
                     returnMsg.append(f"[CQ:at,qq={qq_account}] 进入副本 {dungeon_name} 成功！{energy_msg}体力-{DUNGEON_ENERGY_REQUIRED}")
 
-                    boss = self.dungeon_status[leader]['boss_detail'][0]
+                    boss = self._dungeon_status[leader]['boss_detail'][0]
                     returnMsg.append(
                         (
-                            f"boss战：{boss['display_name']} (1/{len(self.dungeon_status[leader]['boss_detail'])}\n"
+                            f"boss战：{boss['display_name']} (1/{len(self._dungeon_status[leader]['boss_detail'])}\n"
                             f"请输入每位队员输入【攻击boss】开始战斗。"
                         )
                     )
@@ -1848,19 +1887,19 @@ class Jx3Handler(object):
         else:
             leader = self._get_leader_by_member(qq_account)
 
-        dungeon = self.dungeon_status.get(leader, {})
+        dungeon = self._dungeon_status.get(leader, {})
 
         if dungeon != {} and leader != "":
             current_boss = dungeon['boss_detail'][0]
-            rank_list = sorted(dungeon['attack_count'].items(), lambda x, y: cmp(x[1]['damage'], y[1]['damage']), reverse=True)
+            rank_list = sorted(dungeon['attack_count'].keys(), key=lambda x: dungeon['attack_count'][x]['damage'], reverse=True)
             list_len = len(rank_list)
             damage_msg = ""
             for i in range(MAX_GROUP_MEMBER):
                 if i < list_len:
-                    nickname = await get_group_nickname(self.qq_group, int(rank_list[i][0]))
+                    nickname = await get_group_nickname(self._qq_group, int(rank_list[i]))
                     damage_msg += (
-                        f"\n{i + 1}. {nickname} 伤害：{rank_list[i][1]['damage']}"
-                        f" 次数：{dungeon['attack_count'][rank_list[i][0]]['success_attack_count']}/{dungeon['attack_count'][rank_list[i][0]]['total_attack_count']}"
+                        f"\n{i + 1}. {nickname} 伤害：{dungeon['attack_count'][rank_list[i]]['damage']}"
+                        f" 次数：{dungeon['attack_count'][rank_list[i]]['success_attack_count']}/{dungeon['attack_count'][rank_list[i]]['total_attack_count']}"
                     )
                 else:
                     break
@@ -1906,7 +1945,7 @@ class Jx3Handler(object):
             and fromQQ_stat.get('remain_hp', fromQQ_equipment['armor'][gear_mode]) <= max_hp
 
     def _apply_skill_internal(self, buff, equipment, stat, gear_mode):
-        if 'max_count' in buff and buff.get('count', 0) > 0:
+        if 'max_count' in buff and buff.get('count', -1) >= 0:
             equipment['weapon'][gear_mode] = int(equipment['weapon'][gear_mode] * (1 + buff['weapon'] * buff['count']))
             description = buff['description'].format(buff['count'], buff['max_count'])
         elif 'money' in buff:
@@ -1931,7 +1970,7 @@ class Jx3Handler(object):
         for buff in random.sample(buff_list, len(buff_list)):
             rand = random.uniform(0, 1)
 
-            if rand <= buff['chance'] and self._get_hp_range(buff, equipment, stat):
+            if rand <= buff['chance'] and self._get_hp_range(buff, equipment, stat, gear_mode):
                 description = self._apply_skill_internal(buff, equipment, stat, gear_mode)
                 buff_msg = "\n{0}使出了招数：{1}。{2}".format(stat['display_name'], buff['display_name'], description)
 
@@ -1942,7 +1981,7 @@ class Jx3Handler(object):
         for buff in random.sample(buff_list, len(buff_list)):
             rand = random.uniform(0, 1)
 
-            if rand <= buff['chance'] and self._get_hp_range(buff, fromQQ_equipment, fromQQ_stat):
+            if rand <= buff['chance'] and self._get_hp_range(buff, fromQQ_equipment, fromQQ_stat, gear_mode):
                 description = self._apply_skill_internal(buff, toQQ_equipment, toQQ_stat, gear_mode)
                 buff_msg = "\n{0}使出了招数：{1}。{2}".format(fromQQ_stat['display_name'], buff['display_name'], description)
 
@@ -1962,9 +2001,8 @@ class Jx3Handler(object):
 
         buff_msg += self._apply_skill_self(fromQQ_buff, fromQQ_equipment, fromQQ_stat, gear_mode)
         buff_msg += self._apply_skill_self(toQQ_buff, toQQ_equipment, toQQ_stat, gear_mode)
-
-        buff_msg += self._apply_skill_other(fromQQ_buff, fromQQ_equipment, fromQQ_stat, toQQ_equipment, toQQ_stat, gear_mode)
-        buff_msg += self._apply_skill_other(toQQ_buff, toQQ_equipment, toQQ_stat, fromQQ_equipment, fromQQ_stat, gear_mode)
+        buff_msg += self._apply_skill_other(fromQQ_debuff, fromQQ_equipment, fromQQ_stat, toQQ_equipment, toQQ_stat, gear_mode)
+        buff_msg += self._apply_skill_other(toQQ_debuff, toQQ_equipment, toQQ_stat, fromQQ_equipment, fromQQ_stat, gear_mode)
 
         return buff_msg
 
@@ -2003,8 +2041,8 @@ class Jx3Handler(object):
 
         return {'winner': winner, 'loser': loser, 'success_chance': int(math.floor(success_chance * 100)), 'damage': fromQQ_weapon, 'buff_msg': buff_msg}
 
-    @data_handler(return_list=True)
-    def attack_boss(self, qq_account: str) -> list:
+    @data_handler(return_list=True, async_func=True)
+    async def attack_boss(self, qq_account: str) -> list:
         returnMsg = []
 
         if qq_account in self._group_info:
@@ -2012,7 +2050,7 @@ class Jx3Handler(object):
         else:
             leader = self._get_leader_by_member(qq_account)
 
-        dungeon = self.dungeon_status.get(leader, {})
+        dungeon = self._dungeon_status.get(leader, {})
 
         if dungeon != {} and leader != "":
             current_boss = dungeon['boss_detail'][0]
@@ -2044,16 +2082,19 @@ class Jx3Handler(object):
                 )
                 returnMsg.append(f"[CQ:at,qq={qq_account}] 你没有攻击次数啦，还需要等待{remain_time_string}。")
             else:
+                # nickname = await get_group_nickname(self._qq_group, qq_account)
                 qq_stat = {
                     'qq_account': qq_account,
+                    # 'display_name': nickname,
                     'equipment': copy.deepcopy(self._jx3_users[qq_account]['equipment']),
                     'remain_hp': dungeon['attack_count'][qq_account]
                 }
                 boss_stat = {
                     'qq_account': 'boss',
+                    'display_name': current_boss['display_name'],
                     'equipment': copy.deepcopy(current_boss['equipment']),
-                    'buff': current_boss.get('buff', {}),
-                    'debuff': current_boss.get('debuff', {}),
+                    'buff': current_boss.get('buff', []),
+                    'debuff': current_boss.get('debuff', []),
                     'remain_hp': current_boss['remain_hp']
                 }
 
@@ -2067,124 +2108,120 @@ class Jx3Handler(object):
 
                 dungeon['attack_count'][qq_account]['total_attack_count'] += 1
 
-                returnMsg.append(
-                    (
-                        f"[CQ:at,qq={qq_account}] 你对{current_boss['display_name']}发起了攻击。"
-                        f"剩余攻击次数：{dungeon['attack_count'][qq_account]['available_attack'] - 1}/{DUNGEON_MAX_ATTACK_COUNT}"
-                        f"{buff_msg}"
-                    )
+                battle_msg = (
+                    f"[CQ:at,qq={qq_account}] 你对{current_boss['display_name']}发起了攻击。"
                 )
 
                 boss_max_hp = current_boss['equipment']['armor']['pve']
 
-
-
                 if loser == qq_account:
                     dungeon['attack_count'][qq_account]['available_attack'] -= 1 + qq_stat.get('available_attack_modifier', 0)
-                    returnMsg.append(
-                        (
-                            f"\n攻击失败！成功率：{success_chance}%。"
-                            f"{current_boss['display_name']}血量：{current_boss['remain_hp']}/{boss_max_hp}"
-                        )
+                    battle_msg += (
+                        f"剩余攻击次数：{dungeon['attack_count'][qq_account]['available_attack']}/{DUNGEON_MAX_ATTACK_COUNT}"
+                        f"{buff_msg}"
+                        f"\n攻击失败！成功率：{success_chance}%。"
+                        f"{current_boss['display_name']}血量：{current_boss['remain_hp']}/{boss_max_hp}"
                     )
                 else:
                     dungeon['attack_count'][qq_account]['damage'] += damage
                     dungeon['attack_count'][qq_account]['available_attack'] -= 1 + qq_stat.get('available_attack_modifier', 0)
-                    current_boss['remain_hp'] -= damage
                     dungeon['attack_count'][qq_account]['success_attack_count'] += 1
                     dungeon['attack_count'][qq_account]['remain_hp'] += min(qq_stat.get('recover_hp', 0), self._jx3_users[qq_account]['equipment']['armor']['pve'] - qq_stat.get('recover_hp', 0))
                     current_boss['remain_hp'] += min(boss_stat.get('recover_hp', 0), boss_max_hp - boss_stat.get('recover_hp', 0))
+                    current_boss['remain_hp'] -= min(damage, current_boss['remain_hp'])
 
                     if 'buff' in current_boss:
                         for buff in current_boss['buff']:
                             if buff.get('increase_type', '') == 'lose' and 'count' in buff and 'max_count' in buff:
                                 buff['count'] += 1 if buff['count'] < buff['max_count'] else 0
 
+                    battle_msg += (
+                        f"剩余攻击次数：{dungeon['attack_count'][qq_account]['available_attack']}/{DUNGEON_MAX_ATTACK_COUNT}"
+                        f"{buff_msg}"
+                        f"\n攻击成功！成功率：{success_chance}%，"
+                        f"造成伤害：{damage}。"
+                        f"{current_boss['display_name']}血量：{current_boss['remain_hp']}/{boss_max_hp}"
+                    )
+
+                returnMsg.append(battle_msg)
+
+                if current_boss['remain_hp'] <= 0:
+                    reward_member_msg = ""
+                    reward_msg = ""
+
+                    for k, v in current_boss['reward'].items():
+                        for m in self._group_info[leader]['member_list']:
+                            if k in self._jx3_users[m] and m not in dungeon['no_reward']:
+                                self._jx3_users[m][k] += v
+                                reward_member_msg += f"[CQ:at,qq={m}] "
+                                reward_msg = "获得奖励：{0}+{1} ".format(USER_STAT_DISPLAY[k], v)
+
+                    item_reward_msg = ""
+                    for k, v in current_boss['reward_item'].items():
+                        for m in self._group_info[leader]['member_list']:
+                            if m not in dungeon['no_reward']:
+                                rand = random.uniform(0, 1)
+                                if rand <= v:
+                                    if k not in self._jx3_users[m]['bag']:
+                                        self._jx3_users[m]['bag'][k] = 0
+                                    self._jx3_users[m]['bag'][k] += 1
+                                    item_reward_msg += f"\n[CQ:at,qq={m}] 获得额外奖励：{get_item_display_name(k)} x 1 概率：{int(v * 100)}%"
+
+                    mvp = sorted(dungeon['attack_count'].keys(), key=lambda x: dungeon['attack_count'][x]['damage'], reverse=True)
+
+                    mvp_qq = mvp[0]
+                    mvp_reward_msg = ""
+                    if 'mvp_reward' in dungeon and mvp_qq not in dungeon['no_reward']:
+                        mvp_reward_msg = "mvp奖励加成："
+                        for k, v in dungeon['mvp_reward'].items():
+                            if k in self._jx3_users[mvp_qq]:
+                                self._jx3_users[mvp_qq][k] += v
+                                mvp_reward_msg += f"{USER_STAT_DISPLAY[k]}+{v} "
+
                     returnMsg.append(
                         (
-                            f"\n攻击成功！成功率：{success_chance}%，"
-                            f"造成伤害：{damage}。"
-                            f"{current_boss['display_name']}血量：{current_boss['remain_hp']}/{boss_max_hp}"
+                            f"{current_boss['display_name']}成功被击倒！{reward_msg}{item_reward_msg}\n"
+                            f"mvp：[CQ:at,qq={mvp_qq}] 伤害：{dungeon['attack_count'][mvp_qq]['damage']} "
+                            f"攻击次数：{dungeon['attack_count'][mvp_qq]['success_attack_count']}/{dungeon['attack_count'][mvp_qq]['total_attack_count']}"
+                            f"\n{mvp_reward_msg}"
                         )
                     )
 
-                    if current_boss['remain_hp'] <= 0:
-                        reward_member_msg = ""
-                        reward_msg = ""
+                    for k, v in dungeon['attack_count'].items():
+                        dungeon['attack_count'][k] = {
+                            'remain_hp': self._jx3_users[qq_account]['equipment']['armor']['pve'],
+                            'damage': 0,
+                            'available_attack': DUNGEON_MAX_ATTACK_COUNT,
+                            'last_attack_time': time.time(),
+                            'total_attack_count': 0,
+                            'success_attack_count': 0
+                        }
 
-                        for k, v in current_boss['reward'].items():
-                            for m in self._group_info[leader]['member_list']:
-                                if k in self._jx3_users[m] and m not in dungeon['no_reward']:
-                                    self._jx3_users[m][k] += v
-                                    reward_member_msg += f"[CQ:at,qq={m}] "
-                                    reward_msg = "获得奖励：{0}+{1} ".format(USER_STAT_DISPLAY[k], v)
+                    dungeon['boss_detail'].pop(0)
 
-                        item_reward_msg = ""
-                        for k, v in current_boss['reward_item'].items():
-                            for m in self._group_info[leader]['member_list']:
-                                if m not in dungeon['no_reward']:
-                                    rand = random.uniform(0, 1)
-                                    if rand <= v:
-                                        if k not in self._jx3_users[m]['bag']:
-                                            self._jx3_users[m]['bag'][k] = 0
-                                        self._jx3_users[m]['bag'][k] += 1
-                                        item_reward_msg += f"\n[CQ:at,qq={m}] 获得额外奖励：{get_item_display_name(k)} x 1 概率：{int(v * 100)}%"
-
-                        mvp = sorted(dungeon['attack_count'].items(), lambda x, y: cmp(x[1]['damage'], y[1]['damage']), reverse=True)[0]
-
-                        mvp_qq = mvp[0]
-                        mvp_reward_msg = ""
-                        if 'mvp_reward' in dungeon and mvp_qq not in dungeon['no_reward']:
-                            mvp_reward_msg = "mvp奖励加成："
-                            for k, v in dungeon['mvp_reward'].items():
-                                if k in self._jx3_users[mvp_qq]:
-                                    self._jx3_users[mvp_qq][k] += v
-                                    mvp_reward_msg += f"{USER_STAT_DISPLAY[k]}+{v} "
-
+                    if len(dungeon['boss_detail']) > 0:
+                        next_boss =  dungeon['boss_detail'][0]
+                        boss_index = len(dungeon['boss']) - len(dungeon['boss_detail']) + 1
                         returnMsg.append(
                             (
-                                f"{current_boss['display_name']}成功被击倒！{reward_msg}{item_reward_msg}\n"
-                                f"mvp：[CQ:at,qq={mvp_qq}] 伤害：{mvp[1]['damage']} "
-                                f"攻击次数：{mvp[1]['success_attack_count']}/{mvp[1]['total_attack_count']}"
-                                f"\n{mvp_reward_msg}"
+                                f"boss战：{next_boss['display_name']} "
+                                f"{boss_index}/{len(dungeon['boss'])}\n"
+                                f"请输入每位队员输入【攻击boss】开始战斗。"
                             )
                         )
+                    else:
+                        reward_msg = ""
+                        for k, v in dungeon['reward'].items():
+                            for m in self._group_info[leader]['member_list']:
+                                if k in self._jx3_users[m]:
+                                    self._jx3_users[m][k] += v
+                            reward_msg += "{0} + {1} ".format(USER_STAT_DISPLAY[k], v)
 
-                        for k, v in dungeon['attack_count'].items():
-                            dungeon['attack_count'][k] = {
-                                'remain_hp': self._jx3_users[qq_account]['equipment']['armor']['pve'],
-                                'damage': 0,
-                                'available_attack': DUNGEON_MAX_ATTACK_COUNT,
-                                'last_attack_time': time.time(),
-                                'total_attack_count': 0,
-                                'success_attack_count': 0
-                            }
+                        returnMsg.append(f"副本已结束！恭喜通关{dungeon['display_name']}！全员获得通关奖励：{reward_msg}")
 
-                        dungeon['boss_detail'].pop(0)
-
-                        if len(dungeon['boss_detail']) > 0:
-                            next_boss =  dungeon['boss_detail'][0]
-                            boss_index = len(dungeon['boss']) - len(dungeon['boss_detail']) + 1
-                            returnMsg.append(
-                                (
-                                    f"boss战：{next_boss['display_name']} "
-                                    f"{boss_index}/{len(dungeon['boss'])}\n"
-                                    f"请输入每位队员输入【攻击boss】开始战斗。"
-                                )
-                            )
-                        else:
-                            reward_msg = ""
-                            for k, v in dungeon['reward'].items():
-                                for m in self._group_info[leader]['member_list']:
-                                    if k in self._jx3_users[m]:
-                                        self._jx3_users[m][k] += v
-                                reward_msg += "{0} + {1} ".format(USER_STAT_DISPLAY[k], v)
-
-                            returnMsg.append(f"副本已结束！恭喜通关{dungeon['display_name']}！全员获得通关奖励：{reward_msg}")
-
-                            returnMsg.append("队伍已解散。")
-                            self._group_info.pop(leader)
-                            self.dungeon_status.pop(leader)
+                        returnMsg.append("队伍已解散。")
+                        self._group_info.pop(leader)
+                        self._dungeon_status.pop(leader)
 
         return returnMsg
 

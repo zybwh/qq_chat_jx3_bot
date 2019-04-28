@@ -62,6 +62,7 @@ class check_user_register(object):
 
     def __call__(self, func):
         async def wrapper(session: CommandSession):
+            global BOT_START
             if not BOT_START:
                 return
             return_val = False
@@ -69,18 +70,8 @@ class check_user_register(object):
                 group_id = str(session.ctx.get('group_id', ''))
                 user_id = str(session.ctx.get('user_id', ''))
 
-                if group_id != '':
-                    if group_id not in active_group:
-                        active_group.append(group_id)
-                        group_data[group_id] = Jx3Handler(int(group_id), DATABASE_PATH)
-                        async with aiofiles.open(GROUP_DATA_JSON_FILE, 'w') as f:
-                            await f.write(json.dumps(active_group))
-
-                    if group_data[group_id].is_user_register(user_id):
-                        group_data[group_id].add_speech_count(user_id)
-
-                    if not self.need_register or group_data[group_id].is_user_register(user_id):
-                        return_val = True
+                if group_id != '' and (not self.need_register or group_data[group_id].is_user_register(user_id)):
+                    return_val = True
 
             except Exception as e:
                 logging.exception(e)
@@ -99,22 +90,40 @@ def check_to_qq_is_self_or_not_register(group_id, user_id, toQQ, self_msg='该�
         return f"[CQ:at,qq={user_id}] 对方尚未注册。"
     return ""
 
+@bot.on_message('group')
+async def handle_group_message(ctx):
+    global BOT_START
+    group_id = str(ctx.get('group_id', ''))
+    user_id = str(ctx.get('user_id', ''))
+
+    if group_id != '' and BOT_START:
+        if group_id not in active_group:
+            active_group.append(group_id)
+            group_data[group_id] = Jx3Handler(int(group_id), DATABASE_PATH)
+            async with aiofiles.open(GROUP_DATA_JSON_FILE, 'w') as f:
+                await f.write(json.dumps(active_group))
+
+        if group_data[group_id].is_user_register(user_id):
+            await group_data[group_id].add_speech_count(user_id, ctx.get('raw_message'))
+
 @on_command('test', permission=permission.SUPERUSER)
 async def test(session: CommandSession):
     async with aiohttp.ClientSession().get('http://www.jx3tong.com/?m=api&c=daily&a=daily_list') as response:
         big_war_detail = json.loads(await response.text())
-        print(big_war_detail)
 
 @on_command('开启', permission=permission.SUPERUSER)
 async def start_bot(session: CommandSession):
+    global BOT_START
     for group in active_group:
         await bot.send_group_msg(group_id=int(group), message=f'神小隐上线啦！更新日志请查看帮助手册：{HELP_URL}')
         await group_data[str(group)].reset_daily_count_and_start_scheduler()
     BOT_START = True
+
     await session.finish()
 
 @on_command('关闭', permission=permission.SUPERUSER)
 async def stop_bot(session: CommandSession):
+    global BOT_START
     for group in active_group:
         await bot.send_group_msg(group_id=group, message='神小隐[离线，有事请留言]')
     BOT_START = False
@@ -179,7 +188,6 @@ async def get_money_rank(session: CommandSession, group_id: str="", user_id: str
 @check_user_register(need_register=False)
 async def get_speech_rank(session: CommandSession, group_id: str="", user_id: str=""):
     returnMsg = await group_data[group_id].get_speech_rank()
-    print(returnMsg)
     await session.finish(returnMsg)
 
 @on_command('奇遇排行', only_to_me=False)
@@ -216,7 +224,6 @@ async def get_jjc_info(session: CommandSession, group_id: str="", user_id: str="
 @check_user_register()
 async def qiandao(session: CommandSession, group_id: str="", user_id: str=""):
     returnMsg = await group_data[group_id].qiandao(user_id)
-    print(returnMsg)
     await session.finish(returnMsg)
 
 @on_natural_language(keywords={'绑定情缘'}, only_to_me=False)
@@ -301,7 +308,9 @@ async def rob(session: CommandSession, group_id: str="", user_id: str=""):
     toQQ = str(session.current_arg_text)
     returnMsg = check_to_qq_is_self_or_not_register(group_id, user_id, toQQ, "为什么要打劫自己？")
     if returnMsg == "":
-        returnMsg = await group_data[group_id].rob(user_id, toQQ)
+        returnMsgList = await group_data[group_id].rob(user_id, toQQ)
+        for msg in returnMsgList:
+            await session.send(msg)
     await session.finish(returnMsg)
 
 @on_natural_language(keywords={'切磋'}, only_to_me=False)
@@ -418,7 +427,9 @@ async def put_wanted(session: CommandSession, group_id: str="", user_id: str="")
     toQQ = str(session.current_arg_text)
     returnMsg = check_to_qq_is_self_or_not_register(group_id, user_id, toQQ, "为什么要悬赏自己？")
     if returnMsg == "":
-        returnMsg = await group_data[group_id].put_wanted(user_id, toQQ)
+        returnMsgList = await group_data[group_id].put_wanted(user_id, toQQ)
+        for msg in returnMsgList:
+            await session.send(msg)
     await session.finish(returnMsg)
 
 @on_natural_language(keywords={'抓捕'}, only_to_me=False)
@@ -462,7 +473,9 @@ async def catch_hun_hun(session: CommandSession, group_id: str="", user_id: str=
 @check_user_register()
 async def jjc(session: CommandSession, group_id: str="", user_id: str=""):
     returnMsg = await group_data[group_id].jjc(user_id)
-    await session.finish(returnMsg)
+    for msg in returnMsg:
+        await session.send(msg)
+    await session.finish()
 
 @on_natural_language(keywords={'加入门派'}, only_to_me=False)
 async def _(session: NLPSession):
@@ -518,7 +531,6 @@ async def get_group_list(session: CommandSession, group_id: str="", user_id: str
     returnMsg = await group_data[group_id].get_group_list(user_id)
     await session.finish(returnMsg)
 
-
 @on_command('退出队伍', only_to_me=False)
 @check_user_register()
 async def quit_group(session: CommandSession, group_id: str="", user_id: str=""):
@@ -542,9 +554,7 @@ async def _(session: NLPSession):
 @check_user_register()
 async def get_dungeon_info(session: CommandSession, group_id: str="", user_id: str=""):
     returnMsg = await group_data[group_id].get_dungeon_info(user_id, session.current_arg_text)
-    for msg in returnMsg:
-        await session.send(msg)
-    await session.finish()
+    await session.finish(returnMsg)
 
 @on_natural_language(keywords={'进入副本'}, only_to_me=False)
 async def _(session: NLPSession):
@@ -556,11 +566,10 @@ async def _(session: NLPSession):
 @on_command('///jx3_handler_start_dungeon///')
 @check_user_register()
 async def start_dungeon(session: CommandSession, group_id: str="", user_id: str=""):
-    if session.current_arg_text == "":
-        returnMsg = await group_data[group_id].start_dungeon(user_id, session.current_arg_text)
-        for msg in returnMsg:
-            await session.send(msg)
-        await session.finish()
+    returnMsg = await group_data[group_id].start_dungeon(user_id, session.current_arg_text)
+    for msg in returnMsg:
+        await session.send(msg)
+    await session.finish()
 
 @on_command('攻击boss', only_to_me=False)
 @check_user_register()
@@ -597,11 +606,9 @@ async def add_scheduler(session: CommandSession):
 
 @on_natural_language(keywords={'设置闹钟'}, only_to_me=False)
 async def _(session: NLPSession):
-    print(session.msg_text)
     stripped_msg = session.msg_text.strip().split("设置闹钟")
 
     if len(stripped_msg) == 2 and stripped_msg[0] == '' and stripped_msg[1] != '':
-        print(stripped_msg)
         try:
             time = int(stripped_msg[1])
         except ValueError:

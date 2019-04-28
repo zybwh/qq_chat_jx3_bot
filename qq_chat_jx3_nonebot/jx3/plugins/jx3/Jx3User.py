@@ -23,7 +23,6 @@ default_equipment = {
     'armor': {"display_name": "大侠衣", 'pvp': 100, 'pve': 100}
 }
 
-
 USER_STAT_DISPLAY = {
     'banggong': '帮贡',
     'weiwang': '威望',
