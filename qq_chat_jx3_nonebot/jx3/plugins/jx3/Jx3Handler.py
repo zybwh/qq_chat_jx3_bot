@@ -50,31 +50,31 @@ class Jx3Handler(object):
 
             return wrapper
 
-    json_file_path = ""
 
-    _jx3_users = {}
-    _today = 0
-    _jx3_faction = copy.deepcopy(faction_daily_dict)
-    _lover_pending = {}
-    _jail_list = {}
-    _group_info = {}
-    _jjc_data = {
-        'season': 1,
-        'day': 1,
-        'last_season_data': {},
-        'current_season_data': {},
-        'get_last_season_reward': []
-    }
-    _wanted_list = {}
-    _rob_protect = {}
-    _dungeon_status = {}
-    _qiyu_status = {}
 
     def __init__(self, qq_group, DATABASE_PATH):
         self._qq_group = qq_group
 
         self.json_dir_path = os.path.join(DATABASE_PATH, str(qq_group))
         self.json_file_path = os.path.join(self.json_dir_path, 'data.json')
+
+        self._jx3_users = {}
+        self._today = 0
+        self._jx3_faction = copy.deepcopy(faction_daily_dict)
+        self._lover_pending = {}
+        self._jail_list = {}
+        self._group_info = {}
+        self._jjc_data = {
+            'season': 1,
+            'day': 1,
+            'last_season_data': {},
+            'current_season_data': {},
+            'get_last_season_reward': []
+        }
+        self._wanted_list = {}
+        self._rob_protect = {}
+        self._dungeon_status = {}
+        self._qiyu_status = {}
 
         self._read_data()
 
@@ -191,7 +191,7 @@ class Jx3Handler(object):
             self._dungeon_status = game_data.get('dungeon_status', {})
         except Exception as e:
             logging.exception(e)
-    
+
     def _load_jjc_data(self, season_status, jjc_status):
         try:
             self._jjc_data['current_season_data'] = copy.deepcopy(season_status)
@@ -205,7 +205,6 @@ class Jx3Handler(object):
 
         except Exception as e:
             logging.exception(e)
-
 
     def _load_user_data(self, user_data):
         try:
@@ -225,6 +224,7 @@ class Jx3Handler(object):
                     val.pop('pvp_gear_point')
 
                 self._jx3_users[str(k)] = val
+
                 if str(k) not in self._qiyu_status:
                     self._qiyu_status[str(k)] = {'pending_qiyu': "", 'cd': {}, 'has_qiyu_in_same_command': False}
 
@@ -269,7 +269,6 @@ class Jx3Handler(object):
         except Exception as e:
             logging.exception(e)
 
-            
     @data_handler()
     def add_speech_count(self, qq_account: str, msg: str):
         self._jx3_users[qq_account]['daily_count']['speech_count'] += 1
@@ -277,11 +276,11 @@ class Jx3Handler(object):
         if self._jx3_users[qq_account]['daily_count']['speech_energy_gain'] < DALIY_MAX_SPEECH_ENERGY_GAIN:
             self._jx3_users[qq_account]['daily_count']['speech_energy_gain'] += SPEECH_ENERGY_GAIN
             self._jx3_users[qq_account]['energy'] += SPEECH_ENERGY_GAIN
-        
+
         if qq_account not in self._qiyu_status:
             self._qiyu_status[qq_account] = {'pending_qiyu': '', 'cd': {}}
-        
-        self._qiyu_status[qq_account]['pending_qiyu'] = 'luan_shi_wu_ji' if '[CQ:image,file=' in msg else 'fu_yao_jiu_tian' 
+
+        self._qiyu_status[qq_account]['pending_qiyu'] = 'luan_shi_wu_ji' if '[CQ:image,file=' in msg else 'fu_yao_jiu_tian'
 
     @data_handler()
     def register(self, qq_account: str):
@@ -391,7 +390,7 @@ class Jx3Handler(object):
                 self._jx3_users[qq_account]['money'] += int(jjc_money_reward * modifier)
 
                 returnMsg += f"{rank_msg}\n获得上赛季名剑大会排行奖励：威望+{jjc_weiwang_reward} 金钱+{jjc_money_reward}"
-                
+
                 self._qiyu_status[qq_account]['pending_qiyu'] = 'hong_fu_qi_tian'
 
         return returnMsg
@@ -1622,7 +1621,7 @@ class Jx3Handler(object):
                     has_qiyu = True
 
                     logging.info(f"qiyu! qq: {qq_account} qiyu_name: {qiyu_name} success_chance: {rand} < {qiyu['chance']}")
-                
+
                 self._qiyu_status[qq_account]['pending_qiyu'] = ""
 
         return has_qiyu

@@ -32,6 +32,7 @@ bot = get_bot()
 
 @bot.server_app.before_serving
 async def start():
+    global group_data, active_group
     try:
         if not os.path.exists(DATABASE_PATH):
             os.makedirs(DATABASE_PATH)
@@ -39,12 +40,12 @@ async def start():
         if os.path.exists(GROUP_DATA_JSON_FILE):
             with open(GROUP_DATA_JSON_FILE, 'r') as f:
                 group_file_data = json.loads(f.readline())
-                for group in group_file_data:
-                    active_group.append(group)
-                    group_data[str(group)] = Jx3Handler(int(group), DATABASE_PATH)
 
-                print(group_data)
+                active_group = copy.deepcopy(group_file_data)
+                group_data = {str(group): Jx3Handler(int(group), DATABASE_PATH) for group in active_group}
+
         print('load group complete')
+        [print(f"{k}: {len(v._jx3_users.keys())} {v._jx3_users.keys()}") for k, v in group_data.items()]
 
         @scheduler.scheduled_job('cron', hour='0')
         async def _():
