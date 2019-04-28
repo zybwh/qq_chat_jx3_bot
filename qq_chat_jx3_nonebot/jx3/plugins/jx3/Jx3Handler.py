@@ -70,8 +70,6 @@ class Jx3Handler(object):
     _dungeon_status = {}
     _qiyu_status = {}
 
-    _jx3_daily_info = []
-
     def __init__(self, qq_group, DATABASE_PATH):
         self._qq_group = qq_group
 
@@ -79,6 +77,8 @@ class Jx3Handler(object):
         self.json_file_path = os.path.join(self.json_dir_path, 'data.json')
 
         self._read_data()
+
+        logging.info(self._dump_data())
 
     async def reset_daily_count_and_start_scheduler(self):
         await self._reset_daily_count()
@@ -101,22 +101,21 @@ class Jx3Handler(object):
 
             async with aiohttp.ClientSession().get('http://www.jx3tong.com/?m=api&c=daily&a=daily_list') as response:
                 jx3_daily_details = json.loads(await response.text())
-                self._jx3_daily_info = jx3_daily_details['activity_data']
 
-            big_war = ""
-            battle_field = ""
-            for activity in self._jx3_daily_info:
-                for act in activity['activity_list']:
-                    if '大战·' in act['title']:
-                        big_war = act['title'].split('大战·')[1]
-                    if '战场-' in act['title']:
-                        battle_field = act['title'].split('战场-')[1]
+                big_war = ""
+                battle_field = ""
+                for activity in jx3_daily_details['activity_data']:
+                    for act in activity['activity_list']:
+                        if '大战·' in act['title']:
+                            big_war = act['title'].split('大战·')[1]
+                        if '战场-' in act['title']:
+                            battle_field = act['title'].split('战场-')[1]
 
-            msg = (
-                f"日常刷新啦\n"
-                f"今日剑三大战本：{big_war}, 战场：{battle_field}"
-            )
-            await get_bot().send_group_msg(group_id=int(self._qq_group), message=msg)
+                msg = (
+                    f"日常刷新啦\n"
+                    f"今日剑三大战本：{big_war}, 战场：{battle_field}"
+                )
+                await get_bot().send_group_msg(group_id=int(self._qq_group), message=msg)
 
             self._jjc_data['day'] += 1
             if self._jjc_data['day'] > JJC_DAYS_PER_SEASON:
@@ -178,20 +177,37 @@ class Jx3Handler(object):
 
             self._load_user_data(game_data.get('jx3_users', {}))
             self._load_equipment(game_data.get('equipment', {}))
-            self._load_daily_count(game_data.get('daily_action_count', {}))
+            self._load_daily_count(game_data.get('daliy_action_count', {}))
+            if 'jjc_data' not in game_data:
+                self._load_jjc_data(game_data.get('jjc_season_status', {}), game_data.get('jjc_status', {}))
+            else:
+                self._jjc_data = game_data.get('jjc_data', self._jjc_data)
 
             self._jx3_faction = game_data.get('jx3_faction', self._jx3_faction)
             self._lover_pending = game_data.get('lover_pending', {})
             self._jail_list = game_data.get('jail_list', {})
-            self._today = game_data.get('today', 0)
+            self._today = game_data.get('today', self._today)
             self._group_info = game_data.get('group_info', {})
-            self._jjc_data = game_data.get('jjc_data', self._jjc_data)
             self._wanted_list = game_data.get('wanted_list', {})
             self._rob_protect = game_data.get('rob_protect', {})
-            self._jx3_daily_info = game_data.get('jx3_daily_info', [])
             self._dungeon_status = game_data.get('dungeon_status', {})
         except Exception as e:
             logging.exception(e)
+    
+    def _load_jjc_data(self, season_status, jjc_status):
+        try:
+            self._jjc_data['current_season_data'] = copy.deepcopy(season_status)
+            if jjc_status != {}:
+                self._jjc_data['season'] = jjc_status['season']
+                self._jjc_data['day'] = jjc_status['day']
+                self._jjc_data['last_season_data'] = jjc_status['last_season_jjc_status'].get(str(jjc_status['season'] - 1), {})
+                for k, v in self._jjc_data['last_season_data'].items():
+                    if v.get('reward_gain', False) == True:
+                        self._jjc_data['get_last_season_reward'].append(k)
+
+        except Exception as e:
+            logging.exception(e)
+
 
     def _load_user_data(self, user_data):
         try:
@@ -203,10 +219,19 @@ class Jx3Handler(object):
                     val['faction_id'] = OLD_FACTION_LIST[val['faction_id']]
                 if isinstance(val['qiyu'], int):
                     val['qiyu'] = {'unknown': val['qiyu']}
+                if isinstance(val['lover'], int):
+                    val['lover'] = str(val['lover'])
+                if 'pve_gear_point' in val:
+                    val.pop('pve_gear_point')
+                if 'pvp_gear_point' in val:
+                    val.pop('pvp_gear_point')
 
                 self._jx3_users[str(k)] = val
                 if str(k) not in self._qiyu_status:
                     self._qiyu_status[str(k)] = {'pending_qiyu': "", 'cd': {}, 'has_qiyu_in_same_command': False}
+
+                if 'daily_count' not in v and 'daily_count' not in val:
+                    val['daily_count'] = copy.deepcopy(daily_dict)
         except Exception as e:
             logging.exception(e)
 
@@ -219,9 +244,10 @@ class Jx3Handler(object):
     def _load_daily_count(self, daily_count_data):
         if daily_count_data == {}:
             return
-        sorted_list = sorted(daily_count_data['daily_action_count'].items, key=lambda x: int(x[0]), reverse=True)
-        day, count_list = sorted_list.items()[0]
-        for k, v in count_list.items():
+        sorted_list = sorted(daily_count_data.keys(), key=lambda x: int(x), reverse=True)
+        day = sorted_list[0]
+        self._today = int(day)
+        for k, v in daily_count_data[str(day)].items():
             if k in self._jx3_users:
                 self._jx3_users[k]['day'] = day
                 self._jx3_users[k]['daily_count'] = copy.deepcopy(v)
@@ -239,7 +265,6 @@ class Jx3Handler(object):
                 "wanted_list": self._wanted_list,
                 "rob_protect": self._rob_protect,
                 "dungeon_status": self._dungeon_status,
-                "jx3_daily_info": self._jx3_daily_info,
                 "qiyu":self._qiyu_status
             }
             return data
@@ -2227,21 +2252,25 @@ class Jx3Handler(object):
 
         return returnMsg
 
-    @data_handler(read_only=True)
-    def get_jx3_daily_info(self, qq_account: str) -> str:
-        big_war = ""
-        battle_field = ""
-        for activity in self._jx3_daily_info:
-            for act in activity['activity_list']:
-                if '大战·' in act['title']:
-                    big_war = act['title'].split('大战·')[1]
-                if '战场-' in act['title']:
-                    battle_field = act['title'].split('战场-')[1]
+    @data_handler(read_only=True, async_func=True)
+    async def get_jx3_daily_info(self, qq_account: str) -> str:
+        returnMsg = ""
+        async with aiohttp.ClientSession().get('http://www.jx3tong.com/?m=api&c=daily&a=daily_list') as response:
+            jx3_daily_details = json.loads(await response.text())
 
-        returnMsg = f"[CQ:at,qq={qq_account}]本日剑三大战本：{big_war}, 战场：{battle_field}。"
+            big_war = ""
+            battle_field = ""
+            for activity in jx3_daily_details['activity_data']:
+                for act in activity['activity_list']:
+                    if '大战·' in act['title']:
+                        big_war = act['title'].split('大战·')[1]
+                    if '战场-' in act['title']:
+                        battle_field = act['title'].split('战场-')[1]
 
-        weekday = datetime.datetime.today().weekday()
-        if weekday == 1 or weekday == 3:
-            returnMsg += "本日有阵营小攻防。"
+            returnMsg = f"[CQ:at,qq={qq_account}]本日剑三大战本：{big_war}, 战场：{battle_field}。"
+
+            weekday = datetime.datetime.today().weekday()
+            if weekday == 1 or weekday == 3:
+                returnMsg += "本日有阵营小攻防。"
 
         return returnMsg
