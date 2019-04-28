@@ -403,10 +403,10 @@ class Jx3Handler(object):
         toQQ_stat = self._jx3_users[toQQ]
 
         if LOVE_ITEM_REQUIRED != "" and LOVE_ITEM_REQUIRED not in fromQQ_stat['bag']:
-            return "[CQ:at,qq={0}] 绑定情缘需要消耗1个{1}。\n你并没有此物品，请先购买。".format(fromQQ, get_item_display_name(LOVE_ITEM_REQUIRED))
+            return f"[CQ:at,qq={fromQQ}] 绑定情缘需要消耗1个{get_item_display_name(LOVE_ITEM_REQUIRED)}。你并没有此物品，请先购买。"
         else:
             if fromQQ_stat['lover'] == toQQ:
-                return f"[CQ:at,qq={fromQQ}] 你们已经绑定过啦！还想乱撒狗粮？".format()
+                return f"[CQ:at,qq={fromQQ}] 你们已经绑定过啦！还想乱撒狗粮？"
             elif fromQQ_stat['lover'] != "":
                 return f"[CQ:at,qq={fromQQ}]  想什么呢？你就不怕[CQ:at,qq={fromQQ_stat['lover']}]打你吗？"
             elif toQQ_stat['lover'] != "":
@@ -702,7 +702,7 @@ class Jx3Handler(object):
                     wanted_chance = ROB_LOSE_WANTED_CHANCE if energy_cost != 0 else 0
 
                 rand = random.uniform(0, 1)
-                logging.info("wanted chance: {0} rand: {1}".format(wanted_chance, rand))
+                logging.info(f"wanted chance: {wanted_chance} rand: {rand}")
                 if rand <= wanted_chance:
                     returnMsg.append(self._put_wanted_internal(fromQQ, ROB_WANTED_REWARD))
 
@@ -784,7 +784,7 @@ class Jx3Handler(object):
                 loser_nickname = await get_group_nickname(self._qq_group, loser)
 
                 returnMsg = (
-                    f"[CQ:at,qq={0}]与[CQ:at,qq={1}]进行了切磋。"
+                    f"[CQ:at,qq={fromQQ}]与[CQ:at,qq={toQQ}]进行了切磋。"
                     f"{winner_nickname} 战胜了 {loser_nickname}，成功率{success_chance}%。\n"
                     f"{winner_nickname} 威望+{winner_weiwang_gain} {'体力-{0}'.format(energy_cost) if winner == fromQQ else ''}\n"
                     f"{loser_nickname} 威望+{loser_weiwang_gain} {'体力-{0}'.format(energy_cost) if loser == fromQQ else ''}"
@@ -902,7 +902,7 @@ class Jx3Handler(object):
                     self._jjc_data['current_season_data'][random_person]['lose'] += 1
 
                     new_rank = self._jjc_data['current_season_data'][qq_account]['score'] // 100
-                    rank_msg = "\n段位变更为：{0}".format(new_rank) if new_rank != rank else ""
+                    rank_msg = f"\n段位变更为：{new_rank}" if new_rank != rank else ""
 
                     returnMsg.append(
                         (
@@ -934,7 +934,7 @@ class Jx3Handler(object):
                     self._jjc_data['current_season_data'][qq_account]['lose'] += 1
 
                     new_rank = self._jjc_data['current_season_data'][random_person]['score'] // 100
-                    rank_msg = "\n段位变更为：{0}".format(new_rank) if new_rank != random_person_rank else ""
+                    rank_msg = f"\n段位变更为：{new_rank}" if new_rank != random_person_rank else ""
 
                     returnMsg.append(
                         (
@@ -1032,7 +1032,7 @@ class Jx3Handler(object):
                     for k, v in cost_list.items():
                         if k in qq_stat:
                             self._jx3_users[qq_account][k] -= v * item_amount
-                            returnMsg += "{0}-{1} ".format(USER_STAT_DISPLAY[k], v * item_amount)
+                            returnMsg += f"{USER_STAT_DISPLAY[k]}-{v * item_amount} "
                 else:
                     returnMsg = (
                         f"[CQ:at,qq={qq_account}] 购买失败！\n"
@@ -1133,7 +1133,7 @@ class Jx3Handler(object):
                 max_index = new_max_index
 
         rand_index = random.uniform(0, max_index)
-        logging.info("wa_bao items: {1} rand index: {0}".format(rand_index, wa_bao_items))
+        logging.info(f"wa_bao items: {rand_index} rand index: {wa_bao_items}")
         for item_name, min_max in wa_bao_items.items():
             if rand_index >= min_max['min'] and rand_index < min_max['max']:
                 return item_name
@@ -1890,7 +1890,7 @@ class Jx3Handler(object):
                         self._jx3_users[m]['daily_count']['dungeon'][dungeon_id] = True
                         if m not in pve_gear_point_too_high:
                             self._jx3_users[m]['energy'] -= DUNGEON_ENERGY_REQUIRED
-                            energy_msg += "[CQ:at,qq={0}] ".format(m)
+                            energy_msg += f"[CQ:at,qq={m}] "
                     returnMsg.append(f"[CQ:at,qq={qq_account}] 进入副本 {dungeon_name} 成功！{energy_msg}体力-{DUNGEON_ENERGY_REQUIRED}")
 
                     boss = self._dungeon_status[leader]['boss_detail'][0]
@@ -1995,7 +1995,7 @@ class Jx3Handler(object):
 
             if rand <= buff['chance'] and self._get_hp_range(buff, equipment, stat, gear_mode):
                 description = self._apply_skill_internal(buff, equipment, stat, gear_mode)
-                buff_msg = "\n{0}使出了招数：{1}。{2}".format(stat['display_name'], buff['display_name'], description)
+                buff_msg = f"\n{stat['display_name']}使出了招数：{buff['display_name']}。{description}"
 
                 return buff_msg
         return ""
@@ -2006,7 +2006,7 @@ class Jx3Handler(object):
 
             if rand <= buff['chance'] and self._get_hp_range(buff, fromQQ_equipment, fromQQ_stat, gear_mode):
                 description = self._apply_skill_internal(buff, toQQ_equipment, toQQ_stat, gear_mode)
-                buff_msg = "\n{0}使出了招数：{1}。{2}".format(fromQQ_stat['display_name'], buff['display_name'], description)
+                buff_msg = f"\n{fromQQ_stat['display_name']}使出了招数：{buff['display_name']}。{description}"
 
                 return buff_msg
         return ""
@@ -2054,7 +2054,7 @@ class Jx3Handler(object):
         )
 
         chance = random.uniform(0, 1)
-        logging.info("chance: {0}, success_chance: {1}".format(chance, success_chance))
+        logging.info(f"chance: {chance}, success_chance: {success_chance}")
         if chance <= success_chance:
             winner = fromQQ_stat['qq_account']
             loser = toQQ_stat['qq_account']
@@ -2177,7 +2177,7 @@ class Jx3Handler(object):
                             if k in self._jx3_users[m] and m not in dungeon['no_reward']:
                                 self._jx3_users[m][k] += v
                                 reward_member_msg += f"[CQ:at,qq={m}] "
-                                reward_msg = "获得奖励：{0}+{1} ".format(USER_STAT_DISPLAY[k], v)
+                                reward_msg = f"获得奖励：{USER_STAT_DISPLAY[k]}+{v} "
 
                     item_reward_msg = ""
                     for k, v in current_boss['reward_item'].items():
@@ -2238,7 +2238,7 @@ class Jx3Handler(object):
                             for m in self._group_info[leader]['member_list']:
                                 if k in self._jx3_users[m]:
                                     self._jx3_users[m][k] += v
-                            reward_msg += "{0} + {1} ".format(USER_STAT_DISPLAY[k], v)
+                            reward_msg += f"{USER_STAT_DISPLAY[k]} + {v} "
 
                         returnMsg.append(f"副本已结束！恭喜通关{dungeon['display_name']}！全员获得通关奖励：{reward_msg}")
 

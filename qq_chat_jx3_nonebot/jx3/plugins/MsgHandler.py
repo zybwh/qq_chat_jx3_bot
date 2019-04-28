@@ -152,7 +152,7 @@ async def stop_bot(session: CommandSession):
 @on_command('剑三日常', only_to_me=False)
 @check_user_register(need_register=False)
 async def get_jx3_daily_info(session: CommandSession, group_id: str="", user_id: str=""):
-    returnMsg = group_data[group_id].get_jx3_daily_info(user_id)
+    returnMsg = await group_data[group_id].get_jx3_daily_info(user_id)
     await session.finish(returnMsg)
 
 @on_command('注册', only_to_me=False)
