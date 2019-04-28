@@ -4,7 +4,7 @@ import logging
 import datetime
 import pytz
 
-DATABASE_PATH = os.path.join(os.path.dirname(__file__), 'data')
+DATABASE_PATH = os.path.join(os.getcwd(), 'data')
 GROUP_DATA_JSON_FILE = os.path.join(DATABASE_PATH, 'jx3_group.json')
 LOG_FILE_NAME = os.path.join(DATABASE_PATH, 'bot.log')
 

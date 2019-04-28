@@ -248,4 +248,4 @@ class Jx3User(object):
 
 
 def get_qiyu_count(user_data):
-    return sum(user_data['qiyu'].items())
+    return sum(user_data['qiyu'].values())
