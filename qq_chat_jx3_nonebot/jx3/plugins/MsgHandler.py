@@ -115,8 +115,12 @@ async def test(session: CommandSession):
 async def start_bot(session: CommandSession):
     global BOT_START
     for group in active_group:
-        await bot.send_group_msg(group_id=int(group), message=f'神小隐上线啦！更新日志请查看帮助手册：{HELP_URL}')
-        await group_data[str(group)].reset_daily_count_and_start_scheduler()
+        try:
+            await bot.send_group_msg(group_id=int(group), message=f'神小隐上线啦！更新日志请查看帮助手册：{HELP_URL}')
+            await group_data[str(group)].reset_daily_count_and_start_scheduler()
+        except Exception as e:
+            logging.exception(e)
+            pass
     BOT_START = True
 
     await session.finish()
