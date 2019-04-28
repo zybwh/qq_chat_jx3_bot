@@ -1584,6 +1584,7 @@ class Jx3Handler(object):
                 continue
 
             require_meet = True
+            requireMsg = ""
             if 'require' in qiyu:
                 for key, val in qiyu['require'].items():
                     if key in self._jx3_users[qq_account]:
