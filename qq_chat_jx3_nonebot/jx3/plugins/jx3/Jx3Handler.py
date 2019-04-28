@@ -212,7 +212,7 @@ class Jx3Handler(object):
 
     def _load_equipment(self, equipment_data):
         if equipment_data != {}:
-            for k, v in equipment_data['equipment'].items():
+            for k, v in equipment_data.items():
                 if k in self._jx3_users:
                     self._jx3_users[k]['equipment'] = copy.deepcopy(v)
 
