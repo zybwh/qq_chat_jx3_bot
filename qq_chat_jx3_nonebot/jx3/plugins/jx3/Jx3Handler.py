@@ -78,8 +78,6 @@ class Jx3Handler(object):
 
         self._read_data()
 
-        logging.info(self._dump_data())
-
     async def reset_daily_count_and_start_scheduler(self):
         await self._reset_daily_count()
         @scheduler.scheduled_job('cron', hour='7')
@@ -1569,7 +1567,6 @@ class Jx3Handler(object):
 
     async def do_qiyu(self):
         has_qiyu = False
-        print(self._qiyu_status)
         pending_qiyu_list = [k for k, v in self._qiyu_status.items() if v['pending_qiyu'] != ""]
 
         for qq_account in pending_qiyu_list:
