@@ -111,6 +111,19 @@ async def test(session: CommandSession):
     async with aiohttp.ClientSession().get('http://www.jx3tong.com/?m=api&c=daily&a=daily_list') as response:
         big_war_detail = json.loads(await response.text())
 
+@on_command('低调开启', permission=permission.SUPERUSER)
+async def start_bot(session: CommandSession):
+    global BOT_START
+    for group in active_group:
+        try:
+            await group_data[str(group)].reset_daily_count_and_start_scheduler()
+        except Exception as e:
+            logging.exception(e)
+            pass
+    BOT_START = True
+
+    await session.finish()
+
 @on_command('开启', permission=permission.SUPERUSER)
 async def start_bot(session: CommandSession):
     global BOT_START
