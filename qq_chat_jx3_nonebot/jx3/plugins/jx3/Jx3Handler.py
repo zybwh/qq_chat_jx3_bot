@@ -203,6 +203,8 @@ class Jx3Handler(object):
                     val['faction_id'] = OLD_FACTION_LIST[val['faction_id']]
                 if isinstance(val['qiyu'], int):
                     val['qiyu'] = {'unknown': val['qiyu']}
+                if 'ran' in val['bag']:
+                    val['bag']['xiu'] = val['bag'].pop('ran')
 
                 self._jx3_users[str(k)] = val
                 if str(k) not in self._qiyu_status:
