@@ -1370,20 +1370,20 @@ class Jx3Handler(object):
 
         return "本群悬赏榜" + msg_list
 
-    def _put_wanted_internal(self, toQQ_str, money_amount):
-        if toQQ_str in self._wanted_list:
-            if time.time() - self._wanted_list[toQQ_str]['wanted_time'] > WANTED_DURATION:
-                self._wanted_list[toQQ_str]['reward'] = money_amount
+    def _put_wanted_internal(self, toQQ, money_amount):
+        if toQQ in self._wanted_list:
+            if time.time() - self._wanted_list[toQQ]['wanted_time'] > WANTED_DURATION:
+                self._wanted_list[toQQ]['reward'] = money_amount
             else:
-                self._wanted_list[toQQ_str]['reward'] += money_amount
+                self._wanted_list[toQQ]['reward'] += money_amount
 
-            self._wanted_list[toQQ_str]['wanted_time'] = time.time()
+            self._wanted_list[toQQ]['wanted_time'] = time.time()
         else:
-            self._wanted_list[toQQ_str] = {'reward': money_amount, 'wanted_time': time.time(), 'failed_try': {}}
+            self._wanted_list[toQQ] = {'reward': money_amount, 'wanted_time': time.time(), 'failed_try': {}}
 
         return (
-            f"江湖恩怨一朝清，惟望群侠多援手。现有人愿付{money_amount}金对[CQ:at,qq={toQQ_str}]进行悬赏，"
-            f"总赏金已达{self._wanted_list[toQQ_str]['reward']}金，众侠士切勿错过。"
+            f"江湖恩怨一朝清，惟望群侠多援手。现有人愿付{money_amount}金对[CQ:at,qq={toQQ}]进行悬赏，"
+            f"总赏金已达{self._wanted_list[toQQ]['reward']}金，众侠士切勿错过。"
         )
 
     @data_handler(return_list=True)
@@ -1415,7 +1415,7 @@ class Jx3Handler(object):
         elif toQQ in self._wanted_list and time.time() - self._wanted_list[toQQ]['wanted_time'] < WANTED_DURATION:
 
             if 'failed_try' in self._wanted_list[toQQ] and fromQQ in self._wanted_list[toQQ]['failed_try'] and time.time() - self._wanted_list[toQQ]['failed_try'][fromQQ] < WANTED_COOLDOWN:
-                remain_time_msg = get_remaining_time_string(WANTED_DURATION, self._wanted_list[toQQ_str]['failed_try'][fromQQ])
+                remain_time_msg = get_remaining_time_string(WANTED_DURATION, self._wanted_list[toQQ]['failed_try'][fromQQ])
                 returnMsg = f"[CQ:at,qq={fromQQ}] 你已经尝试过抓捕了，奈何技艺不佳。请锻炼{remain_time_msg}后再来挑战！"
             elif self._jx3_users[fromQQ]['energy'] < WANTED_ENERGY_COST:
                 returnMsg = f"[CQ:at,qq={fromQQ}] 体力不足！需要消耗{WANTED_ENERGY_COST}体力。"
