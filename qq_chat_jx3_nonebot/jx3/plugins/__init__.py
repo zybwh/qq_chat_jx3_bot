@@ -1,1 +1,0 @@
-__plugin_name__ = 'jx3'

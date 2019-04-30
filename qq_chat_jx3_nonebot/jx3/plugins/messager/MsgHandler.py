@@ -8,14 +8,6 @@ DATABASE_PATH = os.path.join(os.getcwd(), 'data')
 GROUP_DATA_JSON_FILE = os.path.join(DATABASE_PATH, 'jx3_group.json')
 LOG_FILE_NAME = os.path.join(DATABASE_PATH, 'bot.log')
 
-logging.basicConfig(
-    level       = logging.INFO,
-    format      = '%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
-    datefmt     = '%Y-%m-%d %H:%M:%S',
-    filename    = LOG_FILE_NAME,
-    filemode    = 'w+'
-)
-
 import aiofiles
 
 from nonebot import on_command, CommandSession, get_bot, scheduler, on_natural_language, NLPSession, IntentCommand, Message, permission
