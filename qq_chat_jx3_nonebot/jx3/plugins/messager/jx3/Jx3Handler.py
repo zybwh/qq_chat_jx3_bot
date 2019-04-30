@@ -1415,7 +1415,7 @@ class Jx3Handler(object):
         elif toQQ in self._wanted_list and time.time() - self._wanted_list[toQQ]['wanted_time'] < WANTED_DURATION:
 
             if 'failed_try' in self._wanted_list[toQQ] and fromQQ in self._wanted_list[toQQ]['failed_try'] and time.time() - self._wanted_list[toQQ]['failed_try'][fromQQ] < WANTED_COOLDOWN:
-                remain_time_msg = get_remaining_time_string(WANTED_DURATION, self._wanted_list[toQQ]['failed_try'][fromQQ])
+                remain_time_msg = get_remaining_time_string(WANTED_COOLDOWN, self._wanted_list[toQQ]['failed_try'][fromQQ])
                 returnMsg = f"[CQ:at,qq={fromQQ}] 你已经尝试过抓捕了，奈何技艺不佳。请锻炼{remain_time_msg}后再来挑战！"
             elif self._jx3_users[fromQQ]['energy'] < WANTED_ENERGY_COST:
                 returnMsg = f"[CQ:at,qq={fromQQ}] 体力不足！需要消耗{WANTED_ENERGY_COST}体力。"

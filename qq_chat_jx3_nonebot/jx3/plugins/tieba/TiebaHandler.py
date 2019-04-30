@@ -13,7 +13,7 @@ DATABASE_PATH = os.path.join(os.getcwd(), 'data')
 tieba_data_json = os.path.join(DATABASE_PATH, 'tieba_data.json')
 tieba_data = {'shu_dong': {}, "818": {}, 'other': {}}
 last_update_time = 0
-NEED_REFREST_TIME = 10 * 60
+NEED_REFREST_TIME = 30 * 60
 is_retriving = False
 
 DISPLAY_NAME = {
@@ -153,7 +153,7 @@ async def get_some_tieba_data():
 
 @nonebot.scheduler.scheduled_job('cron', hour='*')
 async def _():
-    await get_tieba_data_internal(100)
+    await get_tieba_data_internal(50)
     
 
 async def get_tieba_data_internal(num):
