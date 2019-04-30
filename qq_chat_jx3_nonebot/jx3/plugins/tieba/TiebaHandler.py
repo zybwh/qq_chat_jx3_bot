@@ -138,7 +138,7 @@ async def get_tieba_info(session, msg_type):
         msg += f"\n{key} {tieba_data[msg_type][key]['name']} {tieba_data[msg_type][key]['num']}"
     else:
         count = 0
-        for k in sorted(tieba_data[msg_type].keys(), key=lambda x: tieba_data[msg_type][x]['last_update_time'], reverse=True):
+        for k in sorted(tieba_data[msg_type].keys(), key=lambda x: tieba_data[msg_type][x]['last_update_time']):
             if tieba_data[msg_type][k]['num'] < num:
                 continue
             msg += f"\n{k} {tieba_data[msg_type][k]['name']} {tieba_data[msg_type][k]['num']}"
