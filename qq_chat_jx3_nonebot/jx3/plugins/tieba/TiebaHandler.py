@@ -128,7 +128,7 @@ async def get_tieba_info(session, msg_type):
         random_id = random.randint(0, len(tieba_data[msg_type]) - 1)
 
     if tieba_data[msg_type] == {} or time.time() - last_update_time > NEED_REFREST_TIME:
-        await session.send(f"[CQ:at,qq={user_id}] 正在获取贴吧关于【{DISPLAY_NAME[msg_type]}】信息，请稍后")
+        await session.send(f"[CQ:at,qq={user_id}] 正在获取贴吧关于【{DISPLAY_NAME[msg_type]}】的最新信息，请稍后")
         await get_some_tieba_data()
 
     msg = f"[CQ:at,qq={user_id}] 您要的{DISPLAY_NAME[msg_type]}在这里："
@@ -149,7 +149,7 @@ async def get_tieba_info(session, msg_type):
     await session.finish(msg)
 
 async def get_some_tieba_data():
-    await get_tieba_data_internal(10)
+    await get_tieba_data_internal(5)
 
 @nonebot.scheduler.scheduled_job('cron', hour='*')
 async def _():
