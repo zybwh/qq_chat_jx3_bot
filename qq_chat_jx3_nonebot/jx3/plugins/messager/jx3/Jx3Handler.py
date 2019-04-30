@@ -83,13 +83,18 @@ class Jx3Handler(object):
         @scheduler.scheduled_job('cron', hour='7')
         async def _():
             try:
-                self._reset_daily_count()
+                self._reset_daily_count(True)
             except Exception as e:
                 logging.exception(e)
 
     @data_handler(async_func=True)
-    async def _reset_daily_count(self):
-        yday = time.localtime(time.time() - DALIY_REFRESH_OFFSET).tm_yday
+    async def _reset_daily_count(self, no_offset=False):
+        if no_offset:
+            yday = time.localtime(time.time()).tm_yday
+        else:
+            yday = time.localtime(time.time() - DALIY_REFRESH_OFFSET).tm_yday
+            logging.info(time.localtime(time.time() - DALIY_REFRESH_OFFSET))
+
         if yday != self._today:
             self._today = yday
 
