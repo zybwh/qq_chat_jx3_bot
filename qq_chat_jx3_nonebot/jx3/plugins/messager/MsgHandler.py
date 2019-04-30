@@ -88,8 +88,9 @@ async def handle_group_message(ctx):
     global BOT_START
     group_id = str(ctx.get('group_id', ''))
     user_id = str(ctx.get('user_id', ''))
+    raw_message = session.ctx.get('raw_message', '')
 
-    if group_id != '' and BOT_START:
+    if group_id != '' and BOT_START and '奇遇' not in raw_message:
         if group_id not in active_group:
             active_group.append(group_id)
             group_data[group_id] = Jx3Handler(int(group_id), DATABASE_PATH)
@@ -140,6 +141,9 @@ async def stop_bot(session: CommandSession):
     for v in group_data.values():
         await v._save_data()
     await session.finish()
+
+@on_natural_language(keywords={'奇遇'})
+    await session.finish(f"[CQ:at,qq={str(session.ctx.get('user_id', ''))}] 你好侠士，没有的哦。")
 
 @on_command('剑三日常', only_to_me=False)
 @check_user_register(need_register=False)

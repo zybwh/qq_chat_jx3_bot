@@ -5,6 +5,7 @@ import os
 import time
 import logging
 import json
+import random
 
 from bs4 import BeautifulSoup
 
@@ -69,17 +70,75 @@ async def search_n_pages(n):
                 async with session.get(target_url) as response:
                     data = await response.text()
                     t2 = time.time()
-                    print(f'one page time: {t2 - t1}')
                     page_list = BeautifulSoup(data, 'html.parser').find_all(class_='j_thread_list')
                     t3 = time.time()
-                    print(f'bs time: {t3 - t2}')
-
                     extra_from_one_page(page_list)
-                    print(f'parse time: {time.time() - t3}')
-
+                    logging.info(f"time for request: {t2-t1} bs: {t3-t2} parsing: {time.time()-t3}")
             i += 1
         except Exception as e:
             logging.exception(e)
+
+@on_command('818', only_to_me=False)
+async def do_818(session):
+    await get_tieba_info(session, '818')
+
+@on_command('树洞', only_to_me=False)
+async def do_shu_dong(session):
+    await get_tieba_info(session, 'shu_dong')
+
+@nonebot.on_natural_language(keywords={'818'})
+async def natural_818(session):
+    IntentCommand(100, '818')
+
+@nonebot.on_natural_language(keywords={'树洞'})
+async def natural_shu_dong(session):
+    IntentCommand(100, '树洞')
+
+async def get_tieba_info(session, msg_type):
+    user_id = str(session.ctx.get('user_id', ''))
+    raw_message = session.ctx.get('raw_message')
+
+    msg_count = 10
+    num = 200
+    random_id = 0
+
+    if '更多' in raw_message:
+        msg_count = 20
+
+    if '随机' in raw_message and len(tieba_data[msg_type]) > 0:
+        msg_count = 1
+        random_id = random.randint(0, len(tieba_data[msg_type]) - 1)
+
+    if tieba_data[msg_type] == {}:
+        await session.send(f"[CQ:at,qq={user_id}] 正在获取贴吧关于【{msg_type}】信息，请稍后")
+        await get_some_tieba_data()
+
+    msg = f"[CQ:at,qq={user_id}] 您要的818在这里："
+
+    if random_id != 0:
+        key = tieba_data[msg_type].keys()[random_id]
+        msg += f'\n{key} {tieba_data[msg_type][key]['name']} {tieba_data[msg_type][key]['num']}'
+    else:
+        count = 0
+        for k in sorted(tieba_data[msg_type].keys(), key=lambda x: tieba_data[msg_type][x]['last_update_time'], reverse=True):
+            msg += f'\n{key} {tieba_data[msg_type][key]['name']} {tieba_data[msg_type][key]['num']}'
+            count += 1
+            if count >= msg_count:
+                break
+
+    await session.finish(msg)
+
+async def get_some_tieba_data():
+    t1 = time.time()
+    try:
+        await search_n_pages(10)
+        async with aiofiles.open(tieba_data_json, 'w', encoding='utf-8') as f:
+            await f.write(json.dumps(tieba_data))
+    except Exception as e:
+        logging.exception(e)
+    t2 = time.time()
+    logging.info(f"tieba job complete in {t2 - t1} seconds")
+
 
 @nonebot.scheduler.scheduled_job('cron', hour='*')
 async def _():
@@ -87,12 +146,8 @@ async def _():
     try:
         await search_n_pages(100)
         async with aiofiles.open(tieba_data_json, 'w', encoding='utf-8') as f:
-            data = {}
-            for k, v in tieba_data.items():
-                data[k] = {addr: v[addr] for addr in sorted(v.keys(), key=lambda x: v[x]['last_update_time'], reverse=True)}
-            await f.write(json.dumps(data))
+            await f.write(json.dumps(tieba_data))
     except Exception as e:
         logging.exception(e)
     t2 = time.time()
     logging.info(f"tieba job complete in {t2 - t1} seconds")
-    print(f"tieba job complete in {t2 - t1} seconds")
