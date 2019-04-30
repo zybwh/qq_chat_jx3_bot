@@ -222,6 +222,8 @@ class Jx3Handler(object):
                     val.pop('pve_gear_point')
                 if 'pvp_gear_point' in val:
                     val.pop('pvp_gear_point')
+                if 'ran' in val['bag']:
+                    val['bag']['xiu'] = val['bag'].pop('ran')
 
                 self._jx3_users[str(k)] = val
 
