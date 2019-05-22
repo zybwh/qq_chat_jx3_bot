@@ -373,7 +373,7 @@ class Jx3Handler(object):
                 self._weiwang += faction_reward
                 returnMsg += f"\n获得昨日阵营奖励：威望+{faction_reward}"
 
-            if self._jjc_data['last_season_data'] != {} and qq_account not in self._jjc_data['get_last_season_reward']:
+            if self._jjc_data['last_season_data'] != {} and qq_account in self._jjc_data['last_season_data'] and qq_account not in self._jjc_data['get_last_season_reward']:
                 self._jjc_data['get_last_season_reward'].append(qq_account)
                 rank = self._jjc_data['last_season_data'][qq_account]['score'] // 100
 
