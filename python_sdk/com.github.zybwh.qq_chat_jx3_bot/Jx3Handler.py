@@ -17,7 +17,6 @@ logging.basicConfig(
     filemode    = 'w+'
 )
 
-import sqlite3
 import json
 import copy
 import random
@@ -116,63 +115,63 @@ DUNGEON_ATTACK_COOLDOWN = 10 * 60
 DUNGEON_ENERGY_REQUIRED = 100
 
 
-FACTION_DISPLAY_NAME = ['ÖĞÁ¢', '¶ñÈË¹È', 'ºÆÆøÃË']
+FACTION_DISPLAY_NAME = ['ä¸­ç«‹', 'æ¶äººè°·', 'æµ©æ°”ç›Ÿ']
 FACTION_NAME_ID = ['zhongli', 'eren', 'haoqi']
 
 ITEM_LIST = [
-    {"name": "zhen_cheng_zhi_xin", "display_name": "Õæ³ÈÖ®ĞÄ", "rank": 2, "cost": {"money": 999}},
-    {"name": "hai_shi_shan_meng", "display_name": "º£ÊÄÉ½ÃË", "rank": 1, "cost": {"money": 9999}},
-    {"name": "jin_zhuan", "display_name": "½ğ×©", "rank": 5, "effect": {"money": 50}},
-    {"name": "jin_ye_zi", "display_name": "½ğÒ¶×Ó", "rank": 6, "effect": {"money": 10}},
-    {"name": "zhuan_shen_can", "display_name": "×ªÉñ²Í", "rank": 5, "effect": {"energy": 5}, "cost": {"money": 100}},
-    {"name": "jia_zhuan_shen_can", "display_name": "¼Ñ¡¤×ªÉñ²Í", "rank": 3, "effect": {"energy": 30}, "cost": {"money": 500}},
-    {"name": "rong_ding", "display_name": "ÈÛ¶§", "rank": 3, "effect": {'pve_weapon': 5}, "cost": {"banggong": 5000}},
-    {"name": "mo_shi", "display_name": "Ä¥Ê¯", "rank": 3, "effect": {'pvp_weapon': 5}, "cost": {"weiwang": 5000}},
-    {"name": "ran", "display_name": "Ğå", "rank": 4, "effect": {'pve_armor': 10}, "cost": {"banggong": 2000}},
-    {"name": "yin", "display_name": "Ó¡", "rank": 4, "effect": {'pvp_armor': 10}, "cost": {"weiwang": 2000}},
-    {"name": "sui_rou", "display_name": "ËéÈâ", "rank": 4, "cost": {"money": 10}},
-    {"name": "cu_bu", "display_name": "´Ö²¼", "rank": 4, "cost": {"money": 10}},
-    {"name": "gan_cao", "display_name": "¸Ê²İ", "rank": 4, "cost": {"money": 10}},
-    {"name": "hong_tong", "display_name": "ºìÍ­", "rank": 4, "cost": {"money": 10}},
-    {"name": "hun_hun_zheng_ming", "display_name": "»ì»ì×¥²¶Ö¤Ã÷", "rank": 0},
-    {"name": "tuan_yuan_yan", "display_name": "ÍÅÔ²Ñç", "rank": 2, "effect": {'attack_count': 5}, "cost": {"money": 500}}
+    {"name": "zhen_cheng_zhi_xin", "display_name": "çœŸæ©™ä¹‹å¿ƒ", "rank": 2, "cost": {"money": 999}},
+    {"name": "hai_shi_shan_meng", "display_name": "æµ·èª“å±±ç›Ÿ", "rank": 1, "cost": {"money": 9999}},
+    {"name": "jin_zhuan", "display_name": "é‡‘ç –", "rank": 5, "effect": {"money": 50}},
+    {"name": "jin_ye_zi", "display_name": "é‡‘å¶å­", "rank": 6, "effect": {"money": 10}},
+    {"name": "zhuan_shen_can", "display_name": "è½¬ç¥é¤", "rank": 5, "effect": {"energy": 5}, "cost": {"money": 100}},
+    {"name": "jia_zhuan_shen_can", "display_name": "ä½³Â·è½¬ç¥é¤", "rank": 3, "effect": {"energy": 30}, "cost": {"money": 500}},
+    {"name": "rong_ding", "display_name": "ç†”é”­", "rank": 3, "effect": {'pve_weapon': 5}, "cost": {"banggong": 5000}},
+    {"name": "mo_shi", "display_name": "ç£¨çŸ³", "rank": 3, "effect": {'pvp_weapon': 5}, "cost": {"weiwang": 5000}},
+    {"name": "ran", "display_name": "ç»£", "rank": 4, "effect": {'pve_armor': 10}, "cost": {"banggong": 2000}},
+    {"name": "yin", "display_name": "å°", "rank": 4, "effect": {'pvp_armor': 10}, "cost": {"weiwang": 2000}},
+    {"name": "sui_rou", "display_name": "ç¢è‚‰", "rank": 4, "cost": {"money": 10}},
+    {"name": "cu_bu", "display_name": "ç²—å¸ƒ", "rank": 4, "cost": {"money": 10}},
+    {"name": "gan_cao", "display_name": "ç”˜è‰", "rank": 4, "cost": {"money": 10}},
+    {"name": "hong_tong", "display_name": "çº¢é“œ", "rank": 4, "cost": {"money": 10}},
+    {"name": "hun_hun_zheng_ming", "display_name": "æ··æ··æŠ“æ•è¯æ˜", "rank": 0},
+    {"name": "tuan_yuan_yan", "display_name": "å›¢åœ†å®´", "rank": 2, "effect": {'attack_count': 5}, "cost": {"money": 500}}
 ]
 
 CHA_GUAN_QUEST_INFO = {
-    "cha_guan_sui_rou": {"display_name": "²è¹İ£ºËéÈâ",
-                            "description": "ĞèÒªÌá½»Ò»·İËéÈâ£¬¿ÉÔÚÉÌµê¹ºÂò¡£",
+    "cha_guan_sui_rou": {"display_name": "èŒ¶é¦†ï¼šç¢è‚‰",
+                            "description": "éœ€è¦æäº¤ä¸€ä»½ç¢è‚‰ï¼Œå¯åœ¨å•†åº—è´­ä¹°ã€‚",
                             "require": {"sui_rou": 1},
                             "reward": {"money": 50, "banggong": 500}},
-    "cha_guan_cu_bu": {"display_name": "²è¹İ£º´Ö²¼",
-                            "description": "ĞèÒªÌá½»Ò»·İ´Ö²¼£¬¿ÉÔÚÉÌµê¹ºÂò¡£",
+    "cha_guan_cu_bu": {"display_name": "èŒ¶é¦†ï¼šç²—å¸ƒ",
+                            "description": "éœ€è¦æäº¤ä¸€ä»½ç²—å¸ƒï¼Œå¯åœ¨å•†åº—è´­ä¹°ã€‚",
                             "require": {"cu_bu": 1},
                             "reward": {"money": 50, "banggong": 500}},
-    "cha_guan_gan_cao": {"display_name": "²è¹İ£º¸Ê²İ",
-                            "description": "ĞèÒªÌá½»Ò»·İ¸Ê²İ£¬¿ÉÔÚÉÌµê¹ºÂò¡£",
+    "cha_guan_gan_cao": {"display_name": "èŒ¶é¦†ï¼šç”˜è‰",
+                            "description": "éœ€è¦æäº¤ä¸€ä»½ç”˜è‰ï¼Œå¯åœ¨å•†åº—è´­ä¹°ã€‚",
                             "require": {"gan_cao": 1},
                             "reward": {"money": 50, "banggong": 500}},
-    "cha_guan_hong_tong": {"display_name": "²è¹İ£ººìÍ­",
-                            "description": "ĞèÒªÌá½»Ò»·İºìÍ­£¬¿ÉÔÚÉÌµê¹ºÂò¡£",
+    "cha_guan_hong_tong": {"display_name": "èŒ¶é¦†ï¼šçº¢é“œ",
+                            "description": "éœ€è¦æäº¤ä¸€ä»½çº¢é“œï¼Œå¯åœ¨å•†åº—è´­ä¹°ã€‚",
                             "require": {"hong_tong": 1},
                             "reward": {"money": 50, "banggong": 500}},
-    "cha_guan_hun_hun": {"display_name": "²è¹İ£º×¥²¶»ì»ì",
-                            "description": "×¥²¶»ì»ìÈı¸ö¡£Ê¹ÓÃÖ¸Áî ×¥²¶»ì»ì",
+    "cha_guan_hun_hun": {"display_name": "èŒ¶é¦†ï¼šæŠ“æ•æ··æ··",
+                            "description": "æŠ“æ•æ··æ··ä¸‰ä¸ªã€‚ä½¿ç”¨æŒ‡ä»¤ æŠ“æ•æ··æ··",
                             "require": {"hun_hun_zheng_ming": 3},
                             "reward": {"money": 50, "banggong": 500}}
 }
 
 NPC_LIST = {
     "hun_hun": {
-        "display_name": "ĞÜ³Õ",
-        "equipment": {'weapon': {"display_name": "»ì»ì¹÷", 'pvp': 0, 'pve': 10},
-                        'armor': {"display_name": "»ì»ìÒÂ", 'pvp': 0, 'pve': 50}},
+        "display_name": "ç†Šç—´",
+        "equipment": {'weapon': {"display_name": "æ··æ··æ£", 'pvp': 0, 'pve': 10},
+                        'armor': {"display_name": "æ··æ··è¡£", 'pvp': 0, 'pve': 50}},
         "reward": {"money": 50},
         "reward_chance": 0.5
     },
     'xiong_chi': {
-        "display_name": "ĞÜ³Õ",
-        "equipment": {'weapon': {"display_name": "ĞÜ³ÕÈ­Ì×", 'pvp': 0, 'pve': 100},
-                        'armor': {"display_name": "ĞÜ³ÕÒÂ", 'pvp': 0, 'pve': 500}},
+        "display_name": "ç†Šç—´",
+        "equipment": {'weapon': {"display_name": "ç†Šç—´æ‹³å¥—", 'pvp': 0, 'pve': 100},
+                        'armor': {"display_name": "ç†Šç—´è¡£", 'pvp': 0, 'pve': 500}},
         "reward": {
             "money": 50,
             "banggong": 2000,
@@ -184,23 +183,23 @@ NPC_LIST = {
         }
     },
     'deng_wen_feng': {
-        "display_name": "µËÎÄ·å",
-        "equipment": {'weapon': {"display_name": "¡°µËÎÄ·åÇ¹", 'pvp': 0, 'pve': 200},
-                        'armor': {"display_name": "µËÎÄ·åÒÂ", 'pvp': 0, 'pve': 1500}},
+        "display_name": "é‚“æ–‡å³°",
+        "equipment": {'weapon': {"display_name": "â€œé‚“æ–‡å³°æª", 'pvp': 0, 'pve': 200},
+                        'armor': {"display_name": "é‚“æ–‡å³°è¡£", 'pvp': 0, 'pve': 1500}},
         "reward": {
             "money": 100,
             "banggong": 5000,
         },
         "buff": [
             {
-                "display_name": "µË¼ÒÕó·¨",
-                "description": "×ÔÉíÎäÆ÷¹¥»÷+50%",
+                "display_name": "é‚“å®¶é˜µæ³•",
+                "description": "è‡ªèº«æ­¦å™¨æ”»å‡»+50%",
                 "weapon": 1.5,
                 "chance": 0.1,
             },
             {
-                "display_name": "µË¼Ò½«",
-                "description": "×ÔÉíÎäÆ÷¹¥»÷+20%",
+                "display_name": "é‚“å®¶å°†",
+                "description": "è‡ªèº«æ­¦å™¨æ”»å‡»+20%",
                 "weapon": 1.2,
                 "chance": 0.3
             }
@@ -212,31 +211,31 @@ NPC_LIST = {
         }
     },
     'shang_zhong_yong': {
-        "display_name": "ÉÌÖÙÓÀ",
-        "equipment": {'weapon': {"display_name": "¡°ÉÌÖÙÓÀÉÈ", 'pvp': 0, 'pve': 200},
-                        'armor': {"display_name": "ÉÌÖÙÓÀÒÂ", 'pvp': 0, 'pve': 3000}},
+        "display_name": "å•†ä»²æ°¸",
+        "equipment": {'weapon': {"display_name": "â€œå•†ä»²æ°¸æ‰‡", 'pvp': 0, 'pve': 200},
+                        'armor': {"display_name": "å•†ä»²æ°¸è¡£", 'pvp': 0, 'pve': 3000}},
         "reward": {
             "money": 200,
             "banggong": 10000,
         },
         "buff": [
             {
-                "display_name": "Ä¾ÈËÕó¹¥»÷",
-                "description": "×ÔÉíÎäÆ÷¹¥»÷+50%",
+                "display_name": "æœ¨äººé˜µæ”»å‡»",
+                "description": "è‡ªèº«æ­¦å™¨æ”»å‡»+50%",
                 "weapon": 1.5,
                 "chance": 0.1,
             }
         ],
         "debuff": [
             {
-                "display_name": "°ËØÔÕó·ÀÓù",
-                "description": "µĞ·½ÎäÆ÷¹¥»÷-50%",
+                "display_name": "å…«å¦é˜µé˜²å¾¡",
+                "description": "æ•Œæ–¹æ­¦å™¨æ”»å‡»-50%",
                 "weapon": 0.5,
                 "chance": 0.2,
             },
             {
-                "display_name": "ÌìÀ×Õó·ÀÓù",
-                "description": "µĞ·½ÎäÆ÷¹¥»÷-20%",
+                "display_name": "å¤©é›·é˜µé˜²å¾¡",
+                "description": "æ•Œæ–¹æ­¦å™¨æ”»å‡»-20%",
                 "weapon": 0.8,
                 "chance": 0.4
             }
@@ -250,17 +249,17 @@ NPC_LIST = {
         }
     },
     'fang_ji_chang': {
-        "display_name": "·½¼¾³£",
-        "equipment": {'weapon': {"display_name": "·½¼¾³£½£", 'pvp': 0, 'pve': 100},
-                        'armor': {"display_name": "·½¼¾³£ÒÂ", 'pvp': 0, 'pve': 1000}},
+        "display_name": "æ–¹å­£å¸¸",
+        "equipment": {'weapon': {"display_name": "æ–¹å­£å¸¸å‰‘", 'pvp': 0, 'pve': 100},
+                        'armor': {"display_name": "æ–¹å­£å¸¸è¡£", 'pvp': 0, 'pve': 1000}},
         "reward": {
             "money": 50,
             "banggong": 2000,
         },
         "buff": [
             {
-                "display_name": "¶¾ÆøÂûÑÓ",
-                "description": "Ã¿´ÎÊÜµ½¹¥»÷Ê±×ÔÉíÎäÆ÷¹¥»÷+10%£¬ÏÖÔÚÒÑµş{0}²ã£¬×î¸ß{1}²ã",
+                "display_name": "æ¯’æ°”è”“å»¶",
+                "description": "æ¯æ¬¡å—åˆ°æ”»å‡»æ—¶è‡ªèº«æ­¦å™¨æ”»å‡»+10%ï¼Œç°åœ¨å·²å {0}å±‚ï¼Œæœ€é«˜{1}å±‚",
                 "weapon": 0.1,
                 "chance": 1,
                 'increase_type': 'win',
@@ -275,17 +274,17 @@ NPC_LIST = {
         }
     },
     'ping_san_zhi': {
-        "display_name": "Æ½ÈıÖ¸",
-        "equipment": {'weapon': {"display_name": "Æ½ÈıÖ¸½£", 'pvp': 0, 'pve': 200},
-                        'armor': {"display_name": "Æ½ÈıÖ¸ÒÂ", 'pvp': 0, 'pve': 3000}},
+        "display_name": "å¹³ä¸‰æŒ‡",
+        "equipment": {'weapon': {"display_name": "å¹³ä¸‰æŒ‡å‰‘", 'pvp': 0, 'pve': 200},
+                        'armor': {"display_name": "å¹³ä¸‰æŒ‡è¡£", 'pvp': 0, 'pve': 3000}},
         "reward": {
             "money": 100,
             "banggong": 5000,
         },
         "debuff": [
             {
-                "display_name": "¶¾ÒºÅçÉä",
-                "description": "¶Ô·½¹¥»÷-100%",
+                "display_name": "æ¯’æ¶²å–·å°„",
+                "description": "å¯¹æ–¹æ”»å‡»-100%",
                 "weapon": 0,
                 "chance": 0.25,
             },
@@ -297,25 +296,25 @@ NPC_LIST = {
         }
     },
     'si_tu_yi_yi': {
-        "display_name": "Ë¾Í½Ò»Ò»",
-        "equipment": {'weapon': {"display_name": "Ë¾Í½Ò»Ò»½£", 'pvp': 0, 'pve': 300},
-                        'armor': {"display_name": "Ë¾Í½Ò»Ò»ÒÂ", 'pvp': 0, 'pve': 5000}},
+        "display_name": "å¸å¾’ä¸€ä¸€",
+        "equipment": {'weapon': {"display_name": "å¸å¾’ä¸€ä¸€å‰‘", 'pvp': 0, 'pve': 300},
+                        'armor': {"display_name": "å¸å¾’ä¸€ä¸€è¡£", 'pvp': 0, 'pve': 5000}},
         "reward": {
             "money": 200,
             "banggong": 10000,
         },
         "buff": [
             {
-                "display_name": "¾ŞÁúºáÉ¨",
-                "description": "×ÔÉíÎäÆ÷¹¥»÷+50%",
+                "display_name": "å·¨é¾™æ¨ªæ‰«",
+                "description": "è‡ªèº«æ­¦å™¨æ”»å‡»+50%",
                 "weapon": 1.5,
                 "chance": 0.2,
             }
         ],
         "debuff": [
             {
-                "display_name": "¾ŞÁúÍÂÏ¢",
-                "description": "µĞ·½ĞèÒªÏûºÄ¶îÍâ1´Î¹¥»÷´ÎÊı",
+                "display_name": "å·¨é¾™åæ¯",
+                "description": "æ•Œæ–¹éœ€è¦æ¶ˆè€—é¢å¤–1æ¬¡æ”»å‡»æ¬¡æ•°",
                 "weapon": 1,
                 "chance": 1,
                 'attack_count': 1,
@@ -331,17 +330,17 @@ NPC_LIST = {
         }
     },
     'feng_du': {
-        "display_name": "·ë¶È",
-        "equipment": {'weapon': {"display_name": "·ë¶È½£", 'pvp': 0, 'pve': 200},
-                        'armor': {"display_name": "·ë¶ÈÒÂ", 'pvp': 0, 'pve': 2000}},
+        "display_name": "å†¯åº¦",
+        "equipment": {'weapon': {"display_name": "å†¯åº¦å‰‘", 'pvp': 0, 'pve': 200},
+                        'armor': {"display_name": "å†¯åº¦è¡£", 'pvp': 0, 'pve': 2000}},
         "reward": {
             "money": 50,
             "banggong": 2000,
         },
         "buff": [
             {
-                "display_name": "¹òµØÇóÈÄ",
-                "description": "×ÔÉí»ØÑª50£¬½±Àø½ğÇ®+10",
+                "display_name": "è·ªåœ°æ±‚é¥¶",
+                "description": "è‡ªèº«å›è¡€50ï¼Œå¥–åŠ±é‡‘é’±+10",
                 "hp_recover": 50,
                 "money": 10,
                 "chance": 0.2,
@@ -355,17 +354,17 @@ NPC_LIST = {
         }
     },
     'wang_yan_zhi': {
-        "display_name": "ÍõÑåÖ±",
-        "equipment": {'weapon': {"display_name": "ÍõÑåÖ±½£", 'pvp': 0, 'pve': 300},
-                        'armor': {"display_name": "ÍõÑåÖ±ÒÂ", 'pvp': 0, 'pve': 5000}},
+        "display_name": "ç‹å½¦ç›´",
+        "equipment": {'weapon': {"display_name": "ç‹å½¦ç›´å‰‘", 'pvp': 0, 'pve': 300},
+                        'armor': {"display_name": "ç‹å½¦ç›´è¡£", 'pvp': 0, 'pve': 5000}},
         "reward": {
             "money": 100,
             "banggong": 5000,
         },
         "buff": [
             {
-                "display_name": "ËéĞÇ³½",
-                "description": "Ã¿´ÎÊÜµ½¹¥»÷Ê±×ÔÉíÎäÆ÷¹¥»÷+20%£¬ÏÖÔÚÒÑµş{0}²ã£¬×î¸ß{1}²ã",
+                "display_name": "ç¢æ˜Ÿè¾°",
+                "description": "æ¯æ¬¡å—åˆ°æ”»å‡»æ—¶è‡ªèº«æ­¦å™¨æ”»å‡»+20%ï¼Œç°åœ¨å·²å {0}å±‚ï¼Œæœ€é«˜{1}å±‚",
                 "weapon": 0.2,
                 "chance": 1,
                 'increase_type': 'win',
@@ -381,25 +380,25 @@ NPC_LIST = {
         }
     },
     'gui_ying_xiao_ci_lang': {
-        "display_name": "¹íÓ°Ğ¡´ÎÀÉ",
-        "equipment": {'weapon': {"display_name": "¹íÓ°Ğ¡´ÎÀÉ½£", 'pvp': 0, 'pve': 400},
-                        'armor': {"display_name": "¹íÓ°Ğ¡´ÎÀÉÒÂ", 'pvp': 0, 'pve': 8000}},
+        "display_name": "é¬¼å½±å°æ¬¡éƒ",
+        "equipment": {'weapon': {"display_name": "é¬¼å½±å°æ¬¡éƒå‰‘", 'pvp': 0, 'pve': 400},
+                        'armor': {"display_name": "é¬¼å½±å°æ¬¡éƒè¡£", 'pvp': 0, 'pve': 8000}},
         "reward": {
             "money": 200,
             "banggong": 10000,
         },
         "buff": [
             {
-                "display_name": "Ò»ÉÁ",
-                "description": "×ÔÉíÎäÆ÷¹¥»÷+20%",
+                "display_name": "ä¸€é—ª",
+                "description": "è‡ªèº«æ­¦å™¨æ”»å‡»+20%",
                 "weapon": 1.2,
                 "chance": 0.4,
             }
         ],
         "debuff": [
             {
-                "display_name": "Õæ¡¤ÌìÖé¡¤Ò»ÉÁ",
-                "description": "µĞ·½ĞèÒªÏûºÄ¶îÍâ1´Î¹¥»÷´ÎÊı",
+                "display_name": "çœŸÂ·å¤©ç Â·ä¸€é—ª",
+                "description": "æ•Œæ–¹éœ€è¦æ¶ˆè€—é¢å¤–1æ¬¡æ”»å‡»æ¬¡æ•°",
                 "chance": 0.5,
                 'attack_count': 1,
                 'hp': 0.5
@@ -416,40 +415,40 @@ NPC_LIST = {
 }
 
 QIYU_LIST = {
-    'hong_fu_qi_tian': {"description": "½­ºş¿ìÂí·É±¨£¡[CQ:at,qq={0}]ÏÀÊ¿ºèÔËµ±Í·£¡Ç©µ½Ê±»ñµÃ¶îÍâ½±Àø¡£",
+    'hong_fu_qi_tian': {"description": "æ±Ÿæ¹–å¿«é©¬é£æŠ¥ï¼[CQ:at,qq={0}]ä¾ å£«é¸¿è¿å½“å¤´ï¼ç­¾åˆ°æ—¶è·å¾—é¢å¤–å¥–åŠ±ã€‚",
                         "chance": 0.1,
                         "cooldown": 0,
                         "reward": {"money": DALIY_MONEY_REWARD, "weiwang": DALIY_REWARD_MIN, "banggong": DALIY_REWARD_MIN}},
-    'luan_shi_wu_ji': {"description": "½­ºş¿ìÂí·É±¨£¡[CQ:at,qq={0}]ÏÀÊ¿±íÑİ¾ªÑŞ¾øÂ×£¬²»¾­Òâ¼ä´¥·¢ÆæÓö¡¾ÂÒÊÀÎè¼§¡¿£¡Çã³Ç¶ÀÁ¢ÊÀËùÏ¡£¬ÂÒÊÀÎèÆğÓ°ÁèÂÒ£¡",
+    'luan_shi_wu_ji': {"description": "æ±Ÿæ¹–å¿«é©¬é£æŠ¥ï¼[CQ:at,qq={0}]ä¾ å£«è¡¨æ¼”æƒŠè‰³ç»ä¼¦ï¼Œä¸ç»æ„é—´è§¦å‘å¥‡é‡ã€ä¹±ä¸–èˆå§¬ã€‘ï¼å€¾åŸç‹¬ç«‹ä¸–æ‰€ç¨€ï¼Œä¹±ä¸–èˆèµ·å½±å‡Œä¹±ï¼",
                         "chance": 0.01,
                         "cooldown": 1 * 60 * 60,
                         "reward": {"money": 200, "energy": 100}},
-    'hu_xiao_shan_lin': {"description": "½­ºş¿ìÂí·É±¨£¡[CQ:at,qq={0}]ÏÀÊ¿ÕıÔÚÔ¡Ñª·ÜÕ½£¬²»¾­Òâ¼ä´¥·¢ÆæÓö¡¾»¢Ğ¥É½ÁÖ¡¿£¡ÕıËùÎ½Ê®ÄêÄ¥Ò»½££¬²»Â©Æä·æÃ¢¡£Ö»´ı½£ÇÊ³ö£¬Õ¶¾¡µĞÊ×Â­¡£",
+    'hu_xiao_shan_lin': {"description": "æ±Ÿæ¹–å¿«é©¬é£æŠ¥ï¼[CQ:at,qq={0}]ä¾ å£«æ­£åœ¨æµ´è¡€å¥‹æˆ˜ï¼Œä¸ç»æ„é—´è§¦å‘å¥‡é‡ã€è™å•¸å±±æ—ã€‘ï¼æ­£æ‰€è°“åå¹´ç£¨ä¸€å‰‘ï¼Œä¸æ¼å…¶é”‹èŠ’ã€‚åªå¾…å‰‘é˜å‡ºï¼Œæ–©å°½æ•Œé¦–é¢…ã€‚",
                         "chance": 0.05,
                         "cooldown": 2 * 60 * 60,
                         "reward": {"weiwang": 5000}},
-    'hu_you_cang_sheng': {"description": "½­ºş¿ìÂí·É±¨£¡[CQ:at,qq={0}]ÏÀÊ¿¾¡ĞÄ±£»¤ËûÈË£¬²»¾­Òâ¼ä´¥·¢ÆæÓö¡¾»¤ÓÓ²ÔÉú¡¿£¡²ÔÉúÌìÏÂÏµÓÚÒ»ĞÄ£¬´Ë·İÖØµ£ÄÜ·ñÒ»¼çµ£Æğ£¬ÓëÆä¹²Ãã£¡",
+    'hu_you_cang_sheng': {"description": "æ±Ÿæ¹–å¿«é©¬é£æŠ¥ï¼[CQ:at,qq={0}]ä¾ å£«å°½å¿ƒä¿æŠ¤ä»–äººï¼Œä¸ç»æ„é—´è§¦å‘å¥‡é‡ã€æŠ¤ä½‘è‹ç”Ÿã€‘ï¼è‹ç”Ÿå¤©ä¸‹ç³»äºä¸€å¿ƒï¼Œæ­¤ä»½é‡æ‹…èƒ½å¦ä¸€è‚©æ‹…èµ·ï¼Œä¸å…¶å…±å‹‰ï¼",
                         "chance": 0.05,
                         "cooldown": 2 * 60 * 60,
                         "reward": {"weiwang": 5000}},
-    'fu_yao_jiu_tian': {"description": "½­ºş¿ìÂí·É±¨£¡[CQ:at,qq={0}]ÏÀÊ¿Çá¹¦¸ÇÊÀ£¬´¥·¢ÆæÓö¡¾·öÒ¡¾ÅÌì¡¿£¡ÕıÊÇÓù·çĞĞÇ§Àï£¬·öÒ¡ºì³¾áÛ",
+    'fu_yao_jiu_tian': {"description": "æ±Ÿæ¹–å¿«é©¬é£æŠ¥ï¼[CQ:at,qq={0}]ä¾ å£«è½»åŠŸç›–ä¸–ï¼Œè§¦å‘å¥‡é‡ã€æ‰¶æ‘‡ä¹å¤©ã€‘ï¼æ­£æ˜¯å¾¡é£è¡Œåƒé‡Œï¼Œæ‰¶æ‘‡çº¢å°˜å·…",
                         "chance": 0.01,
                         "cooldown": 1 * 60 * 60,
                         "reward": {"money": 200, "energy": 100}},
-    'cha_guan_qi_yuan': {"description": "½­ºş¿ìÂí·É±¨£¡[CQ:at,qq={0}]ÏÀÊ¿ÕıÔÚ²è¹İÏĞ×ø£¬²»¾­Òâ¼ä´¥·¢ÆæÓö¡¾²è¹İÆæÔµ¡¿£¡ÕıÊÇ£ºß³ßå½­ºş£¬²»¼ûÃÀÈË¹Ë»³¡£²è¹İÏĞ×ø£¬È´ÓöµÈÏĞÊÇ·Ç£¡",
+    'cha_guan_qi_yuan': {"description": "æ±Ÿæ¹–å¿«é©¬é£æŠ¥ï¼[CQ:at,qq={0}]ä¾ å£«æ­£åœ¨èŒ¶é¦†é—²åï¼Œä¸ç»æ„é—´è§¦å‘å¥‡é‡ã€èŒ¶é¦†å¥‡ç¼˜ã€‘ï¼æ­£æ˜¯ï¼šå±å’¤æ±Ÿæ¹–ï¼Œä¸è§ç¾äººé¡¾æ€€ã€‚èŒ¶é¦†é—²åï¼Œå´é‡ç­‰é—²æ˜¯éï¼",
                         "chance": 0.05,
                         "cooldown": 2 * 60 * 60,
                         "require": {'money': 10000},
                         "reward": {"money": 1000, "banggong": 5000}},
-    'qing_feng_bu_wang': {"description": "½­ºş¿ìÂí·É±¨£¡[CQ:at,qq={0}]ÏÀÊ¿ÕıÔÚĞĞÏÀ½­ºş£¬²»¾­Òâ¼ä´¥·¢ÆæÓö¡¾Çå·ç²¶Íõ¡¿£¡",
+    'qing_feng_bu_wang': {"description": "æ±Ÿæ¹–å¿«é©¬é£æŠ¥ï¼[CQ:at,qq={0}]ä¾ å£«æ­£åœ¨è¡Œä¾ æ±Ÿæ¹–ï¼Œä¸ç»æ„é—´è§¦å‘å¥‡é‡ã€æ¸…é£æ•ç‹ã€‘ï¼",
                         "chance": 0.05,
                         "cooldown": 0,
                         "reward": {"money": 500, "weiwang": 5000}},
-    'san_shan_si_hai': {"description": "½­ºş¿ìÂí·É±¨£¡[CQ:at,qq={0}]ÏÀÊ¿¸£ÖÁĞÄÁé£¬²»¾­Òâ¼ä´¥·¢ÆæÓö¡¾ÈıÉ½ËÄº£¡¿£¡ÕıÊÇ£º·­±éÈıÉ½µ·ËÄº££¬ĞĞ¾¡ÌìÑÄÃÙÕæ½ğ¡£",
+    'san_shan_si_hai': {"description": "æ±Ÿæ¹–å¿«é©¬é£æŠ¥ï¼[CQ:at,qq={0}]ä¾ å£«ç¦è‡³å¿ƒçµï¼Œä¸ç»æ„é—´è§¦å‘å¥‡é‡ã€ä¸‰å±±å››æµ·ã€‘ï¼æ­£æ˜¯ï¼šç¿»éä¸‰å±±æ£å››æµ·ï¼Œè¡Œå°½å¤©æ¶¯è§…çœŸé‡‘ã€‚",
                         "chance": 0.01,
                         "cooldown": 2 * 60 * 60,
                         "reward": {"money": 1000}},
-    'yin_yang_liang_jie': {"description": "½­ºş¿ìÂí·É±¨£¡[CQ:at,qq={0}]ÏÀÊ¿¸£Ôµ·ÇÇ³£¬´¥·¢ÆæÓö¡¾ÒõÑôÁ½½ç¡¿£¬´ËÇ§¹ÅÆæÔµ½«¿ªÆôÔõÑùµÄÆæÃî¼ÊÓö£¬ÁîÈËÉñÍù£¡",
+    'yin_yang_liang_jie': {"description": "æ±Ÿæ¹–å¿«é©¬é£æŠ¥ï¼[CQ:at,qq={0}]ä¾ å£«ç¦ç¼˜éæµ…ï¼Œè§¦å‘å¥‡é‡ã€é˜´é˜³ä¸¤ç•Œã€‘ï¼Œæ­¤åƒå¤å¥‡ç¼˜å°†å¼€å¯æ€æ ·çš„å¥‡å¦™é™…é‡ï¼Œä»¤äººç¥å¾€ï¼",
                         "chance": 0.05,
                         "cooldown": 24 * 60 * 60,
                         "require": {"pvp_gear_point": 3000, "pve_gear_point": 3000},
@@ -458,7 +457,7 @@ QIYU_LIST = {
 
 DUNGEON_LIST = {
     'san_cai_zhen': {
-        "display_name": "Èı²ÅÕó",
+        "display_name": "ä¸‰æ‰é˜µ",
         "max_pve_reward_gain": 12000,
         "boss": ['xiong_chi', 'deng_wen_feng', 'shang_zhong_yong'],
         "reward": {
@@ -466,7 +465,7 @@ DUNGEON_LIST = {
         }
     },
     'tian_gong_fang': {
-        "display_name": "Ìì¹¤·»",
+        "display_name": "å¤©å·¥åŠ",
         "max_pve_reward_gain": 25000,
         "boss": ['fang_ji_chang', 'ping_san_zhi', 'si_tu_yi_yi'],
         "reward": {
@@ -474,7 +473,7 @@ DUNGEON_LIST = {
         }
     },
     'kong_wu_feng': {
-        "display_name": "¿ÕÎí·å",
+        "display_name": "ç©ºé›¾å³°",
         "max_pve_reward_gain": 40000,
         "boss": ['feng_du', 'wang_yan_zhi', 'gui_ying_xiao_ci_lang'],
         "reward": {
@@ -484,28 +483,28 @@ DUNGEON_LIST = {
 }
 
 STAT_DISPLAY_NAME = {
-    "weiwang": "ÍşÍû",
-    "banggong": "°ï¹±",
-    "money": "½ğÇ®",
-    "energy": "ÌåÁ¦"
+    "weiwang": "å¨æœ›",
+    "banggong": "å¸®è´¡",
+    "money": "é‡‘é’±",
+    "energy": "ä½“åŠ›"
 }
 
 CLASS_LIST = [
-    'ÎŞÃÅÅÉ',
-    'Ìì²ß',
-    '´¿Ñô',
-    'ÉÙÁÖ',
-    'ÆßĞã',
-    'Íò»¨',
-    '²Ø½£',
-    'Îå¶¾',
-    'ÌÆÃÅ',
-    'Ã÷½Ì',
-    'Ø¤°ï',
-    '²ÔÔÆ',
-    '³¤¸è',
-    '°Ôµ¶',
-    'ÅîÀ³'
+    'æ— é—¨æ´¾',
+    'å¤©ç­–',
+    'çº¯é˜³',
+    'å°‘æ—',
+    'ä¸ƒç§€',
+    'ä¸‡èŠ±',
+    'è—å‰‘',
+    'äº”æ¯’',
+    'å”é—¨',
+    'æ˜æ•™',
+    'ä¸å¸®',
+    'è‹äº‘',
+    'é•¿æ­Œ',
+    'éœ¸åˆ€',
+    'è“¬è±'
 ]
 
 QIYU_CHANCE = 0.1
@@ -567,7 +566,7 @@ def print_cost(item_cost):
     returnMsg = ""
     for k, v in item_cost.items():
         if k in STAT_DISPLAY_NAME:
-            returnMsg += "\n{0}£º{1}".format(STAT_DISPLAY_NAME[k], v)
+            returnMsg += "\n{0}ï¼š{1}".format(STAT_DISPLAY_NAME[k], v)
     return returnMsg
 
 def find_item(item_display_name):
@@ -598,7 +597,7 @@ def use_zhen_cheng_zhi_xin(fromGroup, fromQQ, toQQ):
     import CQSDK
     try:
         CQSDK.SendGroupMsg(fromGroup, "    [CQ:face,id=145][CQ:face,id=145]    [CQ:face,id=145][CQ:face,id=145]    \n[CQ:face,id=145]         [CQ:face,id=145]         [CQ:face,id=145]\n    [CQ:face,id=145]                [CQ:face,id=145]\n          [CQ:face,id=145]    [CQ:face,id=145]\n               [CQ:face,id=145]")
-        CQSDK.SendGroupMsg(fromGroup, "¡°½­ºş·ÉÂíÀ´±¨£¡[CQ:at,qq={0}] ÏÀÊ¿¶Ô [CQ:at,qq={1}] ÏÀÊ¿Ê¹ÓÃÁË´«ËµÖĞµÄ¡¾Õæ³ÈÖ®ĞÄ¡¿£¡ÒÔ´ËÏòÌìÏÂĞû¸æÆä°®Ä½Ö®ĞÄ£¬·îÈÕÔÂÒÔÎªÃË£¬ÕÑÌìµØÒÔÎª¼ø£¬Ğ¥É½ºÓÒÔÎªÖ¤£¬¾´¹íÉñÒÔÎªÆ¾¡£´Ó´ËÉ½¸ß²»×èÆäÖ¾£¬½§Éî²»¶ÏÆäĞĞ£¬Á÷Äê²»»ÙÆäÒâ£¬·çËª²»ÑÚÆäÇé¡£×İÈ»Ç°Â·¾£¼¬±éÒ°£¬Òà½«Ì¹È»ÎŞ¾åÕÌ½£ËæĞĞ¡£½ñÉú½ñÊÀ£¬²»Àë²»Æú£¬ÓÀÉúÓÀÊÀ£¬ÏàĞíÏà´Ó£¡¡±".format(fromQQ, toQQ))
+        CQSDK.SendGroupMsg(fromGroup, "â€œæ±Ÿæ¹–é£é©¬æ¥æŠ¥ï¼[CQ:at,qq={0}] ä¾ å£«å¯¹ [CQ:at,qq={1}] ä¾ å£«ä½¿ç”¨äº†ä¼ è¯´ä¸­çš„ã€çœŸæ©™ä¹‹å¿ƒã€‘ï¼ä»¥æ­¤å‘å¤©ä¸‹å®£å‘Šå…¶çˆ±æ…•ä¹‹å¿ƒï¼Œå¥‰æ—¥æœˆä»¥ä¸ºç›Ÿï¼Œæ˜­å¤©åœ°ä»¥ä¸ºé‰´ï¼Œå•¸å±±æ²³ä»¥ä¸ºè¯ï¼Œæ•¬é¬¼ç¥ä»¥ä¸ºå‡­ã€‚ä»æ­¤å±±é«˜ä¸é˜»å…¶å¿—ï¼Œæ¶§æ·±ä¸æ–­å…¶è¡Œï¼Œæµå¹´ä¸æ¯å…¶æ„ï¼Œé£éœœä¸æ©å…¶æƒ…ã€‚çºµç„¶å‰è·¯è†æ£˜éé‡ï¼Œäº¦å°†å¦ç„¶æ— æƒ§ä»—å‰‘éšè¡Œã€‚ä»Šç”Ÿä»Šä¸–ï¼Œä¸ç¦»ä¸å¼ƒï¼Œæ°¸ç”Ÿæ°¸ä¸–ï¼Œç›¸è®¸ç›¸ä»ï¼â€".format(fromQQ, toQQ))
     except Exception as e:
             logging.exception(e)
 
@@ -617,24 +616,24 @@ def get_faction_display_name(faction_id):
 class Jx3Handler(object):
 
     commandList = [
-        "²é¿´", "²é¿´×°±¸", "±³°ü",
-        "Ç©µ½",
-        "ÑºïÚ",
-        "°ó¶¨ÇéÔµ",
-        "¼ÓÈëÕóÓª",
-        "ÍË³öÕóÓª",
-        "×ª»»ÕóÓª",
-        "´ò½Ù",
-        "¹ºÂò",
-        "Ê¹ÓÃ",
-        "ÉÌµê",
-        "ÍÚ±¦",
-        "²é¿´ÕóÓª",
-        "²é¿´ĞüÉÍ",
-        "ĞüÉÍ", "×¥²¶",
-        "pve×°·ÖÅÅĞĞ", "pvp×°·ÖÅÅĞĞ", "ÁÄÌìÅÅĞĞ", "ÆæÓöÅÅĞĞ", "ÍÁºÀÅÅĞĞ", "ÍşÍûÅÅĞĞ", "ÎäÆ÷¸üÃû", "·À¾ß¸üÃû",
-        "²è¹İ",
-        "½»ÈÎÎñ", "×¥²¶»ì»ì"]
+        "æŸ¥çœ‹", "æŸ¥çœ‹è£…å¤‡", "èƒŒåŒ…",
+        "ç­¾åˆ°",
+        "æŠ¼é•–",
+        "ç»‘å®šæƒ…ç¼˜",
+        "åŠ å…¥é˜µè¥",
+        "é€€å‡ºé˜µè¥",
+        "è½¬æ¢é˜µè¥",
+        "æ‰“åŠ«",
+        "è´­ä¹°",
+        "ä½¿ç”¨",
+        "å•†åº—",
+        "æŒ–å®",
+        "æŸ¥çœ‹é˜µè¥",
+        "æŸ¥çœ‹æ‚¬èµ",
+        "æ‚¬èµ", "æŠ“æ•",
+        "pveè£…åˆ†æ’è¡Œ", "pvpè£…åˆ†æ’è¡Œ", "èŠå¤©æ’è¡Œ", "å¥‡é‡æ’è¡Œ", "åœŸè±ªæ’è¡Œ", "å¨æœ›æ’è¡Œ", "æ­¦å™¨æ›´å", "é˜²å…·æ›´å",
+        "èŒ¶é¦†",
+        "äº¤ä»»åŠ¡", "æŠ“æ•æ··æ··"]
 
     jx3_users = {}
     lover_pending = {}
@@ -785,11 +784,11 @@ class Jx3Handler(object):
         try:
             qq_account_str = str(qq_account)
             if qq_account_str in self.jx3_users.keys():
-                returnMsg = "[CQ:at,qq={0}] ×¢²áÊ§°Ü£¡ÄãÒÑ¾­×¢²á¹ıÁË¡£".format(qq_account)
+                returnMsg = "[CQ:at,qq={0}] æ³¨å†Œå¤±è´¥ï¼ä½ å·²ç»æ³¨å†Œè¿‡äº†ã€‚".format(qq_account)
             else:
                 self.equipment[qq_account_str] = {
-                    'weapon': {"display_name": "´óÏÀ½£", 'pvp': 10, 'pve': 10},
-                    'armor': {"display_name": "´óÏÀÒÂ", 'pvp': 100, 'pve': 100}
+                    'weapon': {"display_name": "å¤§ä¾ å‰‘", 'pvp': 10, 'pve': 10},
+                    'armor': {"display_name": "å¤§ä¾ è¡£", 'pvp': 100, 'pve': 100}
                 }
 
                 gear_point = calculateGearPoint(self.equipment[qq_account_str])
@@ -812,7 +811,7 @@ class Jx3Handler(object):
                     "qiandao_count": 0,
                     "bag": {}
                 }
-                returnMsg = "×¢²á³É¹¦£¡\n[CQ:at,qq={0}]\n×¢²áÊ±¼ä£º{1}".format(qq_account, time.strftime('%Y-%m-%d', time.localtime(self.jx3_users[qq_account_str]["register_time"])))
+                returnMsg = "æ³¨å†ŒæˆåŠŸï¼\n[CQ:at,qq={0}]\næ³¨å†Œæ—¶é—´ï¼š{1}".format(qq_account, time.strftime('%Y-%m-%d', time.localtime(self.jx3_users[qq_account_str]["register_time"])))
 
             self.writeToJsonFile()
         except Exception as e:
@@ -849,11 +848,11 @@ class Jx3Handler(object):
             yday_str = str(yday)
 
             if self.daliy_action_count[yday_str][qq_account_str]['qiandao']:
-                qiandao_status = "ÒÑÇ©µ½"
+                qiandao_status = "å·²ç­¾åˆ°"
             else:
-                qiandao_status = "Î´Ç©µ½"
+                qiandao_status = "æœªç­¾åˆ°"
 
-            returnMsg = "[CQ:at,qq={0}]\nÇéÔµ:\t\t{1}\nÃÅÅÉ:\t\t{2}\nÕóÓª:\t\t{3}\nÍşÍû:\t\t{4}\n°ï¹±:\t\t{5}\n½ğÇ®:\t\t{6}G\nPVP×°·Ö:\t{7}\nPVE×°·Ö:\t{8}\n×ÊÀú:\t\t{9}\nÇ©µ½×´Ì¬:\t{10}\nÇ©µ½´ÎÊı:\t{11}\nÆæÓö:\t\t{12}\n×¢²áÊ±¼ä:\t{13}\n½ñÈÕ·¢ÑÔ:\t{14}\nÌåÁ¦:\t\t{15}".format(
+            returnMsg = "[CQ:at,qq={0}]\næƒ…ç¼˜:\t\t{1}\né—¨æ´¾:\t\t{2}\né˜µè¥:\t\t{3}\nå¨æœ›:\t\t{4}\nå¸®è´¡:\t\t{5}\né‡‘é’±:\t\t{6}G\nPVPè£…åˆ†:\t{7}\nPVEè£…åˆ†:\t{8}\nèµ„å†:\t\t{9}\nç­¾åˆ°çŠ¶æ€:\t{10}\nç­¾åˆ°æ¬¡æ•°:\t{11}\nå¥‡é‡:\t\t{12}\næ³¨å†Œæ—¶é—´:\t{13}\nä»Šæ—¥å‘è¨€:\t{14}\nä½“åŠ›:\t\t{15}".format(
                     qq_account,
                     "" if val['lover'] == 0 else getGroupNickName(qq_group, val['lover']),
                     CLASS_LIST[val['class_id']],
@@ -892,7 +891,7 @@ class Jx3Handler(object):
             yday_str = str(yday)
 
             if self.daliy_action_count[yday_str][qq_account_str]['qiandao']:
-                returnMsg = "[CQ:at,qq={0}]½ñÌìÒÑ¾­Ç©µ½¹ıÁË!".format(qq_account)
+                returnMsg = "[CQ:at,qq={0}]ä»Šå¤©å·²ç»ç­¾åˆ°è¿‡äº†!".format(qq_account)
             else:
                 banggong_reward = random.randint(DALIY_REWARD_MIN, DALIY_REWARD_MAX)
                 weiwang_reward = random.randint(DALIY_REWARD_MIN, DALIY_REWARD_MAX)
@@ -903,7 +902,7 @@ class Jx3Handler(object):
                 self.jx3_users[qq_account_str]['money'] += DALIY_MONEY_REWARD
 
                 self.daliy_action_count[yday_str][qq_account_str]['qiandao'] = True
-                returnMsg = "[CQ:at,qq={0}] Ç©µ½³É¹¦£¡Ç©µ½½±Àø: ÍşÍû+{1} °ï¹±+{2} ½ğÇ®+{3} ÌåÁ¦+{4}".format(
+                returnMsg = "[CQ:at,qq={0}] ç­¾åˆ°æˆåŠŸï¼ç­¾åˆ°å¥–åŠ±: å¨æœ›+{1} å¸®è´¡+{2} é‡‘é’±+{3} ä½“åŠ›+{4}".format(
                                 qq_account,
                                 weiwang_reward,
                                 banggong_reward,
@@ -914,7 +913,7 @@ class Jx3Handler(object):
                 if faction_id != 0 and 'faction' in self.daliy_action_count and self.daliy_action_count['faction'][FACTION_NAME_ID[faction_id]]['reward'] != 0:
                     reward = self.daliy_action_count['faction'][FACTION_NAME_ID[faction_id]]['reward']
                     self.jx3_users[qq_account_str]['weiwang'] += reward
-                    returnMsg += "\n»ñµÃ×òÈÕÕóÓª½±Àø£ºÍşÍû+{0}".format(reward)
+                    returnMsg += "\nè·å¾—æ˜¨æ—¥é˜µè¥å¥–åŠ±ï¼šå¨æœ›+{0}".format(reward)
                 
                 if qq_account_str not in self.jjc_season_status and qq_account_str in get_key_or_return_default(self.jjc_status['last_season_jjc_status'], str(self.jjc_status['season'] - 1), {}):
                     jjc_status = self.jjc_status['last_season_jjc_status'][str(self.jjc_status['season'] - 1)][qq_account_str]
@@ -931,19 +930,19 @@ class Jx3Handler(object):
                         for k, v in rank_list:
                             i += 1
                             if qq_account_str == k:
-                                rank_msg = "\nÉÏÈü¼¾Ãû½£´ó»á³É¼¨£º ·ÖÊı£º{0}£¬¶ÎÎ»£º{1}£¬ÅÅÃû£º{2}¡£".format(v['score'], rank, i)
+                                rank_msg = "\nä¸Šèµ›å­£åå‰‘å¤§ä¼šæˆç»©ï¼š åˆ†æ•°ï¼š{0}ï¼Œæ®µä½ï¼š{1}ï¼Œæ’åï¼š{2}ã€‚".format(v['score'], rank, i)
                                 if i == 1:
                                     modifier = 2
-                                    rank_msg += "ÓÉÓÚÉÏÈü¼¾ÅÅÃûÎªµÚ1£¬»ñµÃ2±¶½±Àø¡£"
+                                    rank_msg += "ç”±äºä¸Šèµ›å­£æ’åä¸ºç¬¬1ï¼Œè·å¾—2å€å¥–åŠ±ã€‚"
                                 elif i >= 2 and i <= 3:
                                     modifier = 1.5
-                                    rank_msg += "ÓÉÓÚÉÏÈü¼¾ÅÅÃûÎªµÚ{0}£¬»ñµÃ{1}±¶½±Àø¡£".format(i, modifier)
+                                    rank_msg += "ç”±äºä¸Šèµ›å­£æ’åä¸ºç¬¬{0}ï¼Œè·å¾—{1}å€å¥–åŠ±ã€‚".format(i, modifier)
                         
 
                         self.jx3_users[qq_account_str]['weiwang'] += int(jjc_weiwang_reward * modifier)
                         self.jx3_users[qq_account_str]['money'] += int(jjc_money_reward * modifier)
                         self.jjc_status['last_season_jjc_status'][str(self.jjc_status['season'] - 1)][qq_account_str]['reward_gain'] = True
-                        returnMsg += "\n»ñµÃÉÏÈü¼¾Ãû½£´ó»áÅÅĞĞ½±Àø£ºÍşÍû+{0} ½ğÇ®+{1}".format(jjc_weiwang_reward, jjc_money_reward)
+                        returnMsg += "\nè·å¾—ä¸Šèµ›å­£åå‰‘å¤§ä¼šæ’è¡Œå¥–åŠ±ï¼šå¨æœ›+{0} é‡‘é’±+{1}".format(jjc_weiwang_reward, jjc_money_reward)
 
             self.writeToJsonFile()
         except Exception as e:
@@ -986,28 +985,28 @@ class Jx3Handler(object):
 
         try:
             if str(toQQ) not in self.jx3_users.keys():
-                returnMsg = "[CQ:at,qq={0}] »¹Ã»ÓĞ×¢²áÅ¶£¬ÇëÏÈ×¢²áÔÙ°ó¶¨ÇéÔµ£¡".format(toQQ)
+                returnMsg = "[CQ:at,qq={0}] è¿˜æ²¡æœ‰æ³¨å†Œå“¦ï¼Œè¯·å…ˆæ³¨å†Œå†ç»‘å®šæƒ…ç¼˜ï¼".format(toQQ)
             else:
                 fromQQ_stat = self.jx3_users[str(fromQQ)]
                 toQQ_stat = self.jx3_users[str(toQQ)]
 
                 if LOVE_ITEM_REQUIRED != "" and LOVE_ITEM_REQUIRED not in fromQQ_stat['bag'].keys():
-                    returnMsg = "[CQ:at,qq={0}] °ó¶¨ÇéÔµĞèÒªÏûºÄ1¸ö{1}¡£\nÄã²¢Ã»ÓĞ´ËÎïÆ·£¬ÇëÏÈ¹ºÂò¡£".format(fromQQ, get_item_display_name(LOVE_ITEM_REQUIRED))
+                    returnMsg = "[CQ:at,qq={0}] ç»‘å®šæƒ…ç¼˜éœ€è¦æ¶ˆè€—1ä¸ª{1}ã€‚\nä½ å¹¶æ²¡æœ‰æ­¤ç‰©å“ï¼Œè¯·å…ˆè´­ä¹°ã€‚".format(fromQQ, get_item_display_name(LOVE_ITEM_REQUIRED))
                 else:
                     if str(fromQQ_stat['lover']) == str(toQQ):
-                        returnMsg = "[CQ:at,qq={0}] ÄãÃÇÒÑ¾­°ó¶¨¹ıÀ²£¡»¹ÏëÂÒÈö¹·Á¸£¿".format(fromQQ)
+                        returnMsg = "[CQ:at,qq={0}] ä½ ä»¬å·²ç»ç»‘å®šè¿‡å•¦ï¼è¿˜æƒ³ä¹±æ’’ç‹—ç²®ï¼Ÿ".format(fromQQ)
                     elif fromQQ_stat['lover'] != 0:
-                        returnMsg = "[CQ:at,qq={0}]  ÏëÊ²Ã´ÄØ£¿Äã¾Í²»ÅÂ[CQ:at,qq={1}]´òÄãÂğ£¿".format(fromQQ, fromQQ_stat['lover'])
+                        returnMsg = "[CQ:at,qq={0}]  æƒ³ä»€ä¹ˆå‘¢ï¼Ÿä½ å°±ä¸æ€•[CQ:at,qq={1}]æ‰“ä½ å—ï¼Ÿ".format(fromQQ, fromQQ_stat['lover'])
                     elif toQQ_stat['lover'] != 0:
-                        returnMsg = "[CQ:at,qq={0}] ÈË¼ÒÒÑ¾­ÓĞÇéÔµÀ²£¬ÄãÊÇÏëÉÏ818Âğ£¿".format(fromQQ)
+                        returnMsg = "[CQ:at,qq={0}] äººå®¶å·²ç»æœ‰æƒ…ç¼˜å•¦ï¼Œä½ æ˜¯æƒ³ä¸Š818å—ï¼Ÿ".format(fromQQ)
                     elif toQQ in self.lover_pending and self.lover_pending[str(toQQ)] != fromQQ:
-                        returnMsg = "[CQ:at,qq={0}] ÒÑ¾­ÓĞÈËÏò[CQ:at,qq={1}]ÇóÇéÔµÀ²£¬ÄãÊÇ²»ÊÇÔÙ¿¼ÂÇÒ»ÏÂ£¿".format(fromQQ, toQQ)
+                        returnMsg = "[CQ:at,qq={0}] å·²ç»æœ‰äººå‘[CQ:at,qq={1}]æ±‚æƒ…ç¼˜å•¦ï¼Œä½ æ˜¯ä¸æ˜¯å†è€ƒè™‘ä¸€ä¸‹ï¼Ÿ".format(fromQQ, toQQ)
                     else:
                         pendingList = [k for k, v in self.lover_pending.items() if v == fromQQ]
                         for p in pendingList:
                             self.lover_pending.pop(p)
                         self.lover_pending[str(toQQ)] = fromQQ
-                        returnMsg = "[CQ:at,qq={1}]\n[CQ:at,qq={0}] Ï£ÍûÓëÄã°ó¶¨ÇéÔµ£¬ÇëÊäÈë Í¬Òâ »òÕß ¾Ü¾ø¡£".format(fromQQ, toQQ)
+                        returnMsg = "[CQ:at,qq={1}]\n[CQ:at,qq={0}] å¸Œæœ›ä¸ä½ ç»‘å®šæƒ…ç¼˜ï¼Œè¯·è¾“å…¥ åŒæ„ æˆ–è€… æ‹’ç»ã€‚".format(fromQQ, toQQ)
 
         except Exception as e:
             logging.exception(e)
@@ -1028,7 +1027,7 @@ class Jx3Handler(object):
                 fromQQ_str = str(fromQQ)
 
                 if LOVE_ITEM_REQUIRED != "" and LOVE_ITEM_REQUIRED not in self.jx3_users[fromQQ_str]['bag'].keys():
-                    returnMsg = "[CQ:at,qq={1}] ËäÈ»ÈË¼ÒÍ¬ÒâÁËµ«ÊÇÄã²¢Ã»ÓĞ1¸ö{1}¡£".format(fromQQ, get_item_display_name(LOVE_ITEM_REQUIRED))
+                    returnMsg = "[CQ:at,qq={1}] è™½ç„¶äººå®¶åŒæ„äº†ä½†æ˜¯ä½ å¹¶æ²¡æœ‰1ä¸ª{1}ã€‚".format(fromQQ, get_item_display_name(LOVE_ITEM_REQUIRED))
                 else:
                     self.jx3_users[fromQQ_str]['lover'] = toQQ
                     self.jx3_users[fromQQ_str]['lover_time'] = time.time()
@@ -1040,7 +1039,7 @@ class Jx3Handler(object):
                             self.jx3_users[fromQQ_str]['bag'].pop(LOVE_ITEM_REQUIRED)
                         use_zhen_cheng_zhi_xin(fromGroup, fromQQ, toQQ)
 
-                    returnMsg = "[CQ:at,qq={0}] Óë [CQ:at,qq={1}]£¬Ï²½ñÈÕ¼ÎÀñ³õ³É£¬Á¼ÔµËìµŞ¡£Ê«Ó½¹ØöÂ£¬ÑÅ¸è÷ëÖº¡£ÈğÒ¶ÎåÊÀÆä²ı£¬Ïé¿ª¶şÄÏÖ®»¯¡£Í¬ĞÄÍ¬µÂ£¬ÒËÊÒÒË¼Ò¡£Ïà¾´Èç±ö£¬ÓÀĞ³ÓãË®Ö®»¶¡£»¥Öú¾«³Ï£¬¹²ÃËÔ§ÑìÖ®ÊÄ".format(fromQQ, toQQ)
+                    returnMsg = "[CQ:at,qq={0}] ä¸ [CQ:at,qq={1}]ï¼Œå–œä»Šæ—¥å˜‰ç¤¼åˆæˆï¼Œè‰¯ç¼˜é‚ç¼”ã€‚è¯—å’å…³é›ï¼Œé›…æ­ŒéºŸè¶¾ã€‚ç‘å¶äº”ä¸–å…¶æ˜Œï¼Œç¥¥å¼€äºŒå—ä¹‹åŒ–ã€‚åŒå¿ƒåŒå¾·ï¼Œå®œå®¤å®œå®¶ã€‚ç›¸æ•¬å¦‚å®¾ï¼Œæ°¸è°é±¼æ°´ä¹‹æ¬¢ã€‚äº’åŠ©ç²¾è¯šï¼Œå…±ç›Ÿé¸³é¸¯ä¹‹èª“".format(fromQQ, toQQ)
 
             self.writeToJsonFile()
         except Exception as e:
@@ -1058,7 +1057,7 @@ class Jx3Handler(object):
         try:
             if str(toQQ) in self.lover_pending.keys():
                 fromQQ = self.lover_pending.pop(str(toQQ))
-                returnMsg = "Âä»¨ÓĞÒâ£¬Á÷Ë®ÎŞÇé£¬[CQ:at,qq={1}] Íñ¾ÜÁË [CQ:at,qq={0}]¡£".format(fromQQ, toQQ)
+                returnMsg = "è½èŠ±æœ‰æ„ï¼Œæµæ°´æ— æƒ…ï¼Œ[CQ:at,qq={1}] å©‰æ‹’äº† [CQ:at,qq={0}]ã€‚".format(fromQQ, toQQ)
 
         except Exception as e:
             logging.exception(e)
@@ -1077,12 +1076,12 @@ class Jx3Handler(object):
             qq_account_str = str(qq_account)
             val = self.jx3_users[qq_account_str]
             if val['faction_id'] == 0 and not NO_FACTION_ALLOW_YA_BIAO:
-                returnMsg = "[CQ:at,qq={0}] ÖĞÁ¢ÕóÓªÎŞ·¨ÑºïÚ¡£".format(qq_account)
+                returnMsg = "[CQ:at,qq={0}] ä¸­ç«‹é˜µè¥æ— æ³•æŠ¼é•–ã€‚".format(qq_account)
             elif val['energy'] < YA_BIAO_ENERGY_REQUIRED:
-                returnMsg = "[CQ:at,qq={0}] ÌåÁ¦²»×ã£¡ÎŞ·¨ÑºïÚ¡£".format(qq_account)
+                returnMsg = "[CQ:at,qq={0}] ä½“åŠ›ä¸è¶³ï¼æ— æ³•æŠ¼é•–ã€‚".format(qq_account)
             elif qq_account_str in self.jail_list and time.time() - self.jail_list[qq_account_str] < JAIL_DURATION:
                     time_val = calculateRemainingTime(JAIL_DURATION, self.jail_list[qq_account_str])
-                    returnMsg = "[CQ:at,qq={0}] ÀÏÊµµã£¬Äã»¹ÒªÔÚ¼àÓüÀï¶×{1}Ğ¡Ê±{2}·Ö{3}Ãë¡£".format(
+                    returnMsg = "[CQ:at,qq={0}] è€å®ç‚¹ï¼Œä½ è¿˜è¦åœ¨ç›‘ç‹±é‡Œè¹²{1}å°æ—¶{2}åˆ†{3}ç§’ã€‚".format(
                                     qq_account,
                                     time_val['hours'],
                                     time_val['mins'],
@@ -1104,9 +1103,9 @@ class Jx3Handler(object):
                     if not NO_FACTION_ALLOW_YA_BIAO:
                         self.daliy_action_count[yday_str]['faction'][FACTION_NAME_ID[val['faction_id']]]['point'] += YA_BIAO_FACTION_POINT_GAIN
 
-                    returnMsg = "[CQ:at,qq={0}] ÑºïÚ³É¹¦£¡ÌåÁ¦-{1} ÍşÍû+{2} ½ğÇ®+{3}".format(qq_account, YA_BIAO_ENERGY_REQUIRED, reward, DALIY_YA_BIAO_MONEY_REWARD)
+                    returnMsg = "[CQ:at,qq={0}] æŠ¼é•–æˆåŠŸï¼ä½“åŠ›-{1} å¨æœ›+{2} é‡‘é’±+{3}".format(qq_account, YA_BIAO_ENERGY_REQUIRED, reward, DALIY_YA_BIAO_MONEY_REWARD)
                 else:
-                    returnMsg = "[CQ:at,qq={0}] Ò»Ìì×î¶àÑºïÚ{1}´Î¡£ÄãÒÑ¾­ÑºÁË{1}ÌËÀ²£¬Ã÷ÌìÔÙÀ´°É¡£".format(qq_account, MAX_DALIY_YA_BIAO_COUNT)
+                    returnMsg = "[CQ:at,qq={0}] ä¸€å¤©æœ€å¤šæŠ¼é•–{1}æ¬¡ã€‚ä½ å·²ç»æŠ¼äº†{1}è¶Ÿå•¦ï¼Œæ˜å¤©å†æ¥å§ã€‚".format(qq_account, MAX_DALIY_YA_BIAO_COUNT)
 
             self.writeToJsonFile()
         except Exception as e:
@@ -1125,12 +1124,12 @@ class Jx3Handler(object):
         try:
             bag = get_key_or_return_default(self.jx3_users[str(qq_account)], 'bag', {})
             if bag == {}:
-                itemMsg = "\n¿Õ¿ÕÈçÒ²"
+                itemMsg = "\nç©ºç©ºå¦‚ä¹Ÿ"
             else:
                 itemMsg = ""
                 for k, v in bag.items():
                     itemMsg += "\n{0} x {1}".format(get_item_display_name(k), v)
-            returnMsg = "[CQ:at,qq={0}] µÄ±³°ü£º".format(qq_account) + itemMsg
+            returnMsg = "[CQ:at,qq={0}] çš„èƒŒåŒ…ï¼š".format(qq_account) + itemMsg
 
         except Exception as e:
             logging.exception(e)
@@ -1151,12 +1150,12 @@ class Jx3Handler(object):
                 qq_stat = self.jx3_users[qq_account_str]
                 qq_faction_str = get_faction_display_name(qq_stat['faction_id'])
                 if faction_str == qq_faction_str:
-                    returnMsg = "[CQ:at,qq={0}] ÄãÒÑ¾­¼ÓÈëÁË {1}¡£".format(qq_account, faction_str)
+                    returnMsg = "[CQ:at,qq={0}] ä½ å·²ç»åŠ å…¥äº† {1}ã€‚".format(qq_account, faction_str)
                 elif qq_stat['faction_id'] != 0:
-                    returnMsg = "[CQ:at,qq={0}] ÄãÒÑ¾­¼ÓÈëÁË {1}£¬{2} ²¢²»Ïë½ÓÊÜÄãµÄÉêÇë¡£".format(qq_account, qq_faction_str, faction_str)
+                    returnMsg = "[CQ:at,qq={0}] ä½ å·²ç»åŠ å…¥äº† {1}ï¼Œ{2} å¹¶ä¸æƒ³æ¥å—ä½ çš„ç”³è¯·ã€‚".format(qq_account, qq_faction_str, faction_str)
                 elif qq_stat['faction_join_time'] != None and time.time() - qq_stat['faction_join_time'] < FACTION_REJOIN_CD_SECS:
                     time_val = calculateRemainingTime(FACTION_REJOIN_CD_SECS, qq_stat['faction_join_time'])
-                    returnMsg = "[CQ:at,qq={0}] ÓÉÓÚ²»¾ÃÇ°²ÅÍË³öÕóÓª£¬ÄãĞèÒªµÈ´ı{1}Ğ¡Ê±{2}·Ö{3}ÃëÖ®ºó²ÅÄÜÖØĞÂ¼ÓÈë¡£".format(
+                    returnMsg = "[CQ:at,qq={0}] ç”±äºä¸ä¹…å‰æ‰é€€å‡ºé˜µè¥ï¼Œä½ éœ€è¦ç­‰å¾…{1}å°æ—¶{2}åˆ†{3}ç§’ä¹‹åæ‰èƒ½é‡æ–°åŠ å…¥ã€‚".format(
                                     qq_account,
                                     time_val['hours'],
                                     time_val['mins'],
@@ -1164,7 +1163,7 @@ class Jx3Handler(object):
                 else:
                     self.jx3_users[qq_account_str]['faction_id'] = FACTION_DISPLAY_NAME.index(faction_str)
                     self.jx3_users[qq_account_str]['faction_join_time'] = time.time()
-                    returnMsg = "[CQ:at,qq={0}] ³É¹¦¼ÓÈë {1}¡£".format(qq_account, faction_str)
+                    returnMsg = "[CQ:at,qq={0}] æˆåŠŸåŠ å…¥ {1}ã€‚".format(qq_account, faction_str)
 
             self.writeToJsonFile()
         except Exception as e:
@@ -1184,14 +1183,14 @@ class Jx3Handler(object):
             qq_account_str = str(qq_account)
             qq_stat = self.jx3_users[qq_account_str]
             if qq_stat['faction_id'] == 0:
-                returnMsg = "[CQ:at,qq={0}] Äã²¢Ã»ÓĞ¼ÓÈëÈÎºÎÕóÓª¡£".format(qq_account)
+                returnMsg = "[CQ:at,qq={0}] ä½ å¹¶æ²¡æœ‰åŠ å…¥ä»»ä½•é˜µè¥ã€‚".format(qq_account)
             else:
                 pre_faction_id = qq_stat['faction_id']
                 self.jx3_users[qq_account_str]['faction_id'] = 0
                 self.jx3_users[qq_account_str]['faction_join_time'] = time.time()
                 if FACTION_QUIT_EMPTY_WEIWANG:
                     self.jx3_users[qq_account_str]['weiwang'] = 0
-                returnMsg = "[CQ:at,qq={0}] ÍË³öÁË½­ºş·×Õù£¬ÍÑÀëÁË {1}".format(qq_account, get_faction_display_name(pre_faction_id))
+                returnMsg = "[CQ:at,qq={0}] é€€å‡ºäº†æ±Ÿæ¹–çº·äº‰ï¼Œè„±ç¦»äº† {1}".format(qq_account, get_faction_display_name(pre_faction_id))
 
             self.writeToJsonFile()
         except Exception as e:
@@ -1211,21 +1210,21 @@ class Jx3Handler(object):
             qq_account_str = str(qq_account)
             qq_stat = self.jx3_users[qq_account_str]
             if qq_stat['faction_id'] == 0:
-                returnMsg = "[CQ:at,qq={0}] Äã²¢Ã»ÓĞ¼ÓÈëÈÎºÎÕóÓª¡£".format(qq_account)
+                returnMsg = "[CQ:at,qq={0}] ä½ å¹¶æ²¡æœ‰åŠ å…¥ä»»ä½•é˜µè¥ã€‚".format(qq_account)
             elif qq_stat['weiwang'] < FACTION_TRANSFER_WEIWANG_COST:
-                returnMsg = "[CQ:at,qq={0}] ×ª»»ÕóÓªĞèÒªÏûºÄ{1}ÍşÍû£¬µ±Ç°ÍşÍû²»×ã¡£".format(qq_account, FACTION_TRANSFER_WEIWANG_COST)
+                returnMsg = "[CQ:at,qq={0}] è½¬æ¢é˜µè¥éœ€è¦æ¶ˆè€—{1}å¨æœ›ï¼Œå½“å‰å¨æœ›ä¸è¶³ã€‚".format(qq_account, FACTION_TRANSFER_WEIWANG_COST)
             elif qq_stat['faction_join_time'] != None and time.time() - qq_stat['faction_join_time'] < FACTION_REJOIN_CD_SECS:
                 remain_secs = int(math.floor(FACTION_REJOIN_CD_SECS - (time.time() - qq_stat['faction_join_time'])))
                 hours = remain_secs // 3600
                 mins = (remain_secs - hours * 3600) // 60
                 secs = remain_secs - hours * 3600 - mins * 60
-                returnMsg = "[CQ:at,qq={0}] ÓÉÓÚ²»¾ÃÇ°²Å¸ü¸ÄÕóÓª£¬ÄãĞèÒªµÈ´ı{1}Ğ¡Ê±{2}·Ö{3}ÃëÖ®ºó²ÅÄÜ¸ü¸Ä¡£".format(qq_account, hours, mins, secs)
+                returnMsg = "[CQ:at,qq={0}] ç”±äºä¸ä¹…å‰æ‰æ›´æ”¹é˜µè¥ï¼Œä½ éœ€è¦ç­‰å¾…{1}å°æ—¶{2}åˆ†{3}ç§’ä¹‹åæ‰èƒ½æ›´æ”¹ã€‚".format(qq_account, hours, mins, secs)
             else:
                 pre_faction_id = qq_stat['faction_id']
                 new_faction_id = 1 if pre_faction_id == 2 else 2
                 self.jx3_users[qq_account_str]['faction_id'] = new_faction_id
                 self.jx3_users[qq_account_str]['faction_join_time'] = time.time()
-                returnMsg = "[CQ:at,qq={0}] Í¨¹ıµØÏÂ½»Ò×£¬»¨·ÑÁË{1}ÍşÍû£¬³É¹¦µØÍÑÀëÁË {2}£¬¼ÓÈëÁË {3}¡£".format(qq_account, FACTION_TRANSFER_WEIWANG_COST, get_faction_display_name(pre_faction_id), get_faction_display_name(new_faction_id))
+                returnMsg = "[CQ:at,qq={0}] é€šè¿‡åœ°ä¸‹äº¤æ˜“ï¼ŒèŠ±è´¹äº†{1}å¨æœ›ï¼ŒæˆåŠŸåœ°è„±ç¦»äº† {2}ï¼ŒåŠ å…¥äº† {3}ã€‚".format(qq_account, FACTION_TRANSFER_WEIWANG_COST, get_faction_display_name(pre_faction_id), get_faction_display_name(new_faction_id))
 
             self.writeToJsonFile()
         except Exception as e:
@@ -1279,7 +1278,7 @@ class Jx3Handler(object):
 
         try:
             if not self.isUserRegister(toQQ):
-                returnMsg = "[CQ:at,qq={0}] ¶Ô·½ÉĞÎ´×¢²á£¬ÎŞ·¨´ò½Ù¡£".format(fromQQ)
+                returnMsg = "[CQ:at,qq={0}] å¯¹æ–¹å°šæœªæ³¨å†Œï¼Œæ— æ³•æ‰“åŠ«ã€‚".format(fromQQ)
             else:
                 fromQQ_str = str(fromQQ)
                 fromQQ_stat = self.jx3_users[fromQQ_str]
@@ -1294,32 +1293,32 @@ class Jx3Handler(object):
                     self.daliy_action_count[yday_str][fromQQ_str]['rob'] = {'weiwang': 0, 'money': 0, 'last_rob_time': None}
 
                 if fromQQ_stat['faction_id'] == 0:
-                    returnMsg = "[CQ:at,qq={0}] ÖĞÁ¢ÕóÓªÎŞ·¨´ò½Ù£¬ÇëÏÈ¼ÓÈëÕóÓª¡£".format(fromQQ)
+                    returnMsg = "[CQ:at,qq={0}] ä¸­ç«‹é˜µè¥æ— æ³•æ‰“åŠ«ï¼Œè¯·å…ˆåŠ å…¥é˜µè¥ã€‚".format(fromQQ)
                 elif toQQ_stat['faction_id'] == 0:
-                    returnMsg = "[CQ:at,qq={0}] ¶Ô·½ÊÇÖĞÁ¢ÕóÓª£¬ÎŞ·¨´ò½Ù¡£".format(fromQQ)
+                    returnMsg = "[CQ:at,qq={0}] å¯¹æ–¹æ˜¯ä¸­ç«‹é˜µè¥ï¼Œæ— æ³•æ‰“åŠ«ã€‚".format(fromQQ)
                 elif fromQQ_stat['faction_id'] == toQQ_stat['faction_id'] and ROB_SAME_FACTION_PROTECTION:
-                    returnMsg = "[CQ:at,qq={0}] Í¬ÕóÓªÎŞ·¨´ò½Ù£¡".format(fromQQ)
+                    returnMsg = "[CQ:at,qq={0}] åŒé˜µè¥æ— æ³•æ‰“åŠ«ï¼".format(fromQQ)
                 elif toQQ_str in self.rob_protect and ROB_PROTECT_COUNT != 0 and self.rob_protect[toQQ_str]['count'] >= ROB_PROTECT_COUNT and (time.time() - self.rob_protect[toQQ_str]['rob_time']) <= ROB_PROTECT_DURATION:
                     time_val = calculateRemainingTime(ROB_PROTECT_DURATION, self.rob_protect[toQQ_str]['rob_time'])
-                    returnMsg = "[CQ:at,qq={0}] ¶Ô·½×î½ü±»´ò½ÙÌ«¶à´ÎÀ²£¬ÒÑ¾­ÊÜµ½ÁËÉñÖ®»¤ÓÓ¡£\nÊ£ÓàÊ±¼ä£º{1}Ğ¡Ê±{2}·Ö{3}Ãë".format(
+                    returnMsg = "[CQ:at,qq={0}] å¯¹æ–¹æœ€è¿‘è¢«æ‰“åŠ«å¤ªå¤šæ¬¡å•¦ï¼Œå·²ç»å—åˆ°äº†ç¥ä¹‹æŠ¤ä½‘ã€‚\nå‰©ä½™æ—¶é—´ï¼š{1}å°æ—¶{2}åˆ†{3}ç§’".format(
                                     fromQQ,
                                     time_val['hours'],
                                     time_val['mins'],
                                     time_val['secs'])
                 elif fromQQ_str in self.jail_list and time.time() - self.jail_list[fromQQ_str] < JAIL_DURATION:
                     time_val = calculateRemainingTime(JAIL_DURATION, self.jail_list[fromQQ_str])
-                    returnMsg = "[CQ:at,qq={0}] ÀÏÊµµã£¬Äã»¹ÒªÔÚ¼àÓüÀï¶×{1}Ğ¡Ê±{2}·Ö{3}Ãë¡£".format(
+                    returnMsg = "[CQ:at,qq={0}] è€å®ç‚¹ï¼Œä½ è¿˜è¦åœ¨ç›‘ç‹±é‡Œè¹²{1}å°æ—¶{2}åˆ†{3}ç§’ã€‚".format(
                                     fromQQ,
                                     time_val['hours'],
                                     time_val['mins'],
                                     time_val['secs'])
                 elif toQQ_str in self.jail_list and time.time() - self.jail_list[toQQ_str] < JAIL_DURATION:
-                    returnMsg = "[CQ:at,qq={0}] ¶Ô·½ÔÚ¼àÓüÀï¶××ÅÄØ£¬ÄãÕâÊÇÒª½ÙÓüÂğ£¿".format(fromQQ)
+                    returnMsg = "[CQ:at,qq={0}] å¯¹æ–¹åœ¨ç›‘ç‹±é‡Œè¹²ç€å‘¢ï¼Œä½ è¿™æ˜¯è¦åŠ«ç‹±å—ï¼Ÿ".format(fromQQ)
                 elif fromQQ_stat['energy'] < ROB_ENERGY_COST:
-                    returnMsg = "[CQ:at,qq={0}] ÌåÁ¦²»×ã£¡ÎŞ·¨´ò½Ù¡£".format(fromQQ)
+                    returnMsg = "[CQ:at,qq={0}] ä½“åŠ›ä¸è¶³ï¼æ— æ³•æ‰“åŠ«ã€‚".format(fromQQ)
                 elif self.daliy_action_count[yday_str][fromQQ_str]['rob']['last_rob_time'] != None and time.time() - self.daliy_action_count[yday_str][fromQQ_str]['rob']['last_rob_time'] < ROB_LOSE_COOLDOWN:
                     time_val = calculateRemainingTime(ROB_LOSE_COOLDOWN, self.daliy_action_count[yday_str][fromQQ_str]['rob']['last_rob_time'])
-                    returnMsg = "[CQ:at,qq={0}] Äã»¹ĞèÒª»Ö¸´{1}Ğ¡Ê±{2}·Ö{3}Ãë£¬ÎŞ·¨´ò½Ù¡£".format(
+                    returnMsg = "[CQ:at,qq={0}] ä½ è¿˜éœ€è¦æ¢å¤{1}å°æ—¶{2}åˆ†{3}ç§’ï¼Œæ— æ³•æ‰“åŠ«ã€‚".format(
                                     fromQQ,
                                     time_val['hours'],
                                     time_val['mins'],
@@ -1384,7 +1383,7 @@ class Jx3Handler(object):
                         self.jx3_users[loser]['weiwang'] -= weiwang_lost
                         self.jx3_users[loser]['money'] -= money_lost
 
-                        returnMsg = "´ò½Ù³É¹¦£¡³É¹¦ÂÊ£º{0}%\n[CQ:at,qq={1}] ÔÚÒ°Íâ´ò½ÙÁË [CQ:at,qq={2}]\n{3} ÍşÍû+{4} ½ğÇ®+{5} ÌåÁ¦-{6}\n{7} ÍşÍû-{8} ½ğÇ®-{9}".format(
+                        returnMsg = "æ‰“åŠ«æˆåŠŸï¼æˆåŠŸç‡ï¼š{0}%\n[CQ:at,qq={1}] åœ¨é‡å¤–æ‰“åŠ«äº† [CQ:at,qq={2}]\n{3} å¨æœ›+{4} é‡‘é’±+{5} ä½“åŠ›-{6}\n{7} å¨æœ›-{8} é‡‘é’±-{9}".format(
                                         int(math.floor(success_chance * 100)),
                                         fromQQ,
                                         toQQ,
@@ -1410,7 +1409,7 @@ class Jx3Handler(object):
                         else:
                             energy_cost = 0
 
-                        returnMsg = "´ò½ÙÊ§°Ü£¡³É¹¦ÂÊ£º{0}%\n[CQ:at,qq={1}] ÔÚÒ°Íâ´ò½Ù [CQ:at,qq={2}] Ê±±»·´É±£¬ĞèÒªĞİÏ¢{3}Ğ¡Ê±{4}·Ö{5}Ãë¡£ÌåÁ¦-{6}".format(
+                        returnMsg = "æ‰“åŠ«å¤±è´¥ï¼æˆåŠŸç‡ï¼š{0}%\n[CQ:at,qq={1}] åœ¨é‡å¤–æ‰“åŠ« [CQ:at,qq={2}] æ—¶è¢«åæ€ï¼Œéœ€è¦ä¼‘æ¯{3}å°æ—¶{4}åˆ†{5}ç§’ã€‚ä½“åŠ›-{6}".format(
                                         int(math.floor(success_chance * 100)),
                                         fromQQ,
                                         toQQ,
@@ -1446,7 +1445,7 @@ class Jx3Handler(object):
             item = find_item(item_display_name)
             if item != None:
                 if not isItemBuyable(item):
-                    returnMsg = "[CQ:at,qq={0}] {1} ²»¿É¹ºÂò¡£".format(qq_account, item_display_name)
+                    returnMsg = "[CQ:at,qq={0}] {1} ä¸å¯è´­ä¹°ã€‚".format(qq_account, item_display_name)
                 else:
 
                     qq_account_str = str(qq_account)
@@ -1461,13 +1460,13 @@ class Jx3Handler(object):
                         if item['name'] not in self.jx3_users[qq_account_str]['bag']:
                             self.jx3_users[qq_account_str]['bag'][item['name']] = 0
                         self.jx3_users[qq_account_str]['bag'][item['name']] += item_amount
-                        returnMsg = "[CQ:at,qq={0}] ¹ºÂò³É¹¦£¡\n{1}+{2}".format(qq_account, item_display_name, item_amount)
+                        returnMsg = "[CQ:at,qq={0}] è´­ä¹°æˆåŠŸï¼\n{1}+{2}".format(qq_account, item_display_name, item_amount)
                         for k, v in cost_list.items():
                             if k in qq_stat:
                                 self.jx3_users[qq_account_str][k] -= v * item_amount
                                 returnMsg += "\n{0}-{1}".format(STAT_DISPLAY_NAME[k], v * item_amount)
                     else:
-                        returnMsg = "[CQ:at,qq={0}] ¹ºÂòÊ§°Ü£¡\n¹ºÂò1¸ö {1} ĞèÒª:{2}".format(qq_account, item_display_name, print_cost(cost_list))
+                        returnMsg = "[CQ:at,qq={0}] è´­ä¹°å¤±è´¥ï¼\nè´­ä¹°1ä¸ª {1} éœ€è¦:{2}".format(qq_account, item_display_name, print_cost(cost_list))
 
             self.writeToJsonFile()
         except Exception as e:
@@ -1486,7 +1485,7 @@ class Jx3Handler(object):
             item = find_item(item_display_name)
             if item != None:
                 if not isItemUsable(item):
-                    returnMsg = "[CQ:at,qq={0}] {1} ²»¿ÉÊ¹ÓÃ¡£".format(qq_account, item_display_name)
+                    returnMsg = "[CQ:at,qq={0}] {1} ä¸å¯ä½¿ç”¨ã€‚".format(qq_account, item_display_name)
                 else:
 
                     qq_account_str = str(qq_account)
@@ -1495,31 +1494,31 @@ class Jx3Handler(object):
                     effect_list = item['effect']
 
                     if item['name'] not in self.jx3_users[qq_account_str]['bag']:
-                        returnMsg = "[CQ:at,qq={0}] Äã²¢Ã»ÓĞ {1}£¬ÎŞ·¨Ê¹ÓÃ¡£".format(qq_account, item_display_name)
+                        returnMsg = "[CQ:at,qq={0}] ä½ å¹¶æ²¡æœ‰ {1}ï¼Œæ— æ³•ä½¿ç”¨ã€‚".format(qq_account, item_display_name)
                     elif self.jx3_users[qq_account_str]['bag'][item['name']] < item_amount:
-                        returnMsg = "[CQ:at,qq={0}] Äã²¢Ã»ÓĞÄÇÃ´¶à {1}¡£".format(qq_account, item_display_name)
+                        returnMsg = "[CQ:at,qq={0}] ä½ å¹¶æ²¡æœ‰é‚£ä¹ˆå¤š {1}ã€‚".format(qq_account, item_display_name)
                     else:
                         item_used = True
-                        returnMsg = "[CQ:at,qq={0}] Ê¹ÓÃ {1} x {2}".format(qq_account, item_display_name, item_amount)
+                        returnMsg = "[CQ:at,qq={0}] ä½¿ç”¨ {1} x {2}".format(qq_account, item_display_name, item_amount)
                         for k, v in effect_list.items():
                             if k in qq_stat:
                                 self.jx3_users[qq_account_str][k] += v * item_amount
                                 returnMsg += "\n{0}+{1}".format(STAT_DISPLAY_NAME[k], v * item_amount)
                             elif k == 'pve_weapon':
                                 self.equipment[qq_account_str]['weapon']['pve'] += v * item_amount
-                                returnMsg += "\nÎäÆ÷pveÉËº¦+{0}".format(v * item_amount)
+                                returnMsg += "\næ­¦å™¨pveä¼¤å®³+{0}".format(v * item_amount)
                                 self._update_gear_point(qq_account_str)
                             elif k == 'pvp_weapon':
                                 self.equipment[qq_account_str]['weapon']['pvp'] += v * item_amount
-                                returnMsg += "\nÎäÆ÷pvpÉËº¦+{0}".format(v * item_amount)
+                                returnMsg += "\næ­¦å™¨pvpä¼¤å®³+{0}".format(v * item_amount)
                                 self._update_gear_point(qq_account_str)
                             elif k == 'pve_armor':
                                 self.equipment[qq_account_str]['armor']['pve'] += v * item_amount
-                                returnMsg += "\n·À¾ßpveÑªÁ¿+{0}".format(v * item_amount)
+                                returnMsg += "\né˜²å…·pveè¡€é‡+{0}".format(v * item_amount)
                                 self._update_gear_point(qq_account_str)
                             elif k == 'pvp_armor':
                                 self.equipment[qq_account_str]['armor']['pvp'] += v * item_amount
-                                returnMsg += "\n·À¾ßpvpÑªÁ¿+{0}".format(v * item_amount)
+                                returnMsg += "\né˜²å…·pvpè¡€é‡+{0}".format(v * item_amount)
                                 self._update_gear_point(qq_account_str)
                             elif k == 'attack_count':
                                 if qq_account_str in self.group_info:
@@ -1529,9 +1528,9 @@ class Jx3Handler(object):
                                 
                                 if leader != "" and leader in self.dungeon_status:
                                     self.dungeon_status[leader]['attack_count'][qq_account_str]['available_attack'] += v * item_amount
-                                    returnMsg += "\n¹¥»÷´ÎÊı+{0}".format(v * item_amount)
+                                    returnMsg += "\næ”»å‡»æ¬¡æ•°+{0}".format(v * item_amount)
                                 else:
-                                    returnMsg = "[CQ:at,qq={0}] Äã²»ÔÚ¸±±¾Àï£¬ÎŞ·¨Ê¹ÓÃ¡£".format(qq_account)
+                                    returnMsg = "[CQ:at,qq={0}] ä½ ä¸åœ¨å‰¯æœ¬é‡Œï¼Œæ— æ³•ä½¿ç”¨ã€‚".format(qq_account)
                                     item_used = False
 
                         if item_used:
@@ -1552,12 +1551,12 @@ class Jx3Handler(object):
 
     def shopList(self, qq_account):
         try:
-            returnMsg = "[CQ:at,qq={0}]\n---------ÔÓ»õÉÌ---------\n--»õÕæ¼ÛÊµ£¬Í¯ÛÅÎŞÆÛ--".format(qq_account)
+            returnMsg = "[CQ:at,qq={0}]\n---------æ‚è´§å•†---------\n--è´§çœŸä»·å®ï¼Œç«¥åŸæ— æ¬º--".format(qq_account)
             for item in ITEM_LIST:
                 if 'cost' in item:
-                    returnMsg += "\n*¡¾{0}¡¿".format(item['display_name'])
+                    returnMsg += "\n*ã€{0}ã€‘".format(item['display_name'])
                     for k, v in item['cost'].items():
-                        returnMsg += "----{0}£º{1}".format(STAT_DISPLAY_NAME[k], v)
+                        returnMsg += "----{0}ï¼š{1}".format(STAT_DISPLAY_NAME[k], v)
             return returnMsg
         except Exception as e:
             logging.exception(e)
@@ -1570,10 +1569,10 @@ class Jx3Handler(object):
             qq_account_str = str(qq_account)
             val = self.jx3_users[qq_account_str]
             if val['energy'] < WA_BAO_ENERGY_REQUIRED:
-                returnMsg = "[CQ:at,qq={0}] ÌåÁ¦²»×ã£¡ÎŞ·¨ÍÚ±¦¡£".format(qq_account)
+                returnMsg = "[CQ:at,qq={0}] ä½“åŠ›ä¸è¶³ï¼æ— æ³•æŒ–å®ã€‚".format(qq_account)
             elif qq_account_str in self.jail_list and time.time() - self.jail_list[qq_account_str] < JAIL_DURATION:
                     time_val = calculateRemainingTime(JAIL_DURATION, self.jail_list[qq_account_str])
-                    returnMsg = "[CQ:at,qq={0}] ÀÏÊµµã£¬Äã»¹ÒªÔÚ¼àÓüÀï¶×{1}Ğ¡Ê±{2}·Ö{3}Ãë¡£".format(
+                    returnMsg = "[CQ:at,qq={0}] è€å®ç‚¹ï¼Œä½ è¿˜è¦åœ¨ç›‘ç‹±é‡Œè¹²{1}å°æ—¶{2}åˆ†{3}ç§’ã€‚".format(
                                     qq_account,
                                     time_val['hours'],
                                     time_val['mins'],
@@ -1589,7 +1588,7 @@ class Jx3Handler(object):
                     last_time = self.daliy_action_count[yday_str][qq_account_str]["wa_bao"]['last_time']
                     if last_time != None and time.time() - last_time <= WA_BAO_COOLDOWN:
                         time_val = calculateRemainingTime(WA_BAO_COOLDOWN, last_time)
-                        returnMsg = "[CQ:at,qq={0}] ´óÏÀÄã¸Õ¸ÕÍÚÍê±¦²Ø£¬ÉíÌåÓĞĞ©Æ£±¹£¬Çë¹ı{1}·Ö{2}ÃëÖ®ºóÔÙÍÚ¡£".format(
+                        returnMsg = "[CQ:at,qq={0}] å¤§ä¾ ä½ åˆšåˆšæŒ–å®Œå®è—ï¼Œèº«ä½“æœ‰äº›ç–²æƒ«ï¼Œè¯·è¿‡{1}åˆ†{2}ç§’ä¹‹åå†æŒ–ã€‚".format(
                                         qq_account,
                                         time_val['mins'],
                                         time_val['secs'])
@@ -1600,22 +1599,22 @@ class Jx3Handler(object):
 
                         self.jx3_users[qq_account_str]['energy'] -= WA_BAO_ENERGY_REQUIRED
 
-                        returnMsg = '[CQ:at,qq={0}]\n½ñÈÕÍÚ±¦´ÎÊı£º{1}/{2}'.format(
+                        returnMsg = '[CQ:at,qq={0}]\nä»Šæ—¥æŒ–å®æ¬¡æ•°ï¼š{1}/{2}'.format(
                                             qq_account,
                                             self.daliy_action_count[yday_str][qq_account_str]["wa_bao"]['count'],
                                             MAX_DALIY_WA_BAO_COUNT)
 
                         if reward_item_name == "":
-                            returnMsg += "\nÄãÒ»²ù×ÓÏÂÈ¥£¬Ê²Ã´Ò²Ã»ÍÚµ½¡£"
+                            returnMsg += "\nä½ ä¸€é“²å­ä¸‹å»ï¼Œä»€ä¹ˆä¹Ÿæ²¡æŒ–åˆ°ã€‚"
                         else:
                             if reward_item_name not in self.jx3_users[qq_account_str]['bag']:
                                     self.jx3_users[qq_account_str]['bag'][reward_item_name] = 0
                             self.jx3_users[qq_account_str]['bag'][reward_item_name] += 1
-                            returnMsg += "\nÄãÒ»²ù×ÓÏÂÈ¥£¬ÍÚµ½ÁËÒ»¸öÉñÃØµÄ¶«Î÷: {0}+1 ÌåÁ¦-{1}".format(
+                            returnMsg += "\nä½ ä¸€é“²å­ä¸‹å»ï¼ŒæŒ–åˆ°äº†ä¸€ä¸ªç¥ç§˜çš„ä¸œè¥¿: {0}+1 ä½“åŠ›-{1}".format(
                                             get_item_display_name(reward_item_name),
                                             WA_BAO_ENERGY_REQUIRED)
                 else:
-                    returnMsg = "[CQ:at,qq={0}] Ò»Ìì×î¶àÍÚ±¦{1}´Î¡£ÄãÒÑ¾­ÍÚÁË{1}´ÎÀ²£¬½ñÌìĞİÏ¢ĞİÏ¢°É¡£".format(qq_account, MAX_DALIY_WA_BAO_COUNT)
+                    returnMsg = "[CQ:at,qq={0}] ä¸€å¤©æœ€å¤šæŒ–å®{1}æ¬¡ã€‚ä½ å·²ç»æŒ–äº†{1}æ¬¡å•¦ï¼Œä»Šå¤©ä¼‘æ¯ä¼‘æ¯å§ã€‚".format(qq_account, MAX_DALIY_WA_BAO_COUNT)
 
             self.writeToJsonFile()
         except Exception as e:
@@ -1638,7 +1637,7 @@ class Jx3Handler(object):
                 qq_stat = self.jx3_users[fromQQ_str]
 
                 if item['name'] not in self.jx3_users[fromQQ_str]['bag']:
-                    returnMsg = "[CQ:at,qq={0}] Äã²¢Ã»ÓĞ {1}£¬ÎŞ·¨Ê¹ÓÃ¡£".format(fromQQ, item_display_name)
+                    returnMsg = "[CQ:at,qq={0}] ä½ å¹¶æ²¡æœ‰ {1}ï¼Œæ— æ³•ä½¿ç”¨ã€‚".format(fromQQ, item_display_name)
                 else:
                     self.jx3_users[fromQQ_str]['bag'][item['name']] -= 1
                     if self.jx3_users[fromQQ_str]['bag'][item['name']] == 0:
@@ -1662,7 +1661,7 @@ class Jx3Handler(object):
         try:
             val = self.equipment[str(qq_account)]
 
-            returnMsg = "[CQ:at,qq={0}] ×°±¸ĞÅÏ¢£º\nÎäÆ÷£º{1}\n----pve¹¥»÷£º{2}----pvp¹¥»÷£º{3}\n·À¾ß£º{4}\n----pveÑªÁ¿£º{5}----pvpÑªÁ¿£º{6}".format(
+            returnMsg = "[CQ:at,qq={0}] è£…å¤‡ä¿¡æ¯ï¼š\næ­¦å™¨ï¼š{1}\n----pveæ”»å‡»ï¼š{2}----pvpæ”»å‡»ï¼š{3}\né˜²å…·ï¼š{4}\n----pveè¡€é‡ï¼š{5}----pvpè¡€é‡ï¼š{6}".format(
                 qq_account,
                 val['weapon']['display_name'],
                 val['weapon']['pve'],
@@ -1686,7 +1685,7 @@ class Jx3Handler(object):
 
         try:
             self.equipment[str(qq_account)]['weapon']['display_name'] = name
-            returnMsg = "[CQ:at,qq={0}] µÄÎäÆ÷ÒÑ¸üÃûÎª {1}".format(qq_account, name)
+            returnMsg = "[CQ:at,qq={0}] çš„æ­¦å™¨å·²æ›´åä¸º {1}".format(qq_account, name)
 
             self.writeToJsonFile()
         except Exception as e:
@@ -1703,7 +1702,7 @@ class Jx3Handler(object):
 
         try:
             self.equipment[str(qq_account)]['armor']['display_name'] = name
-            returnMsg = "[CQ:at,qq={0}] µÄ·À¾ßÒÑ¸üÃûÎª {1}".format(qq_account, name)
+            returnMsg = "[CQ:at,qq={0}] çš„é˜²å…·å·²æ›´åä¸º {1}".format(qq_account, name)
 
             self.writeToJsonFile()
         except Exception as e:
@@ -1715,15 +1714,15 @@ class Jx3Handler(object):
         return returnMsg
 
     def get_faction_info(self):
-        returnMsg = "±¾ÈºÕóÓªĞÅÏ¢\n"
+        returnMsg = "æœ¬ç¾¤é˜µè¥ä¿¡æ¯\n"
         self.mutex.acquire()
 
         try:
             yday = self._reset_daliy_count()
             yday_str = str(yday)
             retval = self._get_faction_count()
-            returnMsg += "±¾ÈºÎª{0}Èº\n¶ñÈË¹ÈÈËÊı:\t{1} ½ñÈÕÕóÓªµãÊı£º{4}\nºÆÆøÃËÈËÊı:\t{2} ½ñÈÕÕóÓªµãÊı£º{5}\nÖĞÁ¢ÈËÊı:\t{3}".format(
-                        "ºÆÆøÇ¿ÊÆ" if retval[2] > retval[1] else "¶ñÈËÇ¿ÊÆ" if retval[1] > retval[2] else "ÊÆ¾ùÁ¦µĞ",
+            returnMsg += "æœ¬ç¾¤ä¸º{0}ç¾¤\næ¶äººè°·äººæ•°:\t{1} ä»Šæ—¥é˜µè¥ç‚¹æ•°ï¼š{4}\næµ©æ°”ç›Ÿäººæ•°:\t{2} ä»Šæ—¥é˜µè¥ç‚¹æ•°ï¼š{5}\nä¸­ç«‹äººæ•°:\t{3}".format(
+                        "æµ©æ°”å¼ºåŠ¿" if retval[2] > retval[1] else "æ¶äººå¼ºåŠ¿" if retval[1] > retval[2] else "åŠ¿å‡åŠ›æ•Œ",
                         retval[1],
                         retval[2],
                         retval[0],
@@ -1747,7 +1746,7 @@ class Jx3Handler(object):
 
 
     def get_pve_gear_point_rank(self):
-        returnMsg = "±¾Èºpve×°±¸ÅÅĞĞ°ñ"
+        returnMsg = "æœ¬ç¾¤pveè£…å¤‡æ’è¡Œæ¦œ"
         self.mutex.acquire()
 
         try:
@@ -1769,7 +1768,7 @@ class Jx3Handler(object):
 
 
     def get_pvp_gear_point_rank(self):
-        returnMsg = "±¾Èºpvp×°±¸ÅÅĞĞ°ñ"
+        returnMsg = "æœ¬ç¾¤pvpè£…å¤‡æ’è¡Œæ¦œ"
         self.mutex.acquire()
 
         try:
@@ -1790,7 +1789,7 @@ class Jx3Handler(object):
         return returnMsg
 
     def get_money_rank(self):
-        returnMsg = "±¾ÈºÍÁºÀÅÅĞĞ°ñ"
+        returnMsg = "æœ¬ç¾¤åœŸè±ªæ’è¡Œæ¦œ"
         self.mutex.acquire()
 
         try:
@@ -1812,7 +1811,7 @@ class Jx3Handler(object):
 
 
     def get_speech_rank(self, qq_account):
-        returnMsg = "±¾Èº½ñÈÕÁÄÌìÅÅĞĞ°ñ"
+        returnMsg = "æœ¬ç¾¤ä»Šæ—¥èŠå¤©æ’è¡Œæ¦œ"
         self.mutex.acquire()
 
         try:
@@ -1841,7 +1840,7 @@ class Jx3Handler(object):
 
 
     def get_qiyu_rank(self):
-        returnMsg = "±¾ÈºÆæÓöÅÅĞĞ°ñ"
+        returnMsg = "æœ¬ç¾¤å¥‡é‡æ’è¡Œæ¦œ"
         self.mutex.acquire()
 
         try:
@@ -1862,7 +1861,7 @@ class Jx3Handler(object):
         return returnMsg
 
     def get_weiwang_rank(self):
-        returnMsg = "±¾ÈºÍşÍûÅÅĞĞ°ñ"
+        returnMsg = "æœ¬ç¾¤å¨æœ›æ’è¡Œæ¦œ"
         self.mutex.acquire()
 
         try:
@@ -1889,7 +1888,7 @@ class Jx3Handler(object):
 
         try:
             if not self.isUserRegister(toQQ):
-                returnMsg = "[CQ:at,qq={0}] ¶Ô·½ÉĞÎ´×¢²á£¬ÎŞ·¨ĞüÉÍ¡£".format(fromQQ)
+                returnMsg = "[CQ:at,qq={0}] å¯¹æ–¹å°šæœªæ³¨å†Œï¼Œæ— æ³•æ‚¬èµã€‚".format(fromQQ)
             else:
                 fromQQ_str = str(fromQQ)
                 toQQ_str = str(toQQ)
@@ -1898,14 +1897,14 @@ class Jx3Handler(object):
                 yday_str = str(yday)
 
                 if self.jx3_users[fromQQ_str]['money'] < WANTED_MONEY_REWARD:
-                    returnMsg = "[CQ:at,qq={0}] ½ğÇ®²»×ã£¬ÎŞ·¨ĞüÉÍ¡£".format(fromQQ)
+                    returnMsg = "[CQ:at,qq={0}] é‡‘é’±ä¸è¶³ï¼Œæ— æ³•æ‚¬èµã€‚".format(fromQQ)
                 elif self.daliy_action_count[yday_str][toQQ_str]['jailed'] >= JAIL_TIMES_PROTECTION:
-                    returnMsg = "[CQ:at,qq={0}] ¶Ô·½½ñÌìÒÑ¾­±»×¥½øÈ¥{1}´ÎÁË£¬ÎŞ·¨ĞüÉÍ¡£".format(fromQQ, JAIL_TIMES_PROTECTION)
+                    returnMsg = "[CQ:at,qq={0}] å¯¹æ–¹ä»Šå¤©å·²ç»è¢«æŠ“è¿›å»{1}æ¬¡äº†ï¼Œæ— æ³•æ‚¬èµã€‚".format(fromQQ, JAIL_TIMES_PROTECTION)
                 else:
                     self.jx3_users[fromQQ_str]['money'] -= WANTED_MONEY_REWARD
 
                     import CQSDK
-                    CQSDK.SendGroupMsg(self.qq_group, "[CQ:at,qq={0}] ĞüÉÍ³É¹¦£¡\n½ğÇ®-{1}".format(fromQQ, WANTED_MONEY_REWARD))
+                    CQSDK.SendGroupMsg(self.qq_group, "[CQ:at,qq={0}] æ‚¬èµæˆåŠŸï¼\né‡‘é’±-{1}".format(fromQQ, WANTED_MONEY_REWARD))
 
                     returnMsg = self._put_wanted_internal(toQQ_str, WANTED_MONEY_REWARD)
 
@@ -1930,13 +1929,13 @@ class Jx3Handler(object):
         else:
             self.wanted_list[toQQ_str] = {'reward': money_amount, 'wanted_time': time.time(), 'failed_try': {}}
 
-        return "½­ºş¶÷Ô¹Ò»³¯Çå£¬Î©ÍûÈºÏÀ¶àÔ®ÊÖ¡£ÏÖÓĞÈËÔ¸¸¶{0}½ğ¶Ô {1} ½øĞĞĞüÉÍ£¬×ÜÉÍ½ğÒÑ´ï{2}½ğ£¬ÖÚÏÀÊ¿ÇĞÎğ´í¹ı¡£".format(
+        return "æ±Ÿæ¹–æ©æ€¨ä¸€æœæ¸…ï¼ŒæƒŸæœ›ç¾¤ä¾ å¤šæ´æ‰‹ã€‚ç°æœ‰äººæ„¿ä»˜{0}é‡‘å¯¹ {1} è¿›è¡Œæ‚¬èµï¼Œæ€»èµé‡‘å·²è¾¾{2}é‡‘ï¼Œä¼—ä¾ å£«åˆ‡å‹¿é”™è¿‡ã€‚".format(
                                 money_amount,
                                 getGroupNickName(self.qq_group, int(toQQ_str)),
                                 self.wanted_list[toQQ_str]['reward'])
 
     def get_wanted_list(self):
-        returnMsg = "±¾ÈºĞüÉÍ°ñ"
+        returnMsg = "æœ¬ç¾¤æ‚¬èµæ¦œ"
         msg_list = ""
         self.mutex.acquire()
 
@@ -1947,7 +1946,7 @@ class Jx3Handler(object):
             for k, v in rank_list:
                 if time.time() - self.wanted_list[k]['wanted_time'] < WANTED_DURATION:
                     time_val = calculateRemainingTime(WANTED_DURATION, self.wanted_list[k]['wanted_time'])
-                    msg_list += '\n{0}. {1} {2}½ğ {3}Ğ¡Ê±{4}·Ö{5}Ãë'.format(
+                    msg_list += '\n{0}. {1} {2}é‡‘ {3}å°æ—¶{4}åˆ†{5}ç§’'.format(
                                     index,
                                     getGroupNickName(self.qq_group, int(k)),
                                     v['reward'],
@@ -1957,7 +1956,7 @@ class Jx3Handler(object):
                     index += 1
 
             if msg_list == "":
-                msg_list = "\nÔİÎŞĞüÉÍ"
+                msg_list = "\næš‚æ— æ‚¬èµ"
 
             returnMsg += msg_list
 
@@ -1982,23 +1981,23 @@ class Jx3Handler(object):
 
             if fromQQ_str in self.jail_list and time.time() - self.jail_list[fromQQ_str] < JAIL_DURATION:
                     time_val = calculateRemainingTime(JAIL_DURATION, self.jail_list[fromQQ_str])
-                    returnMsg = "[CQ:at,qq={0}] ÀÏÊµµã£¬Äã»¹ÒªÔÚ¼àÓüÀï¶×{1}Ğ¡Ê±{2}·Ö{3}Ãë¡£".format(
+                    returnMsg = "[CQ:at,qq={0}] è€å®ç‚¹ï¼Œä½ è¿˜è¦åœ¨ç›‘ç‹±é‡Œè¹²{1}å°æ—¶{2}åˆ†{3}ç§’ã€‚".format(
                                     fromQQ,
                                     time_val['hours'],
                                     time_val['mins'],
                                     time_val['secs'])
             elif toQQ_str in self.jail_list and time.time() - self.jail_list[toQQ_str] < JAIL_DURATION:
-                    returnMsg = "[CQ:at,qq={0}] ¶Ô·½ÔÚ¼àÓüÀï¶××ÅÄØ£¬ÄãÕâÊÇÒª½ÙÓüÂğ£¿".format(fromQQ)
+                    returnMsg = "[CQ:at,qq={0}] å¯¹æ–¹åœ¨ç›‘ç‹±é‡Œè¹²ç€å‘¢ï¼Œä½ è¿™æ˜¯è¦åŠ«ç‹±å—ï¼Ÿ".format(fromQQ)
             elif toQQ_str in self.wanted_list and time.time() - self.wanted_list[toQQ_str]['wanted_time'] < WANTED_DURATION:
                 if 'failed_try' in self.wanted_list[toQQ_str] and fromQQ_str in self.wanted_list[toQQ_str]['failed_try'] and time.time() - self.wanted_list[toQQ_str]['failed_try'][fromQQ_str] < WANTED_COOLDOWN:
                     time_val = calculateRemainingTime(WANTED_COOLDOWN, self.wanted_list[toQQ_str]['failed_try'][fromQQ_str])
-                    returnMsg = "[CQ:at,qq={0}] ÄãÒÑ¾­³¢ÊÔ¹ı×¥²¶ÁË£¬ÄÎºÎ¼¼ÒÕ²»¼Ñ¡£Çë¶ÍÁ¶{1}Ğ¡Ê±{2}·Ö{3}ÃëºóÔÙÀ´ÌôÕ½£¡".format(
+                    returnMsg = "[CQ:at,qq={0}] ä½ å·²ç»å°è¯•è¿‡æŠ“æ•äº†ï¼Œå¥ˆä½•æŠ€è‰ºä¸ä½³ã€‚è¯·é”»ç‚¼{1}å°æ—¶{2}åˆ†{3}ç§’åå†æ¥æŒ‘æˆ˜ï¼".format(
                                     fromQQ,
                                     time_val['hours'],
                                     time_val['mins'],
                                     time_val['secs'])
                 elif self.jx3_users[fromQQ_str]['energy'] < WANTED_ENERGY_COST:
-                    returnMsg = "[CQ:at,qq={0}] ÌåÁ¦²»×ã£¡ĞèÒªÏûºÄ{1}ÌåÁ¦¡£".format(fromQQ, WANTED_ENERGY_COST)
+                    returnMsg = "[CQ:at,qq={0}] ä½“åŠ›ä¸è¶³ï¼éœ€è¦æ¶ˆè€—{1}ä½“åŠ›ã€‚".format(fromQQ, WANTED_ENERGY_COST)
                 else:
                     battle_result = self._calculate_battle(fromQQ_str, toQQ_str, 'pvp')
                     winner = battle_result['winner']
@@ -2015,7 +2014,7 @@ class Jx3Handler(object):
 
                         self.daliy_action_count[yday_str][toQQ_str]['jailed'] += 1
 
-                        returnMsg = "{0}ÔÚÊ±ÏŞÄÚ±»{1}³É¹¦×¥²¶£¬ĞüÉÍ½â³ı¡£³É¹¦ÂÊ£º{2}%\n[CQ:at,qq={3}] »ñµÃ£º\n½ğÇ®+{4}½ğ\nÌåÁ¦-{5}".format(
+                        returnMsg = "{0}åœ¨æ—¶é™å†…è¢«{1}æˆåŠŸæŠ“æ•ï¼Œæ‚¬èµè§£é™¤ã€‚æˆåŠŸç‡ï¼š{2}%\n[CQ:at,qq={3}] è·å¾—ï¼š\né‡‘é’±+{4}é‡‘\nä½“åŠ›-{5}".format(
                                         getGroupNickName(self.qq_group, int(toQQ)),
                                         getGroupNickName(self.qq_group, int(fromQQ)),
                                         int(math.floor(success_chance * 100)),
@@ -2026,7 +2025,7 @@ class Jx3Handler(object):
                         if 'failed_try' not in self.wanted_list[toQQ_str]:
                             self.wanted_list[toQQ_str]['failed_try'] = {}
                         self.wanted_list[toQQ_str]['failed_try'][fromQQ_str] = time.time()
-                        returnMsg = "[CQ:at,qq={0}] ×¥²¶Ê§°Ü£¬³É¹¦ÂÊ£º{1}%\nÌåÁ¦-{2}".format(
+                        returnMsg = "[CQ:at,qq={0}] æŠ“æ•å¤±è´¥ï¼ŒæˆåŠŸç‡ï¼š{1}%\nä½“åŠ›-{2}".format(
                                         fromQQ,
                                         int(math.floor(success_chance * 100)),
                                         WANTED_ENERGY_COST)
@@ -2055,17 +2054,17 @@ class Jx3Handler(object):
 
             if qq_account_str in self.jail_list and time.time() - self.jail_list[qq_account_str] < JAIL_DURATION:
                     time_val = calculateRemainingTime(JAIL_DURATION, self.jail_list[qq_account_str])
-                    returnMsg = "[CQ:at,qq={0}] ÀÏÊµµã£¬Äã»¹ÒªÔÚ¼àÓüÀï¶×{1}Ğ¡Ê±{2}·Ö{3}Ãë¡£".format(
+                    returnMsg = "[CQ:at,qq={0}] è€å®ç‚¹ï¼Œä½ è¿˜è¦åœ¨ç›‘ç‹±é‡Œè¹²{1}å°æ—¶{2}åˆ†{3}ç§’ã€‚".format(
                                     qq_account,
                                     time_val['hours'],
                                     time_val['mins'],
                                     time_val['secs'])
             elif len(daliy_stat['complete_quest']) >= len(CHA_GUAN_QUEST_INFO):
-                returnMsg = "[CQ:at,qq={0}] ÄãÒÑ¾­Íê³ÉÁË{1}¸ö²è¹İÈÎÎñÀ²£¬Ã÷ÌìÔÙÀ´°É¡£".format(qq_account, len(CHA_GUAN_QUEST_INFO))
+                returnMsg = "[CQ:at,qq={0}] ä½ å·²ç»å®Œæˆäº†{1}ä¸ªèŒ¶é¦†ä»»åŠ¡å•¦ï¼Œæ˜å¤©å†æ¥å§ã€‚".format(qq_account, len(CHA_GUAN_QUEST_INFO))
             elif self.jx3_users[qq_account_str]['energy'] < CHA_GUAN_ENERGY_COST:
-                returnMsg = "[CQ:at,qq={0}] ÌåÁ¦²»×ã£¡ĞèÒªÏûºÄ{1}ÌåÁ¦¡£".format(qq_account, CHA_GUAN_ENERGY_COST)
+                returnMsg = "[CQ:at,qq={0}] ä½“åŠ›ä¸è¶³ï¼éœ€è¦æ¶ˆè€—{1}ä½“åŠ›ã€‚".format(qq_account, CHA_GUAN_ENERGY_COST)
             elif daliy_stat['current_quest'] != "":
-                returnMsg = "[CQ:at,qq={0}] ÄãÒÑ¾­½ÓÁËÒ»¸öÈÎÎñÀ²¡£\nµ±Ç°ÈÎÎñ£º{1}".format(qq_account, CHA_GUAN_QUEST_INFO[daliy_stat['current_quest']]['display_name'])
+                returnMsg = "[CQ:at,qq={0}] ä½ å·²ç»æ¥äº†ä¸€ä¸ªä»»åŠ¡å•¦ã€‚\nå½“å‰ä»»åŠ¡ï¼š{1}".format(qq_account, CHA_GUAN_QUEST_INFO[daliy_stat['current_quest']]['display_name'])
             else:
                 remain_quest = list(set(CHA_GUAN_QUEST_INFO.keys()) - set(daliy_stat['complete_quest']))
 
@@ -2081,9 +2080,9 @@ class Jx3Handler(object):
                 requireMsg = ""
                 for k, v in quest['require'].items():
                     requireMsg += "\n{0} x {1}".format(get_item_display_name(k), v)
-                requireMsg += "\nÌåÁ¦£º{0}".format(CHA_GUAN_ENERGY_COST)
+                requireMsg += "\nä½“åŠ›ï¼š{0}".format(CHA_GUAN_ENERGY_COST)
 
-                returnMsg = "[CQ:at,qq={0}] ²è¹İÈÎÎñ({1}/{2})\n{3}\n{4}\nĞèÇó:{5}\n½±Àø£º{6}".format(
+                returnMsg = "[CQ:at,qq={0}] èŒ¶é¦†ä»»åŠ¡({1}/{2})\n{3}\n{4}\néœ€æ±‚:{5}\nå¥–åŠ±ï¼š{6}".format(
                                 qq_account,
                                 len(daliy_stat['complete_quest']) + 1,
                                 len(CHA_GUAN_QUEST_INFO.keys()),
@@ -2114,7 +2113,7 @@ class Jx3Handler(object):
 
             if qq_account_str in self.jail_list and time.time() - self.jail_list[qq_account_str] < JAIL_DURATION:
                     time_val = calculateRemainingTime(JAIL_DURATION, self.jail_list[qq_account_str])
-                    returnMsg = "[CQ:at,qq={0}] ÀÏÊµµã£¬Äã»¹ÒªÔÚ¼àÓüÀï¶×{1}Ğ¡Ê±{2}·Ö{3}Ãë¡£".format(
+                    returnMsg = "[CQ:at,qq={0}] è€å®ç‚¹ï¼Œä½ è¿˜è¦åœ¨ç›‘ç‹±é‡Œè¹²{1}å°æ—¶{2}åˆ†{3}ç§’ã€‚".format(
                                     qq_account,
                                     time_val['hours'],
                                     time_val['mins'],
@@ -2125,7 +2124,7 @@ class Jx3Handler(object):
                 quest = CHA_GUAN_QUEST_INFO[daliy_stat['current_quest']]
 
                 if self.jx3_users[qq_account_str]['energy'] < CHA_GUAN_ENERGY_COST:
-                    returnMsg = "[CQ:at,qq={0}] ÌåÁ¦²»×ã£¡ĞèÒªÏûºÄ{1}ÌåÁ¦¡£".format(qq_account, CHA_GUAN_ENERGY_COST)
+                    returnMsg = "[CQ:at,qq={0}] ä½“åŠ›ä¸è¶³ï¼éœ€è¦æ¶ˆè€—{1}ä½“åŠ›ã€‚".format(qq_account, CHA_GUAN_ENERGY_COST)
                 else:
 
                     has_require = True
@@ -2151,7 +2150,7 @@ class Jx3Handler(object):
                                 self.jx3_users[qq_account_str][k] += v
                                 rewardMsg += "\n{0}+{1}".format(STAT_DISPLAY_NAME[k], v)
 
-                        returnMsg = "[CQ:at,qq={0}] ²è¹İÈÎÎñÍê³É£¡{1}/{2}\nÏûºÄÈÎÎñÎïÆ·£º{3}\nÌåÁ¦-{4}\n»ñµÃ½±Àø£º{5}".format(
+                        returnMsg = "[CQ:at,qq={0}] èŒ¶é¦†ä»»åŠ¡å®Œæˆï¼{1}/{2}\næ¶ˆè€—ä»»åŠ¡ç‰©å“ï¼š{3}\nä½“åŠ›-{4}\nè·å¾—å¥–åŠ±ï¼š{5}".format(
                                         qq_account,
                                         len(self.daliy_action_count[yday_str][qq_account_str]['cha_guan']['complete_quest']),
                                         len(CHA_GUAN_QUEST_INFO),
@@ -2159,7 +2158,7 @@ class Jx3Handler(object):
                                         CHA_GUAN_ENERGY_COST,
                                         rewardMsg)
                     else:
-                        returnMsg = "[CQ:at,qq={0}] ÈÎÎñÎïÆ·²»×ã£¡".format(qq_account)
+                        returnMsg = "[CQ:at,qq={0}] ä»»åŠ¡ç‰©å“ä¸è¶³ï¼".format(qq_account)
 
             self.writeToJsonFile()
         except Exception as e:
@@ -2183,14 +2182,14 @@ class Jx3Handler(object):
 
             if qq_account_str in self.jail_list and time.time() - self.jail_list[qq_account_str] < JAIL_DURATION:
                     time_val = calculateRemainingTime(JAIL_DURATION, self.jail_list[qq_account_str])
-                    returnMsg = "[CQ:at,qq={0}] ÀÏÊµµã£¬Äã»¹ÒªÔÚ¼àÓüÀï¶×{1}Ğ¡Ê±{2}·Ö{3}Ãë¡£".format(
+                    returnMsg = "[CQ:at,qq={0}] è€å®ç‚¹ï¼Œä½ è¿˜è¦åœ¨ç›‘ç‹±é‡Œè¹²{1}å°æ—¶{2}åˆ†{3}ç§’ã€‚".format(
                                     qq_account,
                                     time_val['hours'],
                                     time_val['mins'],
                                     time_val['secs'])
             elif self.daliy_action_count[yday_str][qq_account_str]['cha_guan']['current_quest'] == "cha_guan_hun_hun":
                 if 'hun_hun_zheng_ming' in self.jx3_users[qq_account_str]['bag'] and self.jx3_users[qq_account_str]['bag']['hun_hun_zheng_ming'] >= 3:
-                    returnMsg = "[CQ:at,qq={0}] ÄãÒÑ¾­×¥ÁËÌ«¶à»ì»ìÀ²£¬ĞİÏ¢Ò»ÏÂ°É¡£".format(qq_account_str)
+                    returnMsg = "[CQ:at,qq={0}] ä½ å·²ç»æŠ“äº†å¤ªå¤šæ··æ··å•¦ï¼Œä¼‘æ¯ä¸€ä¸‹å§ã€‚".format(qq_account_str)
                 else:
                     battle_result = self._calculate_battle(qq_account_str, "hun_hun", 'pve')
                     winner = battle_result['winner']
@@ -2216,12 +2215,12 @@ class Jx3Handler(object):
                         self.jx3_users[qq_account_str]['bag']['hun_hun_zheng_ming'] += 1
                         rewardMsg += '\n{0}+1'.format(get_item_display_name('hun_hun_zheng_ming'))
 
-                        returnMsg = "[CQ:at,qq={0}] ×¥²¶»ì»ì³É¹¦£¡³É¹¦ÂÊ£º{1}%\n»ñµÃ½±Àø£º{2}".format(
+                        returnMsg = "[CQ:at,qq={0}] æŠ“æ•æ··æ··æˆåŠŸï¼æˆåŠŸç‡ï¼š{1}%\nè·å¾—å¥–åŠ±ï¼š{2}".format(
                                         qq_account,
                                         int(math.floor(success_chance * 100)),
                                         rewardMsg)
                     else:
-                        returnMsg = "[CQ:at,qq={0}] ×¥²¶Ê§°Ü£¬³É¹¦ÂÊ£º{1}%".format(
+                        returnMsg = "[CQ:at,qq={0}] æŠ“æ•å¤±è´¥ï¼ŒæˆåŠŸç‡ï¼š{1}%".format(
                                         qq_account,
                                         int(math.floor(success_chance * 100)))
 
@@ -2287,7 +2286,7 @@ class Jx3Handler(object):
                             self.qiyu_status[qiyu_name]['qq'] = qq_account_str
                             self.qiyu_status[qiyu_name]['last_time'] = time.time()
 
-                            returnMsg = "{0}\n»ñµÃ½±Àø£º{1}".format(qiyu['description'].format(qq_account_str), rewardMsg)
+                            returnMsg = "{0}\nè·å¾—å¥–åŠ±ï¼š{1}".format(qiyu['description'].format(qq_account_str), rewardMsg)
 
                             logging.info("qiyu! qq: {0} qiyu_name: {1} success_chance: {2} < {3}".format(
                                             qq_account_str,
@@ -2313,7 +2312,7 @@ class Jx3Handler(object):
             toQQ_str = str(toQQ)
 
             if not self.isUserRegister(toQQ_str):
-                returnMsg = "[CQ:at,qq={0}] ¶Ô·½ÉĞÎ´×¢²á¡£".format(toQQ)
+                returnMsg = "[CQ:at,qq={0}] å¯¹æ–¹å°šæœªæ³¨å†Œã€‚".format(toQQ)
             else:
                 yday = self._reset_daliy_count(toQQ_str)
                 yday_str = str(yday)
@@ -2323,22 +2322,22 @@ class Jx3Handler(object):
                 toQQ_stat = self.jx3_users[toQQ_str]
 
                 if fromQQ_stat['faction_id'] == 0:
-                    returnMsg = "[CQ:at,qq={0}] ÖĞÁ¢ÕóÓªÎŞ·¨ÇĞ´è£¬ÇëÏÈ¼ÓÈëÕóÓª¡£".format(fromQQ)
+                    returnMsg = "[CQ:at,qq={0}] ä¸­ç«‹é˜µè¥æ— æ³•åˆ‡ç£‹ï¼Œè¯·å…ˆåŠ å…¥é˜µè¥ã€‚".format(fromQQ)
                 elif toQQ_stat['faction_id'] == 0:
-                    returnMsg = "[CQ:at,qq={0}] ¶Ô·½ÊÇÖĞÁ¢ÕóÓª£¬ÎŞ·¨ÇĞ´è¡£".format(fromQQ)
+                    returnMsg = "[CQ:at,qq={0}] å¯¹æ–¹æ˜¯ä¸­ç«‹é˜µè¥ï¼Œæ— æ³•åˆ‡ç£‹ã€‚".format(fromQQ)
                 elif fromQQ_stat['faction_id'] != toQQ_stat['faction_id'] and ROB_SAME_FACTION_PROTECTION:
-                    returnMsg = "[CQ:at,qq={0}] ²»Í¬ÕóÓªÎŞ·¨ÇĞ´è£¡".format(fromQQ)
+                    returnMsg = "[CQ:at,qq={0}] ä¸åŒé˜µè¥æ— æ³•åˆ‡ç£‹ï¼".format(fromQQ)
                 elif fromQQ_str in self.jail_list and time.time() - self.jail_list[fromQQ_str] < JAIL_DURATION:
                         time_val = calculateRemainingTime(JAIL_DURATION, self.jail_list[fromQQ_str])
-                        returnMsg = "[CQ:at,qq={0}] ÀÏÊµµã£¬Äã»¹ÒªÔÚ¼àÓüÀï¶×{1}Ğ¡Ê±{2}·Ö{3}Ãë¡£".format(
+                        returnMsg = "[CQ:at,qq={0}] è€å®ç‚¹ï¼Œä½ è¿˜è¦åœ¨ç›‘ç‹±é‡Œè¹²{1}å°æ—¶{2}åˆ†{3}ç§’ã€‚".format(
                                         fromQQ,
                                         time_val['hours'],
                                         time_val['mins'],
                                         time_val['secs'])
                 elif toQQ_str in self.jail_list and time.time() - self.jail_list[toQQ_str] < JAIL_DURATION:
-                        returnMsg = "[CQ:at,qq={0}] ¶Ô·½ÔÚ¼àÓüÀï¶××ÅÄØ£¬Ã»·¨¸úÄãÇĞ´è¡£".format(fromQQ)
+                        returnMsg = "[CQ:at,qq={0}] å¯¹æ–¹åœ¨ç›‘ç‹±é‡Œè¹²ç€å‘¢ï¼Œæ²¡æ³•è·Ÿä½ åˆ‡ç£‹ã€‚".format(fromQQ)
                 elif self.jx3_users[fromQQ_str]['energy'] < PRACTISE_ENERGY_COST:
-                    returnMsg = "[CQ:at,qq={0}] ÌåÁ¦²»×ã£¡ĞèÒªÏûºÄ{1}ÌåÁ¦¡£".format(fromQQ, PRACTISE_ENERGY_COST)
+                    returnMsg = "[CQ:at,qq={0}] ä½“åŠ›ä¸è¶³ï¼éœ€è¦æ¶ˆè€—{1}ä½“åŠ›ã€‚".format(fromQQ, PRACTISE_ENERGY_COST)
                 else:
                     battle_result = self._calculate_battle(fromQQ_str, toQQ_str, 'pvp')
                     winner = battle_result['winner']
@@ -2377,7 +2376,7 @@ class Jx3Handler(object):
                     if energy_cost != 0:
                         self.daliy_action_count[yday_str]['faction'][FACTION_NAME_ID[fromQQ_stat['faction_id']]]['point'] += PRACTISE_FACTION_POINT_GAIN
 
-                    returnMsg = "[CQ:at,qq={0}]Óë[CQ:at,qq={1}]½øĞĞÁËÇĞ´è¡£{2} Õ½Ê¤ÁË {3}£¬³É¹¦ÂÊ{4}%¡£\n{5} ÍşÍû+{6} {7}\n{8} ÍşÍû+{9} {10}".format(
+                    returnMsg = "[CQ:at,qq={0}]ä¸[CQ:at,qq={1}]è¿›è¡Œäº†åˆ‡ç£‹ã€‚{2} æˆ˜èƒœäº† {3}ï¼ŒæˆåŠŸç‡{4}%ã€‚\n{5} å¨æœ›+{6} {7}\n{8} å¨æœ›+{9} {10}".format(
                                     fromQQ,
                                     toQQ,
                                     getGroupNickName(self.qq_group, int(winner)),
@@ -2385,10 +2384,10 @@ class Jx3Handler(object):
                                     int(math.floor(success_chance * 100)),
                                     getGroupNickName(self.qq_group, int(winner)),
                                     winner_weiwang_gain,
-                                    "ÌåÁ¦-{0}".format(energy_cost) if winner == fromQQ_str else "",
+                                    "ä½“åŠ›-{0}".format(energy_cost) if winner == fromQQ_str else "",
                                     getGroupNickName(self.qq_group, int(loser)),
                                     loser_weiwang_gain,
-                                    "ÌåÁ¦-{0}".format(energy_cost) if loser == fromQQ_str else "")
+                                    "ä½“åŠ›-{0}".format(energy_cost) if loser == fromQQ_str else "")
 
             self.writeToJsonFile()
         except Exception as e:
@@ -2415,16 +2414,16 @@ class Jx3Handler(object):
 
             if qq_account_str in self.jail_list and time.time() - self.jail_list[qq_account_str] < JAIL_DURATION:
                     time_val = calculateRemainingTime(JAIL_DURATION, self.jail_list[qq_account_str])
-                    returnMsg = "[CQ:at,qq={0}] ÀÏÊµµã£¬Äã»¹ÒªÔÚ¼àÓüÀï¶×{1}Ğ¡Ê±{2}·Ö{3}Ãë¡£".format(
+                    returnMsg = "[CQ:at,qq={0}] è€å®ç‚¹ï¼Œä½ è¿˜è¦åœ¨ç›‘ç‹±é‡Œè¹²{1}å°æ—¶{2}åˆ†{3}ç§’ã€‚".format(
                                     qq_account,
                                     time_val['hours'],
                                     time_val['mins'],
                                     time_val['secs'])
             elif self.jx3_users[qq_account_str]['energy'] < JJC_ENERGY_COST:
-                returnMsg = "[CQ:at,qq={0}] ÌåÁ¦²»×ã£¡ĞèÒªÏûºÄ{1}ÌåÁ¦¡£".format(qq_account, JJC_ENERGY_COST)
+                returnMsg = "[CQ:at,qq={0}] ä½“åŠ›ä¸è¶³ï¼éœ€è¦æ¶ˆè€—{1}ä½“åŠ›ã€‚".format(qq_account, JJC_ENERGY_COST)
             elif self.jjc_season_status[qq_account_str]['last_time'] != None and time.time() - self.jjc_season_status[qq_account_str]['last_time'] < JJC_COOLDOWN:
                     time_val = calculateRemainingTime(JJC_COOLDOWN, self.jjc_season_status[qq_account_str]['last_time'])
-                    returnMsg = "[CQ:at,qq={0}] Äã¸ÕÅÅ¹ıÃû½£´ó»áÁË£¬Çë¹ı{1}Ğ¡Ê±{2}·ÖÖÓ{3}ÃëºóÔÙÀ´°É¡£".format(
+                    returnMsg = "[CQ:at,qq={0}] ä½ åˆšæ’è¿‡åå‰‘å¤§ä¼šäº†ï¼Œè¯·è¿‡{1}å°æ—¶{2}åˆ†é’Ÿ{3}ç§’åå†æ¥å§ã€‚".format(
                                     qq_account,
                                     time_val['hours'],
                                     time_val['mins'],
@@ -2463,7 +2462,7 @@ class Jx3Handler(object):
                                 random_person_rank,
                                 toQQ_modifier))
 
-                returnMsg = "[CQ:at,qq={0}] ¼ÓÈëÃû½£´ó»áÅÅÎ»¡£\nÄãµÄÃû½£´ó»á·ÖÊı£º{1} ¶ÎÎ»£º{2}¶Î¡£Æ¥Åäµ½µÄ¶ÔÊÖÊÇ {3}£¬Ãû½£´ó»á·ÖÊı£º{4} ¶ÎÎ»£º{5}¶Î".format(
+                returnMsg = "[CQ:at,qq={0}] åŠ å…¥åå‰‘å¤§ä¼šæ’ä½ã€‚\nä½ çš„åå‰‘å¤§ä¼šåˆ†æ•°ï¼š{1} æ®µä½ï¼š{2}æ®µã€‚åŒ¹é…åˆ°çš„å¯¹æ‰‹æ˜¯ {3}ï¼Œåå‰‘å¤§ä¼šåˆ†æ•°ï¼š{4} æ®µä½ï¼š{5}æ®µ".format(
                                 qq_account,
                                 jjc_stat['score'],
                                 rank,
@@ -2498,7 +2497,7 @@ class Jx3Handler(object):
                         score_reward = JJC_REWARD_RANK * reward_modifier
                         score_lost = 0
 
-                    double_msg = " (Ã¿ÈÕ{1}³¡Ë«±¶½±Àø¼Ó³ÉÖĞ£º{0}/{1})".format(self.daliy_action_count[yday_str][qq_account_str]['jjc']['win'] + 1, DALIY_JJC_DOUBLE_REWARD_COUNT) if reward_modifier == 2 else ""
+                    double_msg = " (æ¯æ—¥{1}åœºåŒå€å¥–åŠ±åŠ æˆä¸­ï¼š{0}/{1})".format(self.daliy_action_count[yday_str][qq_account_str]['jjc']['win'] + 1, DALIY_JJC_DOUBLE_REWARD_COUNT) if reward_modifier == 2 else ""
 
                     self.jjc_season_status[qq_account_str]['score'] += score_reward
                     self.jjc_season_status[qq_account_str]['last_time'] = time.time()
@@ -2511,7 +2510,7 @@ class Jx3Handler(object):
                     self.daliy_action_count[yday_str][qq_account_str]['jjc']['win'] += 1
                     self.jjc_season_status[random_person]['lose'] += 1
 
-                    returnMsg = "[CQ:at,qq={0}] Õ½¶·½á¹û£ºÊ¤Àû£¡³É¹¦ÂÊ£º{1}%\n {2} ÍşÍû+{3} ·ÖÊı+{4} ÌåÁ¦-{5}{6}\n{7} ·ÖÊı-{8}".format(
+                    returnMsg = "[CQ:at,qq={0}] æˆ˜æ–—ç»“æœï¼šèƒœåˆ©ï¼æˆåŠŸç‡ï¼š{1}%\n {2} å¨æœ›+{3} åˆ†æ•°+{4} ä½“åŠ›-{5}{6}\n{7} åˆ†æ•°-{8}".format(
                                     qq_account_str,
                                     int(math.floor(success_chance * 100)),
                                     getGroupNickName(self.qq_group, int(qq_account)),
@@ -2524,7 +2523,7 @@ class Jx3Handler(object):
 
                     new_rank = self.jjc_season_status[qq_account_str]['score'] // 100
                     if  new_rank != rank:
-                        returnMsg += "\n¶ÎÎ»±ä¸üÎª£º{0}".format(new_rank)
+                        returnMsg += "\næ®µä½å˜æ›´ä¸ºï¼š{0}".format(new_rank)
                 else:
                     if rank < random_person_rank:
                         score_reward = JJC_REWARD_RANK
@@ -2546,7 +2545,7 @@ class Jx3Handler(object):
                     self.jjc_season_status[random_person]['win'] += 1
                     self.jjc_season_status[qq_account_str]['lose'] += 1
 
-                    returnMsg = "[CQ:at,qq={0}] Õ½¶·½á¹û£ºÊ§°Ü£¡³É¹¦ÂÊ£º{1}%\n {2} ·ÖÊı-{3} ÌåÁ¦-{4}£»{5} ·ÖÊı+{6}".format(
+                    returnMsg = "[CQ:at,qq={0}] æˆ˜æ–—ç»“æœï¼šå¤±è´¥ï¼æˆåŠŸç‡ï¼š{1}%\n {2} åˆ†æ•°-{3} ä½“åŠ›-{4}ï¼›{5} åˆ†æ•°+{6}".format(
                                     qq_account_str,
                                     int(math.floor(success_chance * 100)),
                                     getGroupNickName(self.qq_group, int(qq_account)),
@@ -2557,7 +2556,7 @@ class Jx3Handler(object):
 
                     new_rank = self.jjc_season_status[qq_account_str]['score'] // 100
                     if  new_rank != rank:
-                        returnMsg += "\n¶ÎÎ»±ä¸üÎª£º{0}".format(new_rank)
+                        returnMsg += "\næ®µä½å˜æ›´ä¸ºï¼š{0}".format(new_rank)
 
             self.writeToJsonFile()
         except Exception as e:
@@ -2573,7 +2572,7 @@ class Jx3Handler(object):
         self.mutex.acquire()
 
         try:
-            returnMsg = "Ãû½£´ó»áÅÅÃû°ñ Èü¼¾£º{0} ÌìÊı£º{1}".format(self.jjc_status['season'], self.jjc_status['day'])
+            returnMsg = "åå‰‘å¤§ä¼šæ’åæ¦œ èµ›å­£ï¼š{0} å¤©æ•°ï¼š{1}".format(self.jjc_status['season'], self.jjc_status['day'])
 
             yday = self._reset_daliy_count()
             yday_str = str(yday)
@@ -2582,7 +2581,7 @@ class Jx3Handler(object):
             list_len = len(rank_list)
             for i in range(10):
                 if i < list_len and rank_list[i][1]['score'] != 0:
-                    returnMsg += '\n{0}. {1} ·ÖÊı£º{2} ¶ÎÎ»£º{3}'.format(
+                    returnMsg += '\n{0}. {1} åˆ†æ•°ï¼š{2} æ®µä½ï¼š{3}'.format(
                         i + 1,
                         getGroupNickName(self.qq_group, int(rank_list[i][0])),
                         rank_list[i][1]['score'],
@@ -2612,7 +2611,7 @@ class Jx3Handler(object):
 
             jjc_status = self.jjc_season_status[qq_account_str]
 
-            returnMsg = "[CQ:at,qq={0}] µÚ{1}Èü¼¾Ãû½£´ó»á·ÖÊı£º{2} ¶ÎÎ»£º{3} Ê¤¸º£º{4}/{5} Ê¤ÂÊ£º{6}%".format(
+            returnMsg = "[CQ:at,qq={0}] ç¬¬{1}èµ›å­£åå‰‘å¤§ä¼šåˆ†æ•°ï¼š{2} æ®µä½ï¼š{3} èƒœè´Ÿï¼š{4}/{5} èƒœç‡ï¼š{6}%".format(
                     qq_account,
                     self.jjc_status['season'],
                     jjc_status['score'],
@@ -2648,10 +2647,10 @@ class Jx3Handler(object):
             qq_account_str = str(qq_account)
 
             if self.jx3_users[qq_account_str]['class_id'] != 0:
-                returnMsg = "[CQ:at,qq={0}] ÄãÒÑ¾­¼ÓÈëÁËÃÅÅÉÁË£¡".format(qq_account)
+                returnMsg = "[CQ:at,qq={0}] ä½ å·²ç»åŠ å…¥äº†é—¨æ´¾äº†ï¼".format(qq_account)
             elif class_display_name in CLASS_LIST:
                 self.jx3_users[qq_account_str]['class_id'] = CLASS_LIST.index(class_display_name)
-                returnMsg = "[CQ:at,qq={0}] ¼ÓÈëÃÅÅÉ{1}£¡".format(qq_account, class_display_name)
+                returnMsg = "[CQ:at,qq={0}] åŠ å…¥é—¨æ´¾{1}ï¼".format(qq_account, class_display_name)
 
             self.writeToJsonFile()
         except Exception as e:
@@ -2671,7 +2670,7 @@ class Jx3Handler(object):
             qq_account_str = str(qq_account)
 
             if self.jx3_users[qq_account_str]['lover'] == 0:
-                returnMsg = "[CQ:at,qq={0}] ÄãÃ»ÓĞÇéÔµ£¬±ğÂÒÓÃ¡£".format(qq_account)
+                returnMsg = "[CQ:at,qq={0}] ä½ æ²¡æœ‰æƒ…ç¼˜ï¼Œåˆ«ä¹±ç”¨ã€‚".format(qq_account)
             else:
                 lover = self.jx3_users[qq_account_str]['lover']
                 love_time = time.time() - self.jx3_users[qq_account_str]['lover_time']
@@ -2679,7 +2678,7 @@ class Jx3Handler(object):
                 self.jx3_users[qq_account_str]['lover'] = 0
                 self.jx3_users[str(lover)]['lover_time'] = None
                 self.jx3_user[str(lover)]['lover'] = 0
-                returnMsg = "[CQ:at,qq={0}] ¾ö¶¨È¥Ñ°ÕÒĞÂµÄÂÃ³Ì¡£".format(qq_account)
+                returnMsg = "[CQ:at,qq={0}] å†³å®šå»å¯»æ‰¾æ–°çš„æ—…ç¨‹ã€‚".format(qq_account)
 
             self.writeToJsonFile()
         except Exception as e:
@@ -2698,17 +2697,17 @@ class Jx3Handler(object):
             qq_account_str = str(qq_account)
 
             if qq_account_str in self.group_info:
-                returnMsg = "[CQ:at,qq={0}] ÄãÒÑ¾­´´½¨ÁËÒ»¸ö¶ÓÎéÁË£¡".format(qq_account)
+                returnMsg = "[CQ:at,qq={0}] ä½ å·²ç»åˆ›å»ºäº†ä¸€ä¸ªé˜Ÿä¼äº†ï¼".format(qq_account)
             else:
                 find_leader = self._get_leader_by_member(qq_account_str)
                 if find_leader != "":
-                    returnMsg = "[CQ:at,qq={0}] ÄãÒÑ¾­¼ÓÈëÁË {1} µÄ¶ÓÎé£¡".format(qq_account, getGroupNickName(self.qq_group, int(find_leader)))
+                    returnMsg = "[CQ:at,qq={0}] ä½ å·²ç»åŠ å…¥äº† {1} çš„é˜Ÿä¼ï¼".format(qq_account, getGroupNickName(self.qq_group, int(find_leader)))
                 else:
                     self.group_info[qq_account_str] = {
                         'member_list': [],
                         'create_time': time.time()
                     }
-                    returnMsg = "[CQ:at,qq={0}] ´´½¨¶ÓÎé³É¹¦£¡ÇëÈÃ¶ÓÓÑÊäÈë¡¾¼ÓÈë¶ÓÎé[CQ:at,qq={0}]¡¿¼ÓÈë¶ÓÎé¡£\n½øÈë¸±±¾ºó´Ë¶ÓÎéÎŞ·¨±»¼ÓÈë£¬ÇëÈ·ÈÏÈËÊıÕıÈ·ºóÔÙ½øÈë¸±±¾¡£".format(qq_account)
+                    returnMsg = "[CQ:at,qq={0}] åˆ›å»ºé˜Ÿä¼æˆåŠŸï¼è¯·è®©é˜Ÿå‹è¾“å…¥ã€åŠ å…¥é˜Ÿä¼[CQ:at,qq={0}]ã€‘åŠ å…¥é˜Ÿä¼ã€‚\nè¿›å…¥å‰¯æœ¬åæ­¤é˜Ÿä¼æ— æ³•è¢«åŠ å…¥ï¼Œè¯·ç¡®è®¤äººæ•°æ­£ç¡®åå†è¿›å…¥å‰¯æœ¬ã€‚".format(qq_account)
 
             self.writeToJsonFile()
         except Exception as e:
@@ -2729,20 +2728,20 @@ class Jx3Handler(object):
             leader_str = str(leader)
 
             if qq_account_str in self.group_info:
-                returnMsg = "[CQ:at,qq={0}] ÄãÒÑ¾­´´½¨ÁËÒ»¸ö¶ÓÎé£¬²»ÄÜ¼ÓÈëÆäËûÈËµÄ¶ÓÎé£¬ÊäÈë¡¾ÍË³ö¶ÓÎé¡¿ÍË³öµ±Ç°¶ÓÎé¡£".format(qq_account)
+                returnMsg = "[CQ:at,qq={0}] ä½ å·²ç»åˆ›å»ºäº†ä¸€ä¸ªé˜Ÿä¼ï¼Œä¸èƒ½åŠ å…¥å…¶ä»–äººçš„é˜Ÿä¼ï¼Œè¾“å…¥ã€é€€å‡ºé˜Ÿä¼ã€‘é€€å‡ºå½“å‰é˜Ÿä¼ã€‚".format(qq_account)
             elif leader_str not in self.group_info:
-                returnMsg = "[CQ:at,qq={0}] ¶ÓÎé²»´æÔÚ¡£".format(qq_account)
+                returnMsg = "[CQ:at,qq={0}] é˜Ÿä¼ä¸å­˜åœ¨ã€‚".format(qq_account)
             elif leader_str in self.dungeon_status:
-                returnMsg = "[CQ:at,qq={0}] {1} µÄ¶ÓÎéÕıÔÚ¸±±¾Àï£¬ÎŞ·¨¼ÓÈë¡£".format(qq_account, getGroupNickName(self.qq_group, int(leader)))
+                returnMsg = "[CQ:at,qq={0}] {1} çš„é˜Ÿä¼æ­£åœ¨å‰¯æœ¬é‡Œï¼Œæ— æ³•åŠ å…¥ã€‚".format(qq_account, getGroupNickName(self.qq_group, int(leader)))
             elif len(self.group_info[leader_str]['member_list']) >= MAX_GROUP_MEMBER:
-                returnMsg = "[CQ:at,qq={0}] ¶ÓÎéÒÑÂú£¬ÎŞ·¨¼ÓÈë¡£".format(qq_account)
+                returnMsg = "[CQ:at,qq={0}] é˜Ÿä¼å·²æ»¡ï¼Œæ— æ³•åŠ å…¥ã€‚".format(qq_account)
             else:
                 find_leader = self._get_leader_by_member(qq_account_str)
                 if find_leader != "":
-                    returnMsg = "[CQ:at,qq={0}] ÄãÒÑ¾­¼ÓÈëÁË {1} µÄ¶ÓÎé£¬ÊäÈë¡¾ÍË³ö¶ÓÎé¡¿ÍË³öµ±Ç°¶ÓÎé".format(qq_account, getGroupNickName(self.qq_group, int(find_leader)))
+                    returnMsg = "[CQ:at,qq={0}] ä½ å·²ç»åŠ å…¥äº† {1} çš„é˜Ÿä¼ï¼Œè¾“å…¥ã€é€€å‡ºé˜Ÿä¼ã€‘é€€å‡ºå½“å‰é˜Ÿä¼".format(qq_account, getGroupNickName(self.qq_group, int(find_leader)))
                 else:
                     self.group_info[leader_str]['member_list'].append(qq_account_str)
-                    returnMsg = "[CQ:at,qq={0}] ³É¹¦¼ÓÈë {1} µÄ¶ÓÎé¡£".format(qq_account, getGroupNickName(self.qq_group, int(leader)))
+                    returnMsg = "[CQ:at,qq={0}] æˆåŠŸåŠ å…¥ {1} çš„é˜Ÿä¼ã€‚".format(qq_account, getGroupNickName(self.qq_group, int(leader)))
 
             self.writeToJsonFile()
         except Exception as e:
@@ -2767,15 +2766,15 @@ class Jx3Handler(object):
                 leader = self._get_leader_by_member(qq_account_str)
             
             if leader == "":
-                returnMsg = "[CQ:at,qq={0}] ÄãÃ»ÓĞ¼ÓÈëÈÎºÎ¶ÓÎé¡£".format(qq_account)
+                returnMsg = "[CQ:at,qq={0}] ä½ æ²¡æœ‰åŠ å…¥ä»»ä½•é˜Ÿä¼ã€‚".format(qq_account)
             else:
-                returnMsg = "[CQ:at,qq={0}] µ±Ç°¶ÓÎéĞÅÏ¢£º\n¶Ó³¤£º{1} pve×°·Ö£º{2}".format(
+                returnMsg = "[CQ:at,qq={0}] å½“å‰é˜Ÿä¼ä¿¡æ¯ï¼š\né˜Ÿé•¿ï¼š{1} pveè£…åˆ†ï¼š{2}".format(
                     qq_account_str,
                     getGroupNickName(self.qq_group, int(leader)),
                     self.jx3_users[leader]['pve_gear_point'])
                 if self.group_info[leader]['member_list'] != []:
                     for member in self.group_info[leader]['member_list']:
-                        returnMsg += "\n{0} pve×°·Ö£º{1}".format(
+                        returnMsg += "\n{0} pveè£…åˆ†ï¼š{1}".format(
                             getGroupNickName(self.qq_group, int(member)),
                             self.jx3_users[member]['pve_gear_point'])
 
@@ -2799,15 +2798,15 @@ class Jx3Handler(object):
             if qq_account_str not in self.group_info:
                 leader = self._get_leader_by_member(qq_account_str)
                 if leader == "":
-                    returnMsg = "[CQ:at,qq={0}] Äã²»ÔÚÈÎºÎ¶ÓÎéÀï¡£".format(qq_account)
+                    returnMsg = "[CQ:at,qq={0}] ä½ ä¸åœ¨ä»»ä½•é˜Ÿä¼é‡Œã€‚".format(qq_account)
                 else:
                     self.group_info[leader]['member_list'].remove(qq_account_str)
-                    returnMsg = "[CQ:at,qq={0}] ÄãÀë¿ªÁË {1} µÄ¶ÓÎé¡£".format(qq_account, getGroupNickName(self.qq_group, int(leader)))
+                    returnMsg = "[CQ:at,qq={0}] ä½ ç¦»å¼€äº† {1} çš„é˜Ÿä¼ã€‚".format(qq_account, getGroupNickName(self.qq_group, int(leader)))
             else:
                 self.group_info.pop(qq_account_str)
                 if qq_account_str in self.dungeon_status:
                     self.dungeon_status.pop(qq_account_str)
-                returnMsg = "[CQ:at,qq={0}] ÄãµÄ¶ÓÎé½âÉ¢ÁË¡£".format(qq_account)
+                returnMsg = "[CQ:at,qq={0}] ä½ çš„é˜Ÿä¼è§£æ•£äº†ã€‚".format(qq_account)
 
             self.writeToJsonFile()
         except Exception as e:
@@ -2831,7 +2830,7 @@ class Jx3Handler(object):
         try:
             qq_account_str = str(qq_account)
 
-            returnMsg = "[CQ:at,qq={0}] ¸±±¾ÁĞ±í£º".format(qq_account)
+            returnMsg = "[CQ:at,qq={0}] å‰¯æœ¬åˆ—è¡¨ï¼š".format(qq_account)
             yday = self._reset_daliy_count(qq_account_str)
             yday_str = str(yday)
 
@@ -2843,7 +2842,7 @@ class Jx3Handler(object):
             for k, v in DUNGEON_LIST.items():
                 has_cd = k in self.daliy_action_count[yday_str][qq_account_str]['dungeon'] and self.daliy_action_count[yday_str][qq_account_str]['dungeon'][k] == True
                 has_reward = self.jx3_users[qq_account_str]['pve_gear_point'] < v['max_pve_reward_gain']
-                returnMsg += "\n{0} {1} {2}".format(v['display_name'], "ÒÑ¹¥ÂÔ" if has_cd else "¿É¹¥ÂÔ", "ÓĞboss½±Àø" if has_reward else "ÎŞboss½±Àø")
+                returnMsg += "\n{0} {1} {2}".format(v['display_name'], "å·²æ”»ç•¥" if has_cd else "å¯æ”»ç•¥", "æœ‰bosså¥–åŠ±" if has_reward else "æ— bosså¥–åŠ±")
 
             self.writeToJsonFile()
         except Exception as e:
@@ -2872,13 +2871,13 @@ class Jx3Handler(object):
                 if qq_account_str not in self.group_info:
                     leader = self._get_leader_by_member(qq_account_str)
                     if leader == "":
-                        returnMsg = "[CQ:at,qq={0}] ±ØĞë´´½¨¶ÓÎé²ÅÄÜ½øÈë¸±±¾¡£".format(qq_account)
+                        returnMsg = "[CQ:at,qq={0}] å¿…é¡»åˆ›å»ºé˜Ÿä¼æ‰èƒ½è¿›å…¥å‰¯æœ¬ã€‚".format(qq_account)
                     else:
-                        returnMsg = "[CQ:at,qq={0}] Äã²»ÊÇ¶Ó³¤£¡ÎŞ·¨Ê¹ÓÃ´ËÃüÁî¡£".format(qq_account)
+                        returnMsg = "[CQ:at,qq={0}] ä½ ä¸æ˜¯é˜Ÿé•¿ï¼æ— æ³•ä½¿ç”¨æ­¤å‘½ä»¤ã€‚".format(qq_account)
                 elif qq_account_str in self.dungeon_status:
-                    returnMsg = "[CQ:at,qq={0}] ÄãÒÑ¾­ÔÚ¸±±¾ÀïÁË¡£".format(qq_account)
+                    returnMsg = "[CQ:at,qq={0}] ä½ å·²ç»åœ¨å‰¯æœ¬é‡Œäº†ã€‚".format(qq_account)
                 elif dungeon_id in self.daliy_action_count[yday_str][qq_account_str]['dungeon'] and self.daliy_action_count[yday_str][qq_account_str]['dungeon'][dungeon_id] == True:
-                    returnMsg = "[CQ:at,qq={0}] ÄãÓĞ´Ë¸±±¾cd£¬ÎŞ·¨½øÈë¡£".format(qq_account)
+                    returnMsg = "[CQ:at,qq={0}] ä½ æœ‰æ­¤å‰¯æœ¬cdï¼Œæ— æ³•è¿›å…¥ã€‚".format(qq_account)
                 else:
                     leader = qq_account_str
                     self._update_gear_point(qq_account_str)
@@ -2900,11 +2899,11 @@ class Jx3Handler(object):
                             has_energy = False
 
                     if has_cd:
-                        returnMsg = "[CQ:at,qq={0}] ÄãµÄ¶ÓÓÑÓĞ´Ë¸±±¾cd£¬ÎŞ·¨½øÈë¡£".format(qq_account)
+                        returnMsg = "[CQ:at,qq={0}] ä½ çš„é˜Ÿå‹æœ‰æ­¤å‰¯æœ¬cdï¼Œæ— æ³•è¿›å…¥ã€‚".format(qq_account)
                     elif self.jx3_users[qq_account_str]['energy'] < DUNGEON_ENERGY_REQUIRED and qq_account_str not in pve_gear_point_too_high:
-                        returnMsg = "[CQ:at,qq={0}] ÄãµÄÌåÁ¦²»×ã£¬½øÈë¸±±¾ĞèÒªºÄ·ÑÌåÁ¦£º{1}".format(qq_account, DUNGEON_ENERGY_REQUIRED)
+                        returnMsg = "[CQ:at,qq={0}] ä½ çš„ä½“åŠ›ä¸è¶³ï¼Œè¿›å…¥å‰¯æœ¬éœ€è¦è€—è´¹ä½“åŠ›ï¼š{1}".format(qq_account, DUNGEON_ENERGY_REQUIRED)
                     elif has_energy and energy_msg != "":
-                        returnMsg = "{0} ÌåÁ¦²»×ã£¬½øÈë¸±±¾ĞèÒªºÄ·ÑÌåÁ¦£º{1}".format(energy_msg, DUNGEON_ENERGY_REQUIRED)
+                        returnMsg = "{0} ä½“åŠ›ä¸è¶³ï¼Œè¿›å…¥å‰¯æœ¬éœ€è¦è€—è´¹ä½“åŠ›ï¼š{1}".format(energy_msg, DUNGEON_ENERGY_REQUIRED)
                     else:
                         force_enter = True
                         if pve_gear_point_too_high != []:
@@ -2917,7 +2916,7 @@ class Jx3Handler(object):
                                     self.daliy_action_count[yday_str][str(m)]['dungeon'][dungeon_id] = False
 
                         if not force_enter:
-                            returnMsg += "¶ÓÎéÖĞ{0}pve×°±¸Ì«À÷º¦À²£¬ÒÑ¾­²»ÄÜ»ñµÃboss½±ÀøÁË£¬½ö¿É»ñµÃÍ¨¹Ø½±ÀøÇÒ²»ÏûºÄÌåÁ¦¡£Èç¹ûÈ·¶¨»¹Òª½ø±¾µÄ»°£¬ÇëÔÙ´ÎÊäÈë ½øÈë¸±±¾{1}".format(pve_msg, DUNGEON_LIST[dungeon_id]['display_name'])
+                            returnMsg += "é˜Ÿä¼ä¸­{0}pveè£…å¤‡å¤ªå‰å®³å•¦ï¼Œå·²ç»ä¸èƒ½è·å¾—bosså¥–åŠ±äº†ï¼Œä»…å¯è·å¾—é€šå…³å¥–åŠ±ä¸”ä¸æ¶ˆè€—ä½“åŠ›ã€‚å¦‚æœç¡®å®šè¿˜è¦è¿›æœ¬çš„è¯ï¼Œè¯·å†æ¬¡è¾“å…¥ è¿›å…¥å‰¯æœ¬{1}".format(pve_msg, DUNGEON_LIST[dungeon_id]['display_name'])
                         else:
                             self.dungeon_status[leader] = copy.deepcopy(DUNGEON_LIST[dungeon_id])
                             self.dungeon_status[leader]['boss_detail'] = []
@@ -2940,13 +2939,13 @@ class Jx3Handler(object):
                                 if m not in pve_gear_point_too_high:
                                     self.jx3_users[str(m)]['energy'] -= DUNGEON_ENERGY_REQUIRED
                                     energy_msg += "[CQ:at,qq={0}] ".format(m)
-                            returnMsg = "[CQ:at,qq={0}] ½øÈë¸±±¾ {1} ³É¹¦£¡{2}ÌåÁ¦-{3}".format(qq_account, dungeon_name, energy_msg, DUNGEON_ENERGY_REQUIRED)
+                            returnMsg = "[CQ:at,qq={0}] è¿›å…¥å‰¯æœ¬ {1} æˆåŠŸï¼{2}ä½“åŠ›-{3}".format(qq_account, dungeon_name, energy_msg, DUNGEON_ENERGY_REQUIRED)
 
                             import CQSDK
                             CQSDK.SendGroupMsg(self.qq_group, returnMsg)
 
                             boss = self.dungeon_status[leader]['boss_detail'][0]
-                            returnMsg = "bossÕ½£º{0} (1/{1})\nÇëÊäÈëÃ¿Î»¶ÓÔ±ÊäÈë¡¾¹¥»÷boss¡¿¿ªÊ¼Õ½¶·¡£".format(boss['display_name'], len(self.dungeon_status[qq_account_str]['boss_detail']))
+                            returnMsg = "bossæˆ˜ï¼š{0} (1/{1})\nè¯·è¾“å…¥æ¯ä½é˜Ÿå‘˜è¾“å…¥ã€æ”»å‡»bossã€‘å¼€å§‹æˆ˜æ–—ã€‚".format(boss['display_name'], len(self.dungeon_status[qq_account_str]['boss_detail']))
 
             self.writeToJsonFile()
         except Exception as e:
@@ -2992,7 +2991,7 @@ class Jx3Handler(object):
 
                 if dungeon['attack_count'][qq_account_str]['available_attack'] < 1:
                     time_val = calculateRemainingTime(DUNGEON_ATTACK_COOLDOWN * (1 - dungeon['attack_count'][qq_account_str]['available_attack']), dungeon['attack_count'][qq_account_str]['last_attack_time'])
-                    returnMsg = "[CQ:at,qq={0}] ÄãÃ»ÓĞ¹¥»÷´ÎÊıÀ²£¬»¹ĞèÒªµÈ{1}Ğ¡Ê±{2}·Ö{3}Ãë¡£".format(
+                    returnMsg = "[CQ:at,qq={0}] ä½ æ²¡æœ‰æ”»å‡»æ¬¡æ•°å•¦ï¼Œè¿˜éœ€è¦ç­‰{1}å°æ—¶{2}åˆ†{3}ç§’ã€‚".format(
                                     qq_account_str,
                                     time_val['hours'],
                                     time_val['mins'],
@@ -3022,7 +3021,7 @@ class Jx3Handler(object):
                             else:
                                 boss_equipment['weapon']['pve'] = int(boss_equipment['weapon']['pve'] * modifier['weapon'])
                                 description = modifier['description']
-                            buff_msg = "\n{0}Ê¹³öÁËÕĞÊı£º{1}¡£{2}".format(current_boss['display_name'], modifier['display_name'], description)
+                            buff_msg = "\n{0}ä½¿å‡ºäº†æ‹›æ•°ï¼š{1}ã€‚{2}".format(current_boss['display_name'], modifier['display_name'], description)
                     logging.info(buff_msg)
                     debuff_msg = ""
                     if 'debuff' in current_boss:
@@ -3040,7 +3039,7 @@ class Jx3Handler(object):
                                 dungeon['attack_count'][qq_account_str]['available_attack'] -= modifier['attack_count']
                             else:
                                 qq_equipment['weapon']['pve'] = int(qq_equipment['weapon']['pve'] * modifier['weapon'])
-                            debuff_msg = "\n{0}Ê¹³öÁËÕĞÊı£º{1}¡£{2}".format(current_boss['display_name'], modifier['display_name'], modifier['description'])
+                            debuff_msg = "\n{0}ä½¿å‡ºäº†æ‹›æ•°ï¼š{1}ã€‚{2}".format(current_boss['display_name'], modifier['display_name'], modifier['description'])
 
                     battle_result = self._calculate_battle(qq_account_str, '', 'pve', custom_from_qq_equipment=qq_equipment, custom_to_qq_equipment=boss_equipment)
 
@@ -3051,7 +3050,7 @@ class Jx3Handler(object):
                     dungeon['attack_count'][qq_account_str]['total_attack_count'] += 1
                     
 
-                    returnMsg = "[CQ:at,qq={0}] Äã¶Ô{1}·¢ÆğÁË¹¥»÷¡£Ê£Óà¹¥»÷´ÎÊı£º{2}/{3}".format(qq_account, current_boss['display_name'], dungeon['attack_count'][qq_account_str]['available_attack'] - 1, DUNGEON_MAX_ATTACK_COUNT) + buff_msg + debuff_msg
+                    returnMsg = "[CQ:at,qq={0}] ä½ å¯¹{1}å‘èµ·äº†æ”»å‡»ã€‚å‰©ä½™æ”»å‡»æ¬¡æ•°ï¼š{2}/{3}".format(qq_account, current_boss['display_name'], dungeon['attack_count'][qq_account_str]['available_attack'] - 1, DUNGEON_MAX_ATTACK_COUNT) + buff_msg + debuff_msg
 
                     if winner == qq_account_str:
                         damage = int(min(qq_equipment['weapon']['pve'], current_boss['remain_hp']))
@@ -3065,7 +3064,7 @@ class Jx3Handler(object):
                                 if 'increase_type' in buff and buff['increase_type'] == 'win' and 'count' in buff and 'max_count' in buff:
                                     buff['count'] += 1 if buff['count'] < buff['max_count'] else 0
 
-                        returnMsg += "\n¹¥»÷³É¹¦£¡³É¹¦ÂÊ£º{0}%£¬Ôì³ÉÉËº¦£º{1}¡£{2}ÑªÁ¿£º{3}/{4}".format(
+                        returnMsg += "\næ”»å‡»æˆåŠŸï¼æˆåŠŸç‡ï¼š{0}%ï¼Œé€ æˆä¼¤å®³ï¼š{1}ã€‚{2}è¡€é‡ï¼š{3}/{4}".format(
                             int(math.floor(success_chance * 100)),
                             qq_equipment['weapon']['pve'],
                             current_boss['display_name'],
@@ -3096,7 +3095,7 @@ class Jx3Handler(object):
                                         if k not in self.jx3_users[leader]['bag']:
                                             self.jx3_users[leader]['bag'][k] = 0
                                         self.jx3_users[leader]['bag'][k] += 1
-                                        item_reward_msg += "\n{0}»ñµÃ¶îÍâ½±Àø£º{1} x 1 ¸ÅÂÊ£º{2}%".format(getGroupNickName(self.qq_group, int(leader)), get_item_display_name(k), int(v * 100))
+                                        item_reward_msg += "\n{0}è·å¾—é¢å¤–å¥–åŠ±ï¼š{1} x 1 æ¦‚ç‡ï¼š{2}%".format(getGroupNickName(self.qq_group, int(leader)), get_item_display_name(k), int(v * 100))
 
                                 for m in self.group_info[leader]['member_list']:
                                     if m not in dungeon['no_reward']:
@@ -3105,7 +3104,7 @@ class Jx3Handler(object):
                                             if k not in self.jx3_users[m]['bag']:
                                                 self.jx3_users[m]['bag'][k] = 0
                                             self.jx3_users[m]['bag'][k] += 1
-                                            item_reward_msg += "\n{0}»ñµÃ¶îÍâ½±Àø£º{1} x 1 ¸ÅÂÊ£º{2}%".format(getGroupNickName(self.qq_group, int(m)), get_item_display_name(k), int(v * 100))
+                                            item_reward_msg += "\n{0}è·å¾—é¢å¤–å¥–åŠ±ï¼š{1} x 1 æ¦‚ç‡ï¼š{2}%".format(getGroupNickName(self.qq_group, int(m)), get_item_display_name(k), int(v * 100))
 
                             member_list = copy.deepcopy(self.group_info[leader]['member_list'])
                             member_list.append(leader)
@@ -3113,12 +3112,12 @@ class Jx3Handler(object):
                                 reward_member += "[CQ:at,qq={0}]".format(m)
 
                             if reward_member != "":
-                                reward_msg = "{0}»ñµÃ½±Àø{1}".format(reward_member, reward_msg)
+                                reward_msg = "{0}è·å¾—å¥–åŠ±{1}".format(reward_member, reward_msg)
                             else:
                                 reward_msg = ""
 
                             mvp = sorted(dungeon['attack_count'].items(), lambda x, y: cmp(x[1]['damage'], y[1]['damage']), reverse=True)[0]
-                            returnMsg = "{0}³É¹¦±»»÷µ¹£¡{1}{2}\nmvp£º{3} ÉËº¦£º{4} ¹¥»÷´ÎÊı£º{5}/{6}".format(
+                            returnMsg = "{0}æˆåŠŸè¢«å‡»å€’ï¼{1}{2}\nmvpï¼š{3} ä¼¤å®³ï¼š{4} æ”»å‡»æ¬¡æ•°ï¼š{5}/{6}".format(
                                 current_boss['display_name'],
                                 reward_msg,
                                 item_reward_msg,
@@ -3134,12 +3133,12 @@ class Jx3Handler(object):
                             CQSDK.SendGroupMsg(self.qq_group, returnMsg)
                             if len(dungeon['boss_detail']) > 0:
                                 next_boss =  dungeon['boss_detail'][0]
-                                returnMsg = "bossÕ½£º{0} ({1}/{2})\nÇëÊäÈëÃ¿Î»¶ÓÔ±ÊäÈë¡¾¹¥»÷boss¡¿¿ªÊ¼Õ½¶·¡£".format(
+                                returnMsg = "bossæˆ˜ï¼š{0} ({1}/{2})\nè¯·è¾“å…¥æ¯ä½é˜Ÿå‘˜è¾“å…¥ã€æ”»å‡»bossã€‘å¼€å§‹æˆ˜æ–—ã€‚".format(
                                     next_boss['display_name'],
                                     len(dungeon['boss']) - len(dungeon['boss_detail']) + 1,
                                     len(dungeon['boss']))
                             else:
-                                returnMsg = "¸±±¾ÒÑ½áÊø£¡¹§Ï²Í¨¹Ø{0}£¡È«Ô±»ñµÃÍ¨¹Ø½±Àø£º".format(dungeon['display_name'])
+                                returnMsg = "å‰¯æœ¬å·²ç»“æŸï¼æ­å–œé€šå…³{0}ï¼å…¨å‘˜è·å¾—é€šå…³å¥–åŠ±ï¼š".format(dungeon['display_name'])
                                 reward_msg = ""
                                 for k, v in dungeon['reward'].items():
                                     if k in self.jx3_users[leader]:
@@ -3151,12 +3150,12 @@ class Jx3Handler(object):
                                     reward_msg += "{0} + {1} ".format(STAT_DISPLAY_NAME[k], v)
                                 returnMsg += reward_msg
                                 CQSDK.SendGroupMsg(self.qq_group, returnMsg)
-                                returnMsg = "¶ÓÎéÒÑ½âÉ¢¡£"
+                                returnMsg = "é˜Ÿä¼å·²è§£æ•£ã€‚"
                                 self.group_info.pop(leader)
                                 self.dungeon_status.pop(leader)
                     else:
                         dungeon['attack_count'][qq_account_str]['available_attack'] -= 1
-                        returnMsg += "\n¹¥»÷Ê§°Ü£¡³É¹¦ÂÊ£º{0}%¡£{1}ÑªÁ¿£º{2}/{3}".format(
+                        returnMsg += "\næ”»å‡»å¤±è´¥ï¼æˆåŠŸç‡ï¼š{0}%ã€‚{1}è¡€é‡ï¼š{2}/{3}".format(
                             int(math.floor(success_chance * 100)),
                             current_boss['display_name'],
                             current_boss['remain_hp'],
@@ -3193,7 +3192,7 @@ class Jx3Handler(object):
                 damage_msg = ""
                 for i in range(5):
                     if i < list_len:
-                        damage_msg += '\n{0}. {1} ÉËº¦£º{2} ´ÎÊı£º{3}/{4}'.format(
+                        damage_msg += '\n{0}. {1} ä¼¤å®³ï¼š{2} æ¬¡æ•°ï¼š{3}/{4}'.format(
                             i + 1,
                             getGroupNickName(self.qq_group, int(rank_list[i][0])),
                             rank_list[i][1]['damage'],
@@ -3201,7 +3200,7 @@ class Jx3Handler(object):
                             dungeon['attack_count'][rank_list[i][0]]['total_attack_count'])
                     else:
                         break
-                returnMsg = "[CQ:at,qq={0}] µ±Ç°¸±±¾£º{1} µ±Ç°boss£º{2} {3}/{4}\nÑªÁ¿£º{5}/{6} pve×°·Ö£º{7}\nÉËº¦ÅÅĞĞ°ñ£º{8}".format(
+                returnMsg = "[CQ:at,qq={0}] å½“å‰å‰¯æœ¬ï¼š{1} å½“å‰bossï¼š{2} {3}/{4}\nè¡€é‡ï¼š{5}/{6} pveè£…åˆ†ï¼š{7}\nä¼¤å®³æ’è¡Œæ¦œï¼š{8}".format(
                     qq_account,
                     dungeon['display_name'],
                     current_boss['display_name'],
