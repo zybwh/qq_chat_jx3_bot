@@ -23,6 +23,8 @@
 
 2.x版本：需要设置nonebot，参考：https://none.rclab.tk/guide/installation.html
 
+需要安装nonebot scheduler，pip install "nonebot[scheduler]"
+
 需要安装bs4，pip install bs4
 
 然后python bot.py 即可。
