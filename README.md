@@ -22,5 +22,7 @@
 1.x版本：开启coolq开发者模式，把python_sdk下内容复制进coolq/app即可。
 
 2.x版本：需要设置nonebot，参考：https://none.rclab.tk/guide/installation.html
-需要安装bs4，pip install 本身
+
+需要安装bs4，pip install bs4
+
 然后python bot.py 即可。
