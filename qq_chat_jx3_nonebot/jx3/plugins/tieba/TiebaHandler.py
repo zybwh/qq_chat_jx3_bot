@@ -65,7 +65,7 @@ def extra_from_one_page(page_list, index):
 
         except:
             pass
-        return count
+    return count
 
 async def search_n_pages(n):
     i = 0
