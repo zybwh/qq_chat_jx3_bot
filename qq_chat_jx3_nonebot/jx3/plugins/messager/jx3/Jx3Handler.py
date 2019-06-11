@@ -101,9 +101,18 @@ class Jx3Handler(object):
         if yday != self._today:
             self._today = yday
 
-            for v in self._jx3_users.values():
+            
+            rm_list = []
+            for k, v in self._jx3_users.items():
+                nickname = await get_group_nickname(self._qq_group, k)
+                if nickname == None or nickname == '':
+                    rm_list.append(k)
+                    continue
                 v['daily_count'] = copy.deepcopy(daily_dict)
                 v['today'] = self._today
+
+            for k in rm_list:
+                self._jx3_users.pop(k)
 
             async with aiohttp.ClientSession().get('http://www.jx3tong.com/?m=api&c=daily&a=daily_list') as response:
                 jx3_daily_details = json.loads(await response.text())

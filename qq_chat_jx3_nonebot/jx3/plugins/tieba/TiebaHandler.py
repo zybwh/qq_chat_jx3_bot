@@ -34,7 +34,8 @@ except Exception as e:
 
 template_url = 'https://tieba.baidu.com/f?kw=%E5%89%91%E7%BD%913&fr=index&fp=0&ie=utf-8&pn={}'
 
-def extra_from_one_page(page_list):
+def extra_from_one_page(page_list, index):
+    count = 0
     for i in page_list:
         try:
             if int(i.find(class_='threadlist_rep_num').text) > 0:
@@ -51,23 +52,24 @@ def extra_from_one_page(page_list):
                 address = f"https://tieba.baidu.com{i.find(class_='threadlist_title').a['href']}"
                 num = int(i.find(class_='threadlist_rep_num').text)
 
-                logging.info(f"{address} {name} {num}")
-
                 if address not in tieba_data[field]:
                     tieba_data[field][address] = {
                         'name': name,
                         'num': num,
-                        'last_update_time': time.time()
+                        'last_update_time': index - count
                     }
                 else:
                     tieba_data[field][address]['num'] = num
-                    tieba_data[field][address]['last_update_time'] = time.time()
+                    tieba_data[field][address]['last_update_time'] = index - count
+                count += 1
 
         except:
             pass
+        return count
 
 async def search_n_pages(n):
     i = 0
+    index = int(time.time())
     while i < n:
         time.sleep(0.2)
         try:
@@ -81,7 +83,8 @@ async def search_n_pages(n):
                     t2 = time.time()
                     page_list = BeautifulSoup(data, 'html.parser').find_all(class_='j_thread_list')
                     t3 = time.time()
-                    extra_from_one_page(page_list)
+                    count = extra_from_one_page(page_list, index)
+                    index -= count
                     logging.info(f"time for request: {t2-t1} bs: {t3-t2} parsing: {time.time()-t3}")
             i += 1
         except Exception as e:
@@ -101,7 +104,6 @@ async def do_shu_dong(session):
 
 @nonebot.on_natural_language(keywords={'818'})
 async def natural_818(session):
-    print('HAHAHHA')
     return nonebot.IntentCommand(100, '818')
 
 @nonebot.on_natural_language(keywords={'树洞'})
@@ -138,7 +140,7 @@ async def get_tieba_info(session, msg_type):
         msg += f"\n{key} {tieba_data[msg_type][key]['name']} {tieba_data[msg_type][key]['num']}"
     else:
         count = 0
-        for k in sorted(tieba_data[msg_type].keys(), key=lambda x: tieba_data[msg_type][x]['last_update_time']):
+        for k in sorted(tieba_data[msg_type].keys(), key=lambda x: tieba_data[msg_type][x]['last_update_time'], reverse=True):
             if tieba_data[msg_type][k]['num'] < num:
                 continue
             msg += f"\n{k} {tieba_data[msg_type][k]['name']} {tieba_data[msg_type][k]['num']}"
